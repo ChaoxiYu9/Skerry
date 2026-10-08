@@ -1,0 +1,707 @@
+/**
+ * @file Bangumi 游戏信息 API 封装
+ * @description 提供与 Bangumi API 交互的函数，包括通过名称或 ID 获取游戏条目，并对标签进行敏感词过滤。
+ * @module src/metadata/api/bgm
+ * @author Skerry contributors (based on ReinaManager)
+ * @copyright AGPL-3.0
+ *
+ * 主要导出：
+ * - fetchBgmById：根据 Bangumi ID 获取游戏详细信息
+ * - fetchBgmByName：根据游戏名称搜索获取游戏详细信息
+ *
+ * 依赖：
+ * - http: 封装的 HTTP 请求工具
+ */
+
+import type {
+	BgmAuth,
+	BgmData,
+	GameMetadataDraft,
+	GameStaffMember,
+	GameStaffRole,
+} from "@/types";
+import { AppError, isApiRateLimitError, isHttpStatus } from "@/utils/errors";
+import { USER_AGENT } from "../constants";
+import {
+	createGameCandidate,
+	createSourceCandidateRecord,
+} from "../sourceCandidate";
+import http, {
+	type NetworkRequestContext,
+	type TauriHttpOptions,
+} from "./http";
+
+const BGM_API_BASE_URL = "https://api.bgm.tv/v0";
+const BGM_OAUTH_BASE_URL = "https://bgm.tv/oauth";
+
+const BGM_JSON_HEADERS = {
+	Accept: "application/json",
+	"User-Agent": USER_AGENT,
+} as const;
+
+interface BgmSubjectInfoboxValue {
+	v: string;
+}
+
+interface BgmSubjectInfoboxItem {
+	key: string;
+	value: string | Array<string | BgmSubjectInfoboxValue>;
+}
+
+interface BgmSubjectTag {
+	name: string;
+	/** 搜索接口返回有效总数，条目详情和收藏接口固定返回 0。 */
+	total_count: number;
+}
+
+interface BgmSubjectResponse {
+	id: number;
+	name: string;
+	name_cn: string;
+	summary: string;
+	nsfw: boolean;
+	date?: string;
+	images: { large: string };
+	infobox?: BgmSubjectInfoboxItem[];
+	rating: { rank: number; score: number };
+	tags: BgmSubjectTag[];
+}
+
+interface BgmSearchResponse {
+	data: BgmSubjectResponse[];
+}
+
+interface BgmRelatedPersonResponse {
+	id: number;
+	name: string;
+	relation?: string;
+	career?: string[];
+}
+
+export interface BgmUserCollection {
+	subject_id: number;
+	type: number;
+	rate?: number;
+	comment?: string | null;
+	subject?: {
+		id: number;
+		name: string;
+		name_cn: string;
+		date?: string;
+		images?: { large?: string; common?: string };
+	};
+}
+
+export interface BgmUserCollectionModifyPayload {
+	type?: number;
+	rate?: number;
+	comment?: string;
+	private?: boolean;
+	tags?: string[];
+}
+
+interface BgmUserCollectionsResponse {
+	total?: number;
+	limit?: number;
+	offset?: number;
+	data?: BgmUserCollection[];
+}
+
+export interface BgmUserCollectionsPage {
+	total: number;
+	limit: number;
+	offset: number;
+	data: BgmUserCollection[];
+}
+
+export interface BgmUserProfile {
+	id: number;
+	username: string;
+	nickname: string;
+	sign?: string;
+	avatar: { large: string; medium: string; small: string };
+}
+
+export interface BgmTokenStatus {
+	access_token: string;
+	client_id: string;
+	expires: number | null;
+	scope: string | null;
+}
+
+function buildBgmAuthHeaders(token?: string) {
+	const headers: Record<string, string> = { ...BGM_JSON_HEADERS };
+	if (token) {
+		headers.Authorization = `Bearer ${token}`;
+	}
+	return { headers };
+}
+
+function buildBgmRateLimitedOptions(
+	token?: string,
+	context: NetworkRequestContext = {},
+): TauriHttpOptions {
+	return {
+		...buildBgmAuthHeaders(token),
+		...context,
+		rateLimit: { source: "bgm" as const },
+	};
+}
+
+const STAFF_ROLE_ORDER: readonly GameStaffRole[] = [
+	"writer",
+	"artist",
+	"composer",
+	"director",
+];
+
+function matchSingleRole(part: string): GameStaffRole | undefined {
+	const p = part.trim().toLowerCase();
+	if (!p) return undefined;
+
+	// 1. 音乐 / 作曲 / 编曲 (最高优先级判定，严防音乐人被误归入剧本或原画)
+	if (
+		p.includes("音乐") ||
+		p.includes("音楽") ||
+		p.includes("作曲") ||
+		p.includes("编曲") ||
+		p.includes("編曲") ||
+		p.includes("bgm") ||
+		p.includes("sound") ||
+		p.includes("composer") ||
+		p.includes("arranger") ||
+		p.includes("音响") ||
+		p.includes("音響") ||
+		p.includes("音效") ||
+		p.includes("声效") ||
+		p.includes("主题歌") ||
+		p.includes("主題歌") ||
+		p.includes("主题曲") ||
+		p.includes("主題曲") ||
+		p.includes("插曲") ||
+		p.includes("插入曲") ||
+		p.includes("作词") ||
+		p.includes("作詞") ||
+		p.includes("vocal") ||
+		p.includes("ボーカル") ||
+		p.includes("演唱") ||
+		p.includes("歌手") ||
+		p.includes("主唱") ||
+		p === "music" ||
+		p === "musician"
+	) {
+		return "composer";
+	}
+
+	// 2. 原画 / 美术 / 角色设计
+	if (
+		p.includes("原画") ||
+		p.includes("原畫") ||
+		p.includes("角色设计") ||
+		p.includes("角色原案") ||
+		p.includes("人物设定") ||
+		p.includes("人物原案") ||
+		p.includes("人物设计") ||
+		p.includes("插画") ||
+		p.includes("插图") ||
+		p.includes("イラスト") ||
+		p.includes("cg") ||
+		p.includes("美术") ||
+		p.includes("美術") ||
+		p.includes("作画") ||
+		p.includes("背景") ||
+		p.includes("illustrator") ||
+		p.includes("painter") ||
+		p.includes("character design") ||
+		p.includes("graphic")
+	) {
+		return "artist";
+	}
+
+	// 3. 剧本 / 脚本 / 故事
+	if (
+		p.includes("剧本") ||
+		p.includes("劇本") ||
+		p.includes("脚本") ||
+		p.includes("系列构成") ||
+		p.includes("系列構成") ||
+		p.includes("scenario") ||
+		p.includes("script") ||
+		p.includes("screenwriter") ||
+		p.includes("主笔") ||
+		p.includes("主筆") ||
+		p.includes("剧情") ||
+		p.includes("文案") ||
+		p.includes("故事") ||
+		p === "writer" ||
+		(p.includes("原案") && !p.includes("角色") && !p.includes("人物")) ||
+		p === "原作"
+	) {
+		return "writer";
+	}
+
+	// 4. 监督 / 导演 / 演出
+	if (
+		p.includes("监督") ||
+		p.includes("監督") ||
+		p.includes("导演") ||
+		p.includes("導演") ||
+		p.includes("演出") ||
+		p.includes("总指挥") ||
+		p.includes("総指揮") ||
+		p.includes("制作人") ||
+		p.includes("プロデューサー") ||
+		p.includes("producer") ||
+		p.includes("企划") ||
+		p.includes("企画") ||
+		p.includes("策划") ||
+		p.includes("director")
+	) {
+		return "director";
+	}
+
+	return undefined;
+}
+
+export function parseBgmStaffRoles(relation: string | undefined): GameStaffRole[] {
+	if (!relation) return [];
+	const text = relation.trim().toLowerCase();
+	if (!text) return [];
+
+	const roles = new Set<GameStaffRole>();
+	const parts = text.split(/[/,，、&・+＋\s]+/).filter(Boolean);
+	if (parts.length === 0) parts.push(text);
+
+	for (const part of parts) {
+		const role = matchSingleRole(part);
+		if (role) {
+			roles.add(role);
+		}
+	}
+
+	if (roles.size === 0) {
+		const fullRole = matchSingleRole(text);
+		if (fullRole) {
+			roles.add(fullRole);
+		}
+	}
+
+	return Array.from(roles);
+}
+
+function normalizeBgmStaff(
+	people: BgmRelatedPersonResponse[],
+): GameStaffMember[] {
+	const staffById = new Map<number, GameStaffMember>();
+	for (const person of people) {
+		const name = person.name?.trim();
+		if (!name) continue;
+		// 严格只解析本游戏作品职务 relation，坚决不引入 person.career 全局标签
+		const roles = parseBgmStaffRoles(person.relation);
+		if (roles.length === 0) continue;
+		const current = staffById.get(person.id);
+		if (current) {
+			current.roles = Array.from(new Set([...current.roles, ...roles])).sort(
+				(a, b) => STAFF_ROLE_ORDER.indexOf(a) - STAFF_ROLE_ORDER.indexOf(b),
+			);
+		} else {
+			staffById.set(person.id, {
+				id: person.id,
+				name,
+				roles: Array.from(new Set(roles)).sort(
+					(a, b) => STAFF_ROLE_ORDER.indexOf(a) - STAFF_ROLE_ORDER.indexOf(b),
+				),
+			});
+		}
+	}
+	return [...staffById.values()];
+}
+
+/** 获取 Bangumi 条目制作人员，仅保留制作职位，排除角色/声优。 */
+export async function fetchBgmStaffById(
+	id: string,
+	context: NetworkRequestContext = {},
+): Promise<GameStaffMember[]> {
+	const response = await http.get<BgmRelatedPersonResponse[]>(
+		`${BGM_API_BASE_URL}/subjects/${encodeURIComponent(id)}/persons`,
+		buildBgmRateLimitedOptions(undefined, context),
+	);
+	return normalizeBgmStaff(Array.isArray(response.data) ? response.data : []);
+}
+
+const SENSITIVE_KEYWORDS = ["台独", "港独", "藏独", "分裂", "反华", "辱华"];
+const DEVELOPER_KEYWORDS = ["开发", "游戏开发商", "开发商"];
+
+/**
+ * 过滤掉包含敏感关键词的标签。
+ *
+ * @param tags 标签字符串数组。
+ * @returns 过滤后的标签字符串数组，不包含敏感词。
+ */
+function filterSensitiveTags(tags: string[]): string[] {
+	return tags.filter(
+		(tag) => !SENSITIVE_KEYWORDS.some((kw) => tag.includes(kw)),
+	);
+}
+
+// 新增：将 BGM API 返回对象转换为统一的结构
+const transformBgmData = (BGMdata: BgmSubjectResponse): GameMetadataDraft => {
+	// 处理 aliases 字段：可能是数组或字符串
+	const aliasesRaw = BGMdata.infobox?.find((k) => k.key === "别名")?.value;
+
+	let aliasesArray: string[] = [];
+	if (Array.isArray(aliasesRaw)) {
+		// 如果是数组，提取每个对象的 v 字段
+		aliasesArray = aliasesRaw.map((k) => (typeof k === "string" ? k : k.v));
+	} else if (typeof aliasesRaw === "string") {
+		// 如果是字符串，直接包装成数组
+		aliasesArray = [aliasesRaw];
+	}
+
+	const bgmData: BgmData = {
+		date: BGMdata.date,
+		image: BGMdata.images?.large,
+		summary: BGMdata.summary,
+		name: BGMdata.name,
+		name_cn: BGMdata.name_cn,
+		aliases: aliasesArray,
+		tags: filterSensitiveTags(
+			(BGMdata.tags || [])
+				.filter((tag) => tag.total_count !== 1)
+				.map((tag) => tag.name),
+		),
+		rank: BGMdata.rating?.rank,
+		score: BGMdata.rating?.score,
+		developer: (() => {
+			const developers =
+				BGMdata.infobox?.flatMap((item) => {
+					if (DEVELOPER_KEYWORDS.includes(item.key)) {
+						if (typeof item.value !== "string") return [];
+						return item.value
+							.split(/、|×/g)
+							.map((name: string) => name.trim())
+							.filter((name: string) => name.length > 0);
+					}
+					return [];
+				}) ?? [];
+			const uniqueDevelopers = [...new Set(developers)];
+			return uniqueDevelopers.length > 0
+				? uniqueDevelopers.join("/")
+				: undefined;
+		})(),
+		nsfw: BGMdata.nsfw,
+	};
+
+	return createGameCandidate({
+		idType: "bgm",
+		source: createSourceCandidateRecord("bgm", String(BGMdata.id), bgmData),
+	});
+};
+
+/**
+ * 根据 Bangumi ID 获取游戏详细信息
+ *
+ * @param id Bangumi 条目 ID
+ * @param token Bangumi API 访问令牌
+ * @returns 返回游戏详细信息对象
+ */
+export async function fetchBgmById(
+	id: string,
+	token?: string,
+	context: NetworkRequestContext = {},
+): Promise<GameMetadataDraft> {
+	const BGMdata = (
+		await http.get<BgmSubjectResponse>(
+			`${BGM_API_BASE_URL}/subjects/${id}`,
+			buildBgmRateLimitedOptions(token, context),
+		)
+	).data;
+
+	if (!BGMdata?.id) {
+		throw new AppError({
+			code: "metadata_not_found",
+			message: `Bangumi subject not found: ${id}`,
+		});
+	}
+
+	return transformBgmData(BGMdata);
+}
+
+/**
+ * 根据游戏名称搜索获取游戏详细信息（返回全部结果）
+ *
+ * @param name 游戏名称
+ * @param token Bangumi API 访问令牌
+ * @param limit 最多返回结果数量，默认 25
+ * @returns 返回游戏详细信息数组
+ */
+export async function fetchBgmByName(
+	name: string,
+	token?: string,
+	limit = 25,
+	context: NetworkRequestContext = {},
+): Promise<GameMetadataDraft[]> {
+	const keyword = name.trim();
+	const resp = (
+		await http.post<BgmSearchResponse>(
+			`${BGM_API_BASE_URL}/search/subjects`,
+			{
+				keyword: keyword,
+				filter: {
+					type: [4], // 4 = 游戏类型
+				},
+			},
+			{
+				...buildBgmRateLimitedOptions(token, context),
+				params: { limit },
+			},
+		)
+	).data;
+
+	const rawResults = Array.isArray(resp.data) ? resp.data : [];
+
+	return rawResults.map((item) => transformBgmData(item));
+}
+
+/**
+ * 批量获取 BGM 游戏信息（支持任意数量 ID）
+ *
+ * 通过多次 API 调用获取多个游戏的信息，请求节奏由统一限速队列控制。
+ *
+ * @param ids BGM 游戏 ID 数组（如 ["123", "456", "789", ...]，支持任意数量）
+ * @param token Bangumi API 访问令牌
+ * @returns 包含游戏详细信息的对象数组
+ *
+ * @example
+ * // 获取 50 个游戏（自动控制请求频率）
+ * const results = await fetchBgmByIds(idArray, token);
+ * // 返回: [{ id_type, sources }, ...]
+ */
+export async function fetchBgmByIds(
+	ids: string[],
+	token?: string,
+	context: NetworkRequestContext = {},
+): Promise<GameMetadataDraft[]> {
+	if (ids.length === 0) {
+		return [];
+	}
+
+	const allResults: GameMetadataDraft[] = [];
+	let hasRequestFailure = false;
+
+	for (const id of ids) {
+		try {
+			const BGMdata = (
+				await http.get<BgmSubjectResponse>(
+					`${BGM_API_BASE_URL}/subjects/${id}`,
+					buildBgmRateLimitedOptions(token, context),
+				)
+			).data;
+
+			if (BGMdata?.id) {
+				allResults.push(transformBgmData(BGMdata));
+			}
+		} catch (error) {
+			if (isApiRateLimitError(error)) throw error;
+			if (isHttpStatus(error, 401)) throw error;
+			hasRequestFailure = true;
+		}
+	}
+
+	if (allResults.length === 0 && hasRequestFailure) {
+		throw new AppError({
+			code: "metadata_request_failed",
+			message: `Bangumi batch fetch failed for ${ids.length} ids`,
+		});
+	}
+
+	return allResults;
+}
+
+/**
+ * 获取当前用户的 Profile 信息
+ * @param token Bangumi API 访问令牌
+ * @returns 当前用户资料。
+ */
+export async function fetchCurrentUserProfile(
+	token: string,
+	context: NetworkRequestContext = {},
+) {
+	const res = await http.get<BgmUserProfile>(
+		`${BGM_API_BASE_URL}/me`,
+		buildBgmRateLimitedOptions(token, context),
+	);
+	return res.data;
+}
+
+export async function fetchBgmTokenStatus(
+	token: string,
+	context: NetworkRequestContext = {},
+): Promise<BgmTokenStatus> {
+	const res = await http.post<BgmTokenStatus>(
+		`${BGM_OAUTH_BASE_URL}/token_status`,
+		null,
+		{ ...buildBgmAuthHeaders(token), ...context },
+	);
+	return res.data;
+}
+
+export function getBgmAvatarUrl(username?: string | null) {
+	return username
+		? `${BGM_API_BASE_URL}/users/${encodeURIComponent(username)}/avatar?type=large`
+		: undefined;
+}
+
+export async function buildManualBgmAuth(
+	accessToken: string,
+	context: NetworkRequestContext = {},
+): Promise<BgmAuth | null> {
+	if (!accessToken) return null;
+
+	const [tokenStatus, profile] = await Promise.all([
+		fetchBgmTokenStatus(accessToken, context),
+		fetchCurrentUserProfile(accessToken, context),
+	]);
+
+	return {
+		access_token: accessToken,
+		refresh_token: null,
+		expires_at: tokenStatus?.expires ?? null,
+		username: profile.username,
+		nickname: profile.nickname,
+	};
+}
+
+export async function completeBgmAuth(
+	auth: BgmAuth,
+	context: NetworkRequestContext = {},
+): Promise<BgmAuth> {
+	const [tokenStatus, profile] = await Promise.all([
+		auth.expires_at == null
+			? fetchBgmTokenStatus(auth.access_token, context)
+			: Promise.resolve(null),
+		auth.username && auth.nickname
+			? Promise.resolve(null)
+			: fetchCurrentUserProfile(auth.access_token, context),
+	]);
+
+	return {
+		...auth,
+		expires_at: auth.expires_at ?? tokenStatus?.expires ?? null,
+		username: auth.username ?? profile?.username ?? null,
+		nickname: auth.nickname ?? profile?.nickname ?? null,
+	};
+}
+
+/**
+ * 获取当前用户的条目收藏状态
+ * @param username 用户名
+ * @param subjectId Bangumi 条目 ID
+ * @param token Bangumi API 访问令牌
+ * @returns 收藏数据对象或 null
+ */
+export async function fetchUserCollection(
+	username: string,
+	subjectId: string,
+	token: string,
+	context: NetworkRequestContext = {},
+) {
+	try {
+		const res = await http.get<{
+			type: number;
+			rate?: number;
+			comment?: string;
+		}>(
+			`${BGM_API_BASE_URL}/users/${username}/collections/${subjectId}`,
+			buildBgmRateLimitedOptions(token, context),
+		);
+		return res.data;
+	} catch (error) {
+		if (isHttpStatus(error, 404)) return null;
+		throw error;
+	}
+}
+
+export async function fetchUserGameCollections(
+	username: string,
+	token: string,
+	context: NetworkRequestContext = {},
+): Promise<BgmUserCollection[]> {
+	const collections: BgmUserCollection[] = [];
+	const limit = 50;
+	let page = await fetchUserGameCollectionsPage(
+		username,
+		token,
+		{
+			limit,
+			offset: 0,
+		},
+		context,
+	);
+	collections.push(...page.data);
+
+	while (true) {
+		const nextOffset = page.offset + page.limit;
+		if (page.data.length === 0 || nextOffset >= page.total) {
+			break;
+		}
+		page = await fetchUserGameCollectionsPage(
+			username,
+			token,
+			{
+				limit,
+				offset: nextOffset,
+			},
+			context,
+		);
+		collections.push(...page.data);
+	}
+
+	return collections;
+}
+
+export async function fetchUserGameCollectionsPage(
+	username: string,
+	token: string,
+	params: { limit: number; offset: number },
+	context: NetworkRequestContext = {},
+): Promise<BgmUserCollectionsPage> {
+	const res = await http.get<BgmUserCollectionsResponse>(
+		`${BGM_API_BASE_URL}/users/${username}/collections`,
+		{
+			...buildBgmRateLimitedOptions(token, context),
+			params: {
+				subject_type: 4,
+				limit: params.limit,
+				offset: params.offset,
+			},
+		},
+	);
+
+	return {
+		total: res.data?.total ?? 0,
+		limit: res.data?.limit ?? params.limit,
+		offset: res.data?.offset ?? params.offset,
+		data: Array.isArray(res.data?.data) ? res.data.data : [],
+	};
+}
+/**
+ * 更新当前用户的条目收藏状态
+ * @param subjectId Bangumi 条目 ID
+ * @param payload 收藏状态、评分、评价等更新字段
+ * @param token Bangumi API 访问令牌
+ */
+export async function updateUserCollection(
+	subjectId: string,
+	payload: BgmUserCollectionModifyPayload,
+	token: string,
+	context: NetworkRequestContext = {},
+): Promise<boolean> {
+	await http.post(
+		`${BGM_API_BASE_URL}/users/-/collections/${subjectId}`,
+		payload,
+		buildBgmRateLimitedOptions(token, context),
+	);
+	// HTTP 204 does not return response body
+	return true;
+}

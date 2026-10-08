@@ -1,0 +1,80 @@
+{
+  "$schema": "../node_modules/@tauri-apps/cli/config.schema.json",
+  "productName": "Skerry",
+  "mainBinaryName": "Skerry",
+  "version": "../package.json",
+  "identifier": "local.skerry.app",
+  "build": {
+    "frontendDist": "../dist",
+    "devUrl": "http://127.0.0.1:5173",
+    "beforeDevCommand": "pnpm dev",
+    "beforeBuildCommand": "node ./node_modules/typescript/bin/tsc -b && node ./node_modules/vite/bin/vite.js build"
+  },
+  "app": {
+    "withGlobalTauri": false,
+    "windows": [
+      {
+        "label": "main",
+        "title": "Skerry",
+        "width": 1920,
+        "height": 1080,
+        "minWidth": 1918,
+        "minHeight": 1078,
+        "decorations": false,
+        "shadow": true,
+        "resizable": true,
+        "fullscreen": false,
+        "dragDropEnabled": true,
+        "zoomHotkeysEnabled": false,
+        "visible": false,
+        "additionalBrowserArgs": "--disable-features=msWebOOUI,msPdfOOUI,msSmartScreenProtection,AutofillServerCommunication,AutofillShowTypePredictions,msAutofillProfile,msEdgeAutofill --disable-single-click-autofill --disable-save-password-bubble --enable-gpu-rasterization --ignore-gpu-blocklist --enable-smooth-scrolling"
+      }
+    ],
+    "security": {
+      "csp": null,
+      "assetProtocol": {
+        "enable": true,
+        "scope": [
+          "**"
+        ]
+      }
+    }
+  },
+  "bundle": {
+    "active": true,
+    "targets": "all",
+    "resources": {
+      "target/7zip/": "tools/7zip"
+    },
+    "icon": [
+      "icons/32x32.png",
+      "icons/128x128.png",
+      "icons/128x128@2x.png",
+      "icons/icon.icns",
+      "icons/icon.ico"
+    ],
+    "copyright": "Skerry contributors",
+    "publisher": "Local build",
+    "windows": {
+      "nsis": {
+        "installerIcon": "icons/icon.ico",
+        "languages": [
+          "English",
+          "SimpChinese",
+          "TradChinese",
+          "Japanese"
+        ],
+        "displayLanguageSelector": true
+      }
+    }
+  },
+  "plugins": {
+    "deep-link": {
+      "desktop": {
+        "schemes": [
+          "skerry"
+        ]
+      }
+    }
+  }
+}

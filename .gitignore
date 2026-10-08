@@ -1,0 +1,49 @@
+# Dependencies
+node_modules/
+.pnpm-store/
+
+# Production & Build Outputs
+dist/
+dist-ssr/
+*.local
+
+# Tauri / Rust target artifacts
+src-tauri/target/
+target/
+.project-cache/
+.shim/
+
+# IDE & Editor files
+.vscode/
+.idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+.DS_Store
+Thumbs.db
+
+# Sensitive Credentials & Private tokens
+.env
+.env.*
+*.local
+bgm_oauth_secret.txt
+bgm_oauth_secret.json
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Large Installers & Temp Backups (Installers are published via GitHub Releases)
+*.exe
+*.msi
+*.zip
+*.7z
+*.rar
+backups/
+小完全体/
+temp_*

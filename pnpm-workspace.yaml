@@ -1,0 +1,17 @@
+minimumReleaseAge: 4320
+minimumReleaseAgeStrict: true
+minimumReleaseAgeIgnoreMissingTime: false
+
+blockExoticSubdeps: true
+trustPolicy: no-downgrade
+trustPolicyIgnoreAfter: 43200
+trustPolicyExclude:
+  - "tinyexec@1.2.2"
+
+strictDepBuilds: true
+allowBuilds:
+  "@biomejs/biome": true
+  "@swc/core": true
+  esbuild: false
+
+verifyDepsBeforeRun: warn

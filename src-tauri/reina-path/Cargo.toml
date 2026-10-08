@@ -1,0 +1,8 @@
+[package]
+name = "reina-path"
+version = "0.1.0"
+edition = "2021"
+publish = false
+
+[dependencies]
+directories = "6.0.0"

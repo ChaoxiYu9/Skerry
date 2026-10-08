@@ -1,0 +1,568 @@
+import BackupIcon from "@mui/icons-material/Backup";
+import DeleteIcon from "@mui/icons-material/Delete";
+import FolderOpenIcon from "@mui/icons-material/FolderOpen";
+import RestoreIcon from "@mui/icons-material/Restore";
+import SaveIcon from "@mui/icons-material/Save";
+import {
+	Box,
+	Button,
+	CardContent,
+	CircularProgress,
+	Divider,
+	FormControlLabel,
+	IconButton,
+	InputAdornment,
+	List,
+	ListItem,
+	ListItemText,
+	Stack,
+	Switch,
+	TextField,
+	Tooltip,
+	Typography,
+} from "@mui/material";
+import { useEffect, useMemo, useState } from "react";
+import { useTranslation } from "react-i18next";
+import { AlertConfirmBox } from "@/components/AlertBox";
+import { SelectedGameGuard } from "@/components/SelectedGameGuard";
+import { useUpdateGame } from "@/hooks/queries/useGames";
+import { useSaveDataResources } from "@/hooks/queries/useSavedata";
+import { snackbar } from "@/providers/snackBar";
+import { handleFolder } from "@/services/fs/fileDialog";
+import {
+	openGameBackupFolder,
+	openGameSaveDataFolder,
+} from "@/services/fs/savedataBackup";
+import type { GameData, SavedataRecord } from "@/types";
+import { getUserErrorMessage } from "@/utils/errors";
+import { formatFileSize } from "@/utils/fileSize";
+import { GlassSurface } from "@/components/ui/GlassSurface";
+
+/** 格式化时间戳 */
+const formatDate = (timestamp: number): string => {
+	return new Date(timestamp * 1000).toLocaleString();
+};
+
+interface SaveDataContentProps {
+	selectedGame: GameData;
+	gameId: number;
+}
+
+/**
+ * SaveData 组件
+ * 游戏存档页面
+ */
+export const SaveData: React.FC = () => {
+	return (
+		<SelectedGameGuard>
+			{(selectedGame) => (
+				<SaveDataContent selectedGame={selectedGame} gameId={selectedGame.id} />
+			)}
+		</SelectedGameGuard>
+	);
+};
+
+function SaveDataContent({ selectedGame, gameId }: SaveDataContentProps) {
+	const updateGameMutation = useUpdateGame();
+	const { t } = useTranslation();
+	const originalAutoSaveEnabled = selectedGame.autosave === 1;
+	const originalSaveDataPath = selectedGame.savepath || "";
+	const originalMaxBackups = selectedGame.maxbackups ?? 20;
+	const hasSavedGameSavePath = Boolean(originalSaveDataPath);
+
+	// React Query hooks
+	const {
+		backupList,
+		createBackupMutation,
+		deleteBackupMutation,
+		restoreBackupMutation,
+	} = useSaveDataResources(gameId);
+
+	// 备份设置 - 本地状态（统一保存）
+	const [saveDataPath, setSaveDataPath] = useState("");
+	const [autoSaveEnabled, setAutoSaveEnabled] = useState(false);
+	const [maxBackups, setMaxBackups] = useState(20);
+
+	// 对话框状态
+	const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+	const [backupToDelete, setBackupToDelete] = useState<SavedataRecord | null>(
+		null,
+	);
+	const [restoreDialogOpen, setRestoreDialogOpen] = useState(false);
+	const [backupToRestore, setBackupToRestore] = useState<SavedataRecord | null>(
+		null,
+	);
+
+	// 从 selectedGame 同步设置状态
+	useEffect(() => {
+		setAutoSaveEnabled(originalAutoSaveEnabled);
+		setSaveDataPath(originalSaveDataPath);
+		setMaxBackups(originalMaxBackups);
+	}, [originalAutoSaveEnabled, originalMaxBackups, originalSaveDataPath]);
+
+	// 检测是否有未保存的更改
+	const hasUnsavedChanges = useMemo(
+		() =>
+			autoSaveEnabled !== originalAutoSaveEnabled ||
+			saveDataPath !== originalSaveDataPath ||
+			maxBackups !== originalMaxBackups,
+		[
+			autoSaveEnabled,
+			maxBackups,
+			originalAutoSaveEnabled,
+			originalMaxBackups,
+			originalSaveDataPath,
+			saveDataPath,
+		],
+	);
+
+	const isSaving = updateGameMutation.isPending;
+
+	// 统一保存备份设置
+	const handleSaveSettings = async () => {
+		if (maxBackups < 1) {
+			snackbar.error(
+				t("pages.Detail.Backup.invalidMaxBackups", "最大备份数量必须大于0"),
+			);
+			return;
+		}
+
+		try {
+			const clearsavePath = saveDataPath.trim();
+			const autosaveValue = clearsavePath ? (autoSaveEnabled ? 1 : 0) : 0;
+			// 如果路径被清空，强制关闭自动备份，避免界面状态与保存结果不一致
+			setAutoSaveEnabled(autosaveValue === 1);
+			await updateGameMutation.mutateAsync({
+				gameId,
+				updates: {
+					savepath: clearsavePath,
+					autosave: autosaveValue,
+					maxbackups: maxBackups,
+				},
+			});
+			snackbar.success(
+				t("pages.Detail.Backup.settingsSaved", "备份设置保存成功"),
+			);
+		} catch (error) {
+			snackbar.error(
+				`${t("pages.Detail.Backup.settingsSaveFailed", "备份设置保存失败")}: ${getUserErrorMessage(error, t)}`,
+			);
+		}
+	};
+
+	// 选择存档文件夹
+	const handleSelectSaveDataPath = async () => {
+		const selectedPath = await handleFolder(selectedGame.localpath ?? "");
+		if (selectedPath) {
+			setSaveDataPath(selectedPath);
+		}
+	};
+
+	// 创建备份
+	const handleCreateBackup = async () => {
+		if (!hasSavedGameSavePath) {
+			snackbar.error(
+				t("pages.Detail.Backup.pathRequired", "请先选择存档文件夹"),
+			);
+			return;
+		}
+
+		try {
+			await createBackupMutation.mutateAsync({
+				gameId,
+				savePath: originalSaveDataPath,
+			});
+			snackbar.success(t("pages.Detail.Backup.backupSuccess", "备份创建成功"));
+		} catch (error) {
+			snackbar.error(
+				`${t("pages.Detail.Backup.backupFailed", "备份失败")}: ${getUserErrorMessage(error, t)}`,
+			);
+		}
+	};
+
+	// 打开备份文件夹
+	const handleOpenBackupFolder = async () => {
+		try {
+			await openGameBackupFolder(gameId);
+		} catch (error) {
+			snackbar.error(
+				`${t("pages.Detail.Backup.openBackupFolderFailed", "打开备份文件夹失败")}: ${getUserErrorMessage(error, t)}`,
+			);
+		}
+	};
+
+	// 打开存档文件夹
+	const handleOpenSaveDataFolder = async () => {
+		if (!hasSavedGameSavePath) {
+			snackbar.error(
+				t("pages.Detail.Backup.pathRequired", "请先选择存档文件夹"),
+			);
+			return;
+		}
+
+		try {
+			await openGameSaveDataFolder(originalSaveDataPath);
+		} catch (error) {
+			snackbar.error(
+				`${t("pages.Detail.Backup.openSaveDataFolderFailed", "打开存档文件夹失败")}: ${getUserErrorMessage(error, t)}`,
+			);
+		}
+	};
+
+	// 打开删除确认对话框
+	const handleDeleteClick = (backup: SavedataRecord) => {
+		setBackupToDelete(backup);
+		setDeleteDialogOpen(true);
+	};
+
+	// 删除备份
+	const handleDeleteBackup = async () => {
+		if (!backupToDelete) return;
+		deleteBackupMutation.mutate(
+			{
+				gameId,
+				backup: backupToDelete,
+			},
+			{
+				onSuccess: () => {
+					snackbar.success(
+						t("pages.Detail.Backup.deleteSuccess", "备份删除成功"),
+					);
+				},
+				onError: (error) => {
+					snackbar.error(
+						`${t("pages.Detail.Backup.deleteFailed", "删除失败")}: ${getUserErrorMessage(error, t)}`,
+					);
+				},
+				onSettled: () => {
+					setDeleteDialogOpen(false);
+					setBackupToDelete(null);
+				},
+			},
+		);
+	};
+
+	// 打开恢复确认对话框
+	const handleRestoreClick = (backup: SavedataRecord) => {
+		if (!hasSavedGameSavePath) {
+			snackbar.error(
+				t("pages.Detail.Backup.pathRequired", "请先选择存档文件夹"),
+			);
+			return;
+		}
+		setBackupToRestore(backup);
+		setRestoreDialogOpen(true);
+	};
+
+	// 确认恢复备份
+	const handleConfirmRestore = async () => {
+		if (!backupToRestore || !hasSavedGameSavePath) return;
+		try {
+			await restoreBackupMutation.mutateAsync({
+				gameId,
+				backup: backupToRestore,
+				savePath: originalSaveDataPath,
+			});
+			snackbar.success(t("pages.Detail.Backup.restoreSuccess", "存档恢复成功"));
+			setRestoreDialogOpen(false);
+			setBackupToRestore(null);
+		} catch (error) {
+			snackbar.error(
+				`${t("pages.Detail.Backup.restoreFailed", "恢复失败")}: ${getUserErrorMessage(error, t)}`,
+			);
+		}
+	};
+
+	return (
+		<Box className="detail-editor-shell">
+			<Stack spacing={3}>
+				{/* 备份设置 */}
+				<GlassSurface component="section" className="detail-glass-card">
+					<CardContent>
+						<Typography variant="h6" gutterBottom>
+							{t("pages.Detail.Backup.settings", "备份设置")}
+						</Typography>
+
+						<Stack spacing={2}>
+							{/* 自动备份开关和最大备份数量 */}
+							<Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
+								<FormControlLabel
+									control={
+										<Switch
+											checked={autoSaveEnabled}
+											onChange={(e) => setAutoSaveEnabled(e.target.checked)}
+											disabled={!saveDataPath}
+										/>
+									}
+									label={t("pages.Detail.Backup.autoSave", "自动备份")}
+								/>
+
+								<TextField
+									label={t("pages.Detail.Backup.maxBackups", "最大备份数量")}
+									type="number"
+									variant="outlined"
+									size="small"
+									value={maxBackups}
+									onChange={(e) => {
+										const value = Number.parseInt(e.target.value, 10);
+										if (!Number.isNaN(value) && value > 0) {
+											setMaxBackups(value);
+										}
+									}}
+									disabled={isSaving}
+								/>
+							</Box>
+
+							<Divider />
+
+							{/* 存档路径设置 */}
+							<Typography variant="subtitle2" color="textSecondary">
+								{t("pages.Detail.Backup.savePathSettings", "存档路径设置")}
+							</Typography>
+
+							<TextField
+								label={t("pages.Detail.Backup.saveDataPath", "存档文件夹路径")}
+								variant="outlined"
+								fullWidth
+								value={saveDataPath}
+								onChange={(e) => setSaveDataPath(e.target.value)}
+								disabled={isSaving}
+								placeholder={t(
+									"pages.Detail.Backup.selectSaveDataFolder",
+									"选择存档文件夹",
+								)}
+								slotProps={{
+									input: {
+										endAdornment: (
+											<InputAdornment position="end">
+												<IconButton
+													onClick={handleSelectSaveDataPath}
+													disabled={isSaving}
+													edge="end"
+													size="small"
+												>
+													<FolderOpenIcon />
+												</IconButton>
+											</InputAdornment>
+										),
+									},
+								}}
+							/>
+
+							<Divider />
+
+							{/* 统一保存按钮 */}
+							<Button
+								variant="contained"
+								onClick={handleSaveSettings}
+								disabled={isSaving || !hasUnsavedChanges}
+								startIcon={
+									isSaving ? <CircularProgress size={16} /> : <SaveIcon />
+								}
+							>
+								{isSaving
+									? t("pages.Detail.Backup.saving", "保存中...")
+									: t("pages.Detail.Backup.saveSettings", "保存备份设置")}
+							</Button>
+						</Stack>
+					</CardContent>
+				</GlassSurface>
+
+				{/* 手动备份操作 */}
+				<GlassSurface component="section" className="detail-glass-card">
+					<CardContent>
+						<Typography variant="h6" gutterBottom>
+							{t("pages.Detail.Backup.manualBackup", "手动备份")}
+						</Typography>
+
+						{/* 创建备份按钮 */}
+						<Stack spacing={2}>
+							<Button
+								variant="contained"
+								color="primary"
+								size="large"
+								fullWidth
+								onClick={handleCreateBackup}
+								disabled={
+									createBackupMutation.isPending || !hasSavedGameSavePath
+								}
+								startIcon={
+									createBackupMutation.isPending ? (
+										<CircularProgress size={20} color="inherit" />
+									) : (
+										<BackupIcon />
+									)
+								}
+							>
+								{createBackupMutation.isPending
+									? t("pages.Detail.Backup.creating", "正在创建备份...")
+									: t("pages.Detail.Backup.createBackup", "创建备份")}
+							</Button>
+
+							{/* 打开文件夹按钮 */}
+							<Stack direction="row" spacing={1}>
+								<Button
+									variant="outlined"
+									size="medium"
+									onClick={handleOpenBackupFolder}
+									startIcon={<FolderOpenIcon />}
+									sx={{ flex: 1 }}
+								>
+									{t("pages.Detail.Backup.openBackupFolder", "打开备份文件夹")}
+								</Button>
+
+								<Button
+									variant="outlined"
+									size="medium"
+									onClick={handleOpenSaveDataFolder}
+									disabled={!hasSavedGameSavePath}
+									startIcon={<FolderOpenIcon />}
+									sx={{ flex: 1 }}
+								>
+									{t(
+										"pages.Detail.Backup.openSaveDataFolder",
+										"打开存档文件夹",
+									)}
+								</Button>
+							</Stack>
+						</Stack>
+					</CardContent>
+				</GlassSurface>
+
+				{/* 备份列表 */}
+				<GlassSurface component="section" className="detail-glass-card">
+					<CardContent>
+						<Typography variant="h6" gutterBottom>
+							{t("pages.Detail.Backup.backupHistory", "备份历史")}
+						</Typography>
+
+						{backupList.length === 0 ? (
+							<Typography color="textSecondary" component="div">
+								{t("pages.Detail.Backup.noBackups", "暂无备份记录")}
+							</Typography>
+						) : (
+							<List>
+								{backupList.map((backup) => (
+									<ListItem
+										key={backup.id}
+										divider
+										secondaryAction={
+											<>
+												<Tooltip
+													title={
+														!hasSavedGameSavePath
+															? t(
+																	"pages.Detail.Backup.setPathForRestore",
+																	"请先设置存档路径以恢复备份",
+																)
+															: t(
+																	"pages.Detail.Backup.restoreBackup",
+																	"恢复备份",
+																)
+													}
+												>
+													<span>
+														<IconButton
+															edge="end"
+															onClick={() => handleRestoreClick(backup)}
+															disabled={
+																createBackupMutation.isPending ||
+																restoreBackupMutation.isPending ||
+																!hasSavedGameSavePath
+															}
+															color="primary"
+															sx={{ mr: 1 }}
+														>
+															{restoreBackupMutation.isPending &&
+															restoreBackupMutation.variables?.backup.id ===
+																backup.id ? (
+																<CircularProgress size={24} />
+															) : (
+																<RestoreIcon />
+															)}
+														</IconButton>
+													</span>
+												</Tooltip>
+												<IconButton
+													edge="end"
+													onClick={() => handleDeleteClick(backup)}
+													disabled={
+														createBackupMutation.isPending ||
+														restoreBackupMutation.isPending ||
+														deleteBackupMutation.isPending
+													}
+													color="error"
+												>
+													{deleteBackupMutation.isPending ? (
+														<CircularProgress size={24} color="error" />
+													) : (
+														<DeleteIcon />
+													)}
+												</IconButton>
+											</>
+										}
+									>
+										<ListItemText
+											primary={backup.file}
+											secondary={
+												<>
+													<Typography
+														variant="body2"
+														color="textSecondary"
+														component="span"
+													>
+														{t("pages.Detail.Backup.backupTime", "备份时间")}:{" "}
+														{formatDate(backup.backup_time)}
+													</Typography>
+													<br />
+													<Typography
+														variant="body2"
+														color="textSecondary"
+														component="span"
+													>
+														{t("pages.Detail.Backup.fileSize", "文件大小")}:{" "}
+														{formatFileSize(backup.file_size)}
+													</Typography>
+												</>
+											}
+										/>
+									</ListItem>
+								))}
+							</List>
+						)}
+					</CardContent>
+				</GlassSurface>
+			</Stack>
+
+			{/* 删除确认对话框 */}
+			<AlertConfirmBox
+				open={deleteDialogOpen}
+				setOpen={setDeleteDialogOpen}
+				onConfirm={handleDeleteBackup}
+				isLoading={deleteBackupMutation.isPending}
+				title={t("components.AlertBox.deleteBackupTitle", "删除备份")}
+				message={
+					backupToDelete
+						? `${t("pages.Detail.Backup.confirmDelete", "确定要删除备份")} "${backupToDelete.file}" ${t("pages.Detail.Backup.confirmDeleteSuffix", "吗？此操作不可撤销。")}`
+						: undefined
+				}
+			/>
+
+			{/* 恢复确认对话框 */}
+			<AlertConfirmBox
+				open={restoreDialogOpen}
+				setOpen={setRestoreDialogOpen}
+				onConfirm={handleConfirmRestore}
+				isLoading={restoreBackupMutation.isPending}
+				title={t("pages.Detail.Backup.restoreBackupTitle", "恢复存档")}
+				message={
+					backupToRestore
+						? `${t("pages.Detail.Backup.confirmRestore", "确定要恢复备份")} "${backupToRestore.file}"${t("pages.Detail.Backup.confirmRestoreSuffix", " 吗？这将覆盖当前存档，建议在恢复前先创建新备份。")}`
+						: undefined
+				}
+				confirmText={t("pages.Detail.Backup.confirmRestoreButton", "恢复")}
+				confirmColor="warning"
+			/>
+		</Box>
+	);
+}

@@ -1,0 +1,219 @@
+/**
+ * @file 用户设置查询层
+ * @description 使用 React Query 管理用户设置相关的数据获取和写入
+ * @module src/hooks/queries/useSettings
+ */
+
+import {
+	type QueryClient,
+	queryOptions,
+	useMutation,
+	useQuery,
+	useQueryClient,
+} from "@tanstack/react-query";
+import { useCallback } from "react";
+import { fetchCurrentUserProfile } from "@/metadata/api/bgm";
+import { fetchHikarinagiCurrentUserProfile } from "@/metadata/api/hikarinagi";
+import { fetchVndbCurrentUserProfile } from "@/metadata/api/vndb";
+import { remoteQueryOptions } from "@/providers/queryClient";
+import { settingsService } from "@/services/invoke";
+import { getNetworkRequestContext } from "@/services/requestContext";
+import type { LogLevel, UpdateSettingsParams } from "@/types";
+
+// ============================================================================
+// Key Factory - 统一的 Query Key 前缀
+// ============================================================================
+
+export const settingsKeys = {
+	all: ["settings"] as const,
+	allSettings: () => [...settingsKeys.all, "allSettings"] as const,
+	bgmCurrentUserProfile: () =>
+		[...settingsKeys.all, "bgmCurrentUserProfile"] as const,
+	bgmCurrentUserProfileByToken: (token: string) =>
+		[...settingsKeys.bgmCurrentUserProfile(), token] as const,
+	hikarinagiCurrentUserProfile: () =>
+		[...settingsKeys.all, "hikarinagiCurrentUserProfile"] as const,
+	hikarinagiCurrentUserProfileByToken: (token: string) =>
+		[...settingsKeys.hikarinagiCurrentUserProfile(), token] as const,
+	vndbCurrentUserProfile: () =>
+		[...settingsKeys.all, "vndbCurrentUserProfile"] as const,
+	vndbCurrentUserProfileByToken: (token: string) =>
+		[...settingsKeys.vndbCurrentUserProfile(), token] as const,
+	logLevel: () => [...settingsKeys.all, "logLevel"] as const,
+};
+
+type SettingsQueryOptions = {
+	enabled?: boolean;
+};
+
+// ============================================================================
+// Query Options - 内部复用的查询定义
+// ============================================================================
+
+function allSettingsQueryOptions() {
+	return queryOptions({
+		queryKey: settingsKeys.allSettings(),
+		queryFn: () => settingsService.getAllSettings(),
+	});
+}
+
+function bgmCurrentUserProfileQueryOptions(token: string) {
+	return queryOptions({
+		queryKey: settingsKeys.bgmCurrentUserProfileByToken(token),
+		queryFn: () => fetchCurrentUserProfile(token, getNetworkRequestContext()),
+		...remoteQueryOptions,
+	});
+}
+
+// ============================================================================
+// Fetch Functions - 非组件 ts 文件使用
+// ============================================================================
+
+/**
+ * 通过 React Query 统一获取设置
+ * 非组件环境也应优先调用这里，以便复用缓存与失效策略
+ */
+export function fetchAllSettings(queryClient: QueryClient) {
+	return queryClient.fetchQuery(allSettingsQueryOptions());
+}
+
+export function fetchBgmCurrentUserProfile(
+	queryClient: QueryClient,
+	token: string,
+) {
+	return queryClient.fetchQuery(bgmCurrentUserProfileQueryOptions(token));
+}
+
+// ============================================================================
+// Hooks - 组件使用
+// ============================================================================
+
+/**
+ * 获取当前 VNDB Token 对应的用户资料
+ */
+export function useVndbCurrentUserProfile(options?: SettingsQueryOptions) {
+	const { data: settings } = useAllSettings(options);
+	const vndbToken = settings?.vndb_token ?? "";
+
+	return useQuery({
+		queryKey: settingsKeys.vndbCurrentUserProfileByToken(vndbToken),
+		queryFn: () =>
+			fetchVndbCurrentUserProfile(vndbToken, getNetworkRequestContext()),
+		enabled: (options?.enabled ?? true) && Boolean(vndbToken),
+		...remoteQueryOptions,
+	});
+}
+
+/**
+ * 获取当前 Hikarinagi Token 对应的用户资料
+ */
+export function useHikarinagiCurrentUserProfile(
+	options?: SettingsQueryOptions,
+) {
+	const { data: settings } = useAllSettings(options);
+	const hikarinagiToken = settings?.hikarinagi_auth?.access_token ?? "";
+
+	return useQuery({
+		queryKey: settingsKeys.hikarinagiCurrentUserProfileByToken(hikarinagiToken),
+		queryFn: () =>
+			fetchHikarinagiCurrentUserProfile(
+				hikarinagiToken,
+				getNetworkRequestContext(),
+			),
+		enabled: (options?.enabled ?? true) && Boolean(hikarinagiToken),
+		...remoteQueryOptions,
+	});
+}
+
+/**
+ * 获取当前日志级别
+ */
+export function useLogLevel(options?: SettingsQueryOptions) {
+	return useQuery({
+		queryKey: settingsKeys.logLevel(),
+		queryFn: () => settingsService.getLogLevel(),
+		enabled: options?.enabled,
+	});
+}
+
+/**
+ * 获取所有设置
+ */
+export function useAllSettings(options?: SettingsQueryOptions) {
+	return useQuery({
+		...allSettingsQueryOptions(),
+		enabled: options?.enabled,
+	});
+}
+
+/**
+ * 刷新所有设置缓存
+ */
+export function useRefreshSettings() {
+	const queryClient = useQueryClient();
+
+	return useCallback(
+		() =>
+			queryClient.invalidateQueries({
+				queryKey: settingsKeys.allSettings(),
+			}),
+		[queryClient],
+	);
+}
+
+// ============================================================================
+// Mutations - 数据操作 hooks
+// ============================================================================
+
+/**
+ * 设置日志级别
+ */
+export function useSetLogLevel() {
+	const queryClient = useQueryClient();
+
+	return useMutation({
+		mutationFn: (level: LogLevel) => settingsService.setLogLevel(level),
+		onSuccess: () => {
+			queryClient.invalidateQueries({
+				queryKey: settingsKeys.logLevel(),
+			});
+		},
+	});
+}
+
+/**
+ * 批量更新设置
+ */
+export function useUpdateSettings() {
+	const queryClient = useQueryClient();
+
+	return useMutation({
+		mutationFn: (updates: UpdateSettingsParams) =>
+			settingsService.updateSettings(updates),
+		onSuccess: async (_data, updates) => {
+			const invalidations = [
+				queryClient.invalidateQueries({
+					queryKey: settingsKeys.allSettings(),
+				}),
+			];
+
+			if (updates.bgmAuth !== undefined) {
+				invalidations.push(
+					queryClient.invalidateQueries({
+						queryKey: settingsKeys.bgmCurrentUserProfile(),
+					}),
+				);
+			}
+
+			if (updates.vndbToken !== undefined) {
+				invalidations.push(
+					queryClient.invalidateQueries({
+						queryKey: settingsKeys.vndbCurrentUserProfile(),
+					}),
+				);
+			}
+
+			await Promise.all(invalidations);
+		},
+	});
+}

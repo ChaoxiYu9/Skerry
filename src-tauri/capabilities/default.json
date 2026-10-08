@@ -1,0 +1,83 @@
+{
+  "$schema": "../gen/schemas/desktop-schema.json",
+  "identifier": "default",
+  "description": "Capability for the main window",
+  "windows": [
+    "main"
+  ],
+  "permissions": [
+    "dialog:default",
+    "notification:default",
+    "core:path:default",
+    "core:path:allow-dirname",
+    "core:event:default",
+    "core:event:allow-listen",
+    "shell:allow-open",
+    "core:app:allow-default-window-icon",
+    "core:tray:allow-new",
+    "core:tray:default",
+    "core:menu:allow-new",
+    "core:menu:default",
+    "core:window:allow-show",
+    "core:window:allow-unminimize",
+    "core:window:allow-set-focus",
+    "core:window:allow-close",
+    "core:window:allow-minimize",
+    "core:window:allow-is-focused",
+    "core:window:allow-is-maximized",
+    "core:window:allow-toggle-maximize",
+    "core:window:allow-internal-toggle-maximize",
+    "core:window:allow-start-dragging",
+    "core:window:allow-hide",
+    "core:window:allow-destroy",
+    "core:window:allow-set-theme",
+    "core:webview:allow-set-webview-zoom",
+    "http:allow-fetch",
+    "http:default",
+    "store:allow-get",
+    "store:allow-set",
+    "store:allow-save",
+    "store:allow-load",
+    {
+      "identifier": "http:default",
+      "allow": [
+        {
+          "url": "https://api.bgm.tv"
+        },
+        {
+          "url": "https://bgm.tv"
+        },
+        {
+          "url": "https://www.ymgal.games"
+        },
+        {
+          "url": "https://api.vndb.org"
+        },
+        {
+          "url": "https://t.vndb.org"
+        },
+        {
+          "url": "https://www.kungal.com"
+        },
+        {
+          "url": "https://image.kungal.iloveren.link"
+        },
+        {
+          "url": "https://www.dlsite.com"
+        },
+        {
+          "url": "https://erogamescape.org"
+        },
+        {
+          "url": "https://www.hikarinagi.org"
+        },
+        {
+          "url": "https://api.hikarinagi.org"
+        },
+        {
+          "url": "https://cdn.ymgal.games"
+        }
+      ]
+    }
+  ]
+}

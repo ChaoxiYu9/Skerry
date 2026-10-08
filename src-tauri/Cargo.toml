@@ -1,0 +1,139 @@
+[workspace]
+members = ["reina-path", "migration"]
+
+[package]
+name = "Skerry"
+version = "1.0.0-beta"
+default-run = "Skerry"
+description = "Skerry is a local visual novel launcher and downloader based on ReinaManager workflows, with PotatoVN import support."
+authors = ["Skerry contributors"]
+license = "GNU AFFERO GENERAL PUBLIC LICENSE"
+edition = "2024"
+rust-version = "1.97.1"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[lib]
+name = "skerry_lib"
+crate-type = ["staticlib", "cdylib", "rlib"]
+
+[features]
+default = ["tauri-app"]
+tauri-app = [
+    "dep:tauri",
+    "dep:tauri-build",
+    "dep:tauri-plugin-autostart",
+    "dep:tauri-plugin-dialog",
+    "dep:tauri-plugin-deep-link",
+    "dep:tauri-plugin-http",
+    "dep:tauri-plugin-log",
+    "dep:tauri-plugin-notification",
+    "dep:tauri-plugin-opener",
+    "dep:tauri-plugin-shell",
+    "dep:tauri-plugin-single-instance",
+    "dep:tauri-plugin-window-state",
+    "dep:tauri-plugin-store",
+]
+native-service = []
+
+[build-dependencies]
+tauri-build = { version = "~2.6.3", features = [], optional = true }
+dotenvy = "0.15.7"
+sevenz-rust2 = { version = "0.21.3", default-features = false, features = ["util"] }
+sha2 = "0.10.9"
+tar = "0.4.44"
+ureq = { version = "3.1.4", default-features = false, features = ["rustls"] }
+xz2 = "0.1.7"
+
+[dependencies]
+# Serialization & logging
+serde = { version = "1.0.229", features = ["derive"] }
+serde_json = "1.0.151"
+steamlocate = "2.1.0"
+log = "0.4.33"
+
+# Tauri core and plugins
+tauri = { version = "~2.11.5", features = ["protocol-asset", "tray-icon"], optional = true }
+tauri-plugin-autostart = { version = "~2.5.1", optional = true }
+tauri-plugin-dialog = { version = "~2.7.2", optional = true }
+tauri-plugin-deep-link = { version = "~2.4.9", optional = true }
+tauri-plugin-http = { version = "~2.5.9", default-features = false, optional = true, features = [
+    "rustls-tls",
+    "http2",
+    "charset",
+    "macos-system-configuration",
+    "unsafe-headers",
+] }
+tauri-plugin-log = { version = "~2.9.0", optional = true }
+tauri-plugin-notification = { version = "~2.3.3", optional = true }
+tauri-plugin-opener = { version = "~2.5.4", optional = true }
+tauri-plugin-shell = { version = "~2.3.5", optional = true }
+tauri-plugin-single-instance = { version = "~2.4.3", features = ["deep-link"], optional = true }
+tauri-plugin-window-state = { version = "=2.2.3", optional = true }
+tauri-plugin-store = { version = "~2.4.4", optional = true }
+
+# Native service HTTP client. This must remain independent from the Tauri HTTP plugin.
+reqwest = { version = "0.12.24", default-features = false, features = ["rustls-tls", "http2", "charset"] }
+
+# System / utilities
+base64 = "0.22.1"
+arboard = { version = "3.6.1", default-features = false, features = [
+    "image-data",
+    "wayland-data-control",
+] }
+sevenz-rust2 = { version = "0.21.3", default-features = false, features = [
+    "compress",
+    "util",
+    "zstd",
+] }
+chrono = { version = "0.4.45", default-features = false, features = ["clock"] }
+parking_lot = "0.12.5"
+sha2 = "0.10.9"
+blake3 = "1.8.5"
+
+# Async runtime / DB
+tokio = { version = "1.53.1", features = ["rt-multi-thread", "time", "sync", "fs", "io-util", "net", "process", "macros"] }
+sea-orm = { version = "1.1.20", default-features = false, features = [
+    "sqlx-sqlite",
+    "runtime-tokio",
+    "macros",
+    "with-json",
+] }
+
+# Misc
+getrandom = "0.4.3"
+url = "2.5.8"
+pinyin = "0.11.0"
+walkdir = "2.5.0"
+migration = { path = "migration" }
+reina-path = { path = "reina-path" }
+image = { version = "0.25.10", default-features = false, features = ["png"] }
+
+# Windows system APIs
+[target.'cfg(target_os = "windows")'.dependencies]
+tauri-winrt-notification = "0.7.3"
+windows = { version = "0.62.2", features = [
+    "Win32_Foundation",
+    "Win32_System_Threading",
+    "Win32_UI_WindowsAndMessaging",
+    "Win32_UI_Shell",
+    "Win32_System_Registry",
+    "Win32_System_Diagnostics_ToolHelp",
+] }
+
+[target.'cfg(target_os = "linux")'.dependencies]
+xcb = "1.7.0"
+zbus = "5.18.0"
+zbus_systemd = { version = "0.26100.0", features = ["systemd1"] }
+
+
+[profile.dev]
+incremental = true # 以较小的步骤编译您的二进制文件。
+split-debuginfo = "unpacked"
+
+[profile.release]
+codegen-units = 16 # 降低峰值内存消耗，防止 LLVM OOM
+lto = "off"      # 使用轻量级 ThinLTO 维持高优化同时大幅降低内存峰值
+opt-level = "z"   # 优先考虑小的二进制文件大小。如果您更喜欢速度，请使用 `3`。
+panic = "abort"   # 通过禁用 panic 处理程序来提高性能。
+strip = "debuginfo" # 移除调试信息，但保留符号名以便排查错误。
