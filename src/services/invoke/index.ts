@@ -1,0 +1,43 @@
+/**
+ * @file Service 层统一导出
+ * @description 提供所有 service 的统一访问入口
+ */
+
+export { collectionService } from "./collectionService";
+export type {
+	BackupOptions,
+	BackupResult,
+	ExportUserDataRequest,
+	ExportUserDataResult,
+	ImportResult,
+	ImportUserDataResult,
+	MoveBackupFolderResult,
+	SteamLaunchTarget,
+	SteamLaunchTargetScanResult,
+	UserDataGamePreview,
+	UserDataManifest,
+	UserDataPreviewResult,
+} from "./fileService";
+export { fileService } from "./fileService";
+// 导出所有服务
+export { gameService } from "./gameService";
+export {
+	type GameInstallMetadataRequestedEvent,
+	type GameInstallResultV1,
+	type GameInstallStage,
+	type GameInstallTask,
+	type InstallCompletedEvent,
+	type InstallFailedEvent,
+	type InstallRequest,
+	isGameInstallTask,
+	type Task,
+	type TaskProgressEvent,
+	type TaskStatus,
+	taskService,
+} from "./installService";
+export { savedataService } from "./savedataService";
+export type { ProxyConfig, UserSettings } from "./settingsService";
+export { settingsService } from "./settingsService";
+export { statsService } from "./statsService";
+// 导出类型
+export type { GameType, SortOption, SortOrder } from "./types";

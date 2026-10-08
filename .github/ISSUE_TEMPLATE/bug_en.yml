@@ -1,0 +1,89 @@
+name: "Bug Report 🐛"
+description: "Report a bug in ReinaManager"
+title: "🐛[Bug] "
+labels:
+  - bug
+
+
+body:
+
+  - type: markdown
+    attributes:
+      value: |
+        ## 🐛 Bug Report
+
+        Please provide real and reproducible information.
+
+
+  - type: textarea
+    id: description
+    attributes:
+      label: Description
+      description: |
+        Describe the problem in detail.
+    validations:
+      required: true
+
+
+  - type: textarea
+    id: reproduce
+    attributes:
+      label: Steps to Reproduce
+      value: |
+        1.
+        2.
+        3.
+    validations:
+      required: true
+
+
+  - type: textarea
+    id: logs
+    attributes:
+      label: Logs
+      render: shell
+
+
+  - type: input
+    id: version
+    attributes:
+      label: Version
+    validations:
+      required: true
+
+
+  - type: dropdown
+    id: os
+    attributes:
+      label: Operating System
+      multiple: true
+      options:
+        - Windows
+        - Linux
+        - macOS
+        - Other
+    validations:
+      required: true
+
+
+  - type: textarea
+    id: screenshot
+    attributes:
+      label: Screenshots
+
+
+  - type: checkboxes
+    id: confirmation
+    attributes:
+      label: Confirmation
+      options:
+
+        - label: |
+            <sub>
+            I confirm that I have read this template
+            and provided valid information.
+            If this issue is meaningless, duplicated,
+            or impossible to investigate,
+            I accept that maintainers may close it directly.
+            </sub>
+          required: true

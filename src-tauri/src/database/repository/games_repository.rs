@@ -1,0 +1,1797 @@
+//! 游戏聚合仓库。
+
+use crate::database::dto::{
+    BatchOperationError, BatchOperationResult, FullGameData, GameSourceData, InsertGameData,
+    UpdateGameData, UpsertGameSourceData,
+};
+use crate::entity::prelude::*;
+use crate::entity::{game_sources, game_statistics, games, savedata};
+use crate::utils::fs::validate_executable_name;
+use sea_orm::sea_query::{Expr, OnConflict};
+use sea_orm::*;
+use serde::{Deserialize, Serialize};
+use serde_json::Value;
+use std::cmp::Ordering;
+use std::collections::{HashMap, HashSet};
+#[cfg(test)]
+use std::path::Path;
+
+/// 游戏数据排序选项
+#[derive(Debug, Clone, Copy, Serialize, Deserialize)]
+#[serde(rename_all = "lowercase")]
+pub enum SortOption {
+    Addtime,
+    Datetime,
+    LastPlayed,
+    BGMRank,
+    VNDBRank,
+    UserRatingRank,
+    Namesort,
+}
+
+/// 排序方向
+#[derive(Debug, Clone, Copy, Serialize, Deserialize)]
+#[serde(rename_all = "lowercase")]
+pub enum SortOrder {
+    Asc,
+    Desc,
+}
+
+/// 游戏类型筛选
+#[derive(Debug, Clone, Copy, Serialize, Deserialize)]
+#[serde(rename_all = "lowercase")]
+pub enum GameType {
+    All,
+    Local,
+    Online,
+    IsCustom,
+}
+
+#[derive(Clone, Copy, Debug, Default, PartialEq, Eq)]
+pub(crate) struct ToolLaunchDefaults {
+    pub le_launch: bool,
+    pub magpie: bool,
+}
+
+pub struct GamesRepository;
+
+impl GamesRepository {
+    /// 缺省游戏状态：想玩 / WISH
+    const DEFAULT_PLAY_STATUS: i32 = 1;
+    const MIXED_NAME_PRIORITY: [&str; 4] = ["bgm", "vndb", "ymgal", "kun"];
+    const FULL_GAME_SELECT: &str = r#"
+        SELECT
+            g.id,
+            g.id_type,
+            g.date,
+            g.localpath,
+            g.executable,
+            g.launch_type,
+            g.steam_launch_id,
+            g.savepath,
+            g.autosave,
+            g.maxbackups,
+            g.clear,
+            g.le_launch,
+            g.magpie,
+            g.custom_data,
+            g.created_at,
+            g.updated_at,
+            (
+                SELECT json_group_array(
+                    json_object(
+                        'source', source_rows.source,
+                        'external_id', source_rows.external_id,
+                        'data', json(source_rows.data)
+                    )
+                )
+                FROM (
+                    SELECT source, external_id, data
+                    FROM game_sources
+                    WHERE game_id = g.id
+                    ORDER BY source
+                ) AS source_rows
+            ) AS sources_json
+        FROM games AS g
+    "#;
+
+    fn build_batch_failure_result(total: usize, message: String) -> BatchOperationResult {
+        BatchOperationResult {
+            total,
+            success: 0,
+            failed: total,
+            ids: Vec::new(),
+            games: Vec::new(),
+            errors: (0..total)
+                .map(|index| BatchOperationError {
+                    index,
+                    message: message.clone(),
+                })
+                .collect(),
+        }
+    }
+
+    fn validate_source(source: &UpsertGameSourceData) -> Result<(), DbErr> {
+        if source.source.is_empty() {
+            return Err(DbErr::Custom("source 不能为空".to_string()));
+        }
+        if source.external_id.is_none() && source.data.is_none() {
+            return Err(DbErr::Custom(format!(
+                "{} source 的 external_id 和 data 不能同时为空",
+                source.source
+            )));
+        }
+        Ok(())
+    }
+
+    fn validate_source_changes(
+        upserts: &[UpsertGameSourceData],
+        removes: &[String],
+    ) -> Result<(), DbErr> {
+        let mut seen = HashSet::new();
+        for source in upserts {
+            Self::validate_source(source)?;
+            if !seen.insert(source.source.as_str()) {
+                return Err(DbErr::Custom(format!(
+                    "{} source 被重复提交",
+                    source.source
+                )));
+            }
+        }
+
+        let mut removed = HashSet::new();
+        for source in removes {
+            if !removed.insert(source.as_str()) {
+                return Err(DbErr::Custom(format!("{} source 被重复删除", source)));
+            }
+            if seen.contains(source.as_str()) {
+                return Err(DbErr::Custom(format!(
+                    "{} source 不能同时更新和删除",
+                    source
+                )));
+            }
+        }
+
+        Ok(())
+    }
+
+    fn validate_path_state(localpath: Option<&str>, executable: Option<&str>) -> Result<(), DbErr> {
+        if localpath.is_none() && executable.is_some() {
+            return Err(DbErr::Custom(
+                "executable 不能在 localpath 为空时单独存在".to_string(),
+            ));
+        }
+        if let Some(executable) = executable {
+            validate_executable_name(executable).map_err(DbErr::Custom)?;
+        }
+        Ok(())
+    }
+
+    fn normalize_steam_launch_id(value: &str) -> Result<String, DbErr> {
+        let value = value.trim();
+        let id = value.parse::<u64>().map_err(|_| {
+            DbErr::Custom("steam_launch_id 必须是 u64 范围内的十进制字符串".to_string())
+        })?;
+        if id == 0 {
+            return Err(DbErr::Custom("steam_launch_id 必须大于 0".to_string()));
+        }
+        Ok(id.to_string())
+    }
+
+    fn validate_launch_state(
+        launch_type: &str,
+        steam_launch_id: Option<&str>,
+    ) -> Result<(), DbErr> {
+        if !matches!(launch_type, "local" | "steam") {
+            return Err(DbErr::Custom(
+                "launch_type 只能是 local 或 steam".to_string(),
+            ));
+        }
+        if launch_type == "steam" && steam_launch_id.is_none() {
+            return Err(DbErr::Custom(
+                "Steam 启动必须提供 steam_launch_id".to_string(),
+            ));
+        }
+        if launch_type == "local" && steam_launch_id.is_some() {
+            return Err(DbErr::Custom(
+                "本地启动不能保留 steam_launch_id".to_string(),
+            ));
+        }
+        Ok(())
+    }
+
+    fn normalize_insert_launch_state(game: &mut InsertGameData) -> Result<(), DbErr> {
+        game.steam_launch_id = game
+            .steam_launch_id
+            .as_deref()
+            .map(Self::normalize_steam_launch_id)
+            .transpose()?;
+        Self::validate_launch_state(&game.launch_type, game.steam_launch_id.as_deref())
+    }
+
+    fn normalize_insert_date(game: &mut InsertGameData) {
+        if game.date.is_some() {
+            return;
+        }
+
+        game.date = game
+            .sources
+            .iter()
+            .find_map(|source| Self::extract_source_date(source.data.as_ref()));
+    }
+
+    fn extract_source_date(data: Option<&Value>) -> Option<String> {
+        data.and_then(|data| data.get("date"))
+            .and_then(|date| date.as_str())
+            .map(str::trim)
+            .filter(|date| !date.is_empty())
+            .map(ToOwned::to_owned)
+    }
+
+    fn resolve_source_date(source_data: &HashMap<String, Option<Value>>) -> Option<String> {
+        for source in Self::MIXED_NAME_PRIORITY {
+            if let Some(date) = source_data
+                .get(source)
+                .and_then(|data| Self::extract_source_date(data.as_ref()))
+            {
+                return Some(date);
+            }
+        }
+
+        let mut other_sources = source_data
+            .keys()
+            .filter(|source| !Self::MIXED_NAME_PRIORITY.contains(&source.as_str()))
+            .collect::<Vec<_>>();
+        other_sources.sort();
+
+        other_sources.into_iter().find_map(|source| {
+            source_data
+                .get(source)
+                .and_then(|data| Self::extract_source_date(data.as_ref()))
+        })
+    }
+
+    // ==================== 私有方法 ====================
+
+    async fn current_source_data<C>(
+        db: &C,
+        game_id: i32,
+    ) -> Result<HashMap<String, Option<Value>>, DbErr>
+    where
+        C: ConnectionTrait,
+    {
+        GameSources::find()
+            .filter(game_sources::Column::GameId.eq(game_id))
+            .all(db)
+            .await
+            .map(|sources| {
+                sources
+                    .into_iter()
+                    .map(|source| (source.source, source.data))
+                    .collect()
+            })
+    }
+
+    async fn normalize_update_date<C>(
+        db: &C,
+        game_id: i32,
+        mut updates: UpdateGameData,
+    ) -> Result<UpdateGameData, DbErr>
+    where
+        C: ConnectionTrait,
+    {
+        let has_source_changes = updates
+            .upsert_sources
+            .as_ref()
+            .is_some_and(|sources| !sources.is_empty())
+            || updates
+                .remove_sources
+                .as_ref()
+                .is_some_and(|sources| !sources.is_empty());
+        if !(matches!(updates.date, Some(None)) || updates.date.is_none() && has_source_changes) {
+            return Ok(updates);
+        }
+
+        let mut source_data = Self::current_source_data(db, game_id).await?;
+
+        for source in updates.remove_sources.as_deref().unwrap_or_default() {
+            source_data.remove(source);
+        }
+        for source in updates.upsert_sources.as_deref().unwrap_or_default() {
+            source_data.insert(source.source.clone(), source.data.clone());
+        }
+
+        updates.date = Some(Self::resolve_source_date(&source_data));
+        Ok(updates)
+    }
+
+    async fn normalize_update_path_state<C>(
+        db: &C,
+        game_id: i32,
+        mut updates: UpdateGameData,
+    ) -> Result<UpdateGameData, DbErr>
+    where
+        C: ConnectionTrait,
+    {
+        if updates.localpath.is_none() && updates.executable.is_none() {
+            return Ok(updates);
+        }
+
+        let current = Games::find_by_id(game_id)
+            .one(db)
+            .await?
+            .ok_or_else(|| DbErr::RecordNotFound(format!("game {game_id} not found")))?;
+
+        // 清空目录意味着游戏不再位于本地，启动文件名必须同步清空。
+        if matches!(updates.localpath, Some(None)) {
+            updates.executable = Some(None);
+        }
+
+        let final_localpath = updates.localpath.clone().unwrap_or(current.localpath);
+        let final_executable = updates.executable.clone().unwrap_or(current.executable);
+        Self::validate_path_state(final_localpath.as_deref(), final_executable.as_deref())?;
+        Ok(updates)
+    }
+
+    async fn normalize_update_launch_state<C>(
+        db: &C,
+        game_id: i32,
+        mut updates: UpdateGameData,
+    ) -> Result<UpdateGameData, DbErr>
+    where
+        C: ConnectionTrait,
+    {
+        if updates.launch_type.is_none() && updates.steam_launch_id.is_none() {
+            return Ok(updates);
+        }
+
+        if updates.launch_type.as_deref() == Some("local") {
+            updates.steam_launch_id = Some(None);
+        } else if let Some(Some(steam_launch_id)) = updates.steam_launch_id.as_mut() {
+            *steam_launch_id = Self::normalize_steam_launch_id(steam_launch_id)?;
+        }
+
+        let current = Games::find_by_id(game_id)
+            .one(db)
+            .await?
+            .ok_or_else(|| DbErr::RecordNotFound(format!("game {game_id} not found")))?;
+        let final_launch_type = updates
+            .launch_type
+            .as_deref()
+            .unwrap_or(&current.launch_type);
+        let final_steam_launch_id = updates
+            .steam_launch_id
+            .as_ref()
+            .map(|value| value.as_deref())
+            .unwrap_or(current.steam_launch_id.as_deref());
+        Self::validate_launch_state(final_launch_type, final_steam_launch_id)?;
+        Ok(updates)
+    }
+
+    pub(crate) async fn tool_launch_defaults<C>(
+        db: &C,
+    ) -> Result<ToolLaunchDefaults, DbErr>
+    where
+        C: ConnectionTrait,
+    {
+        let settings = User::find_by_id(1).one(db).await?;
+        Ok(settings.map_or(ToolLaunchDefaults::default(), |settings| {
+            ToolLaunchDefaults {
+                le_launch: settings.default_le_launch,
+                magpie: settings.default_magpie,
+            }
+        }))
+    }
+
+    fn build_insert_active_model(
+        game: &InsertGameData,
+        now: i32,
+        defaults: ToolLaunchDefaults,
+    ) -> games::ActiveModel {
+        games::ActiveModel {
+            id: NotSet,
+            id_type: Set(game.id_type.clone()),
+            date: Set(game.date.clone()),
+            localpath: Set(game.localpath.clone()),
+            executable: Set(game.executable.clone()),
+            launch_type: Set(game.launch_type.clone()),
+            steam_launch_id: Set(game.steam_launch_id.clone()),
+            savepath: Set(game.savepath.clone()),
+            autosave: game.autosave.map_or(NotSet, |value| Set(Some(value))),
+            maxbackups: game.maxbackups.map_or(NotSet, |value| Set(Some(value))),
+            clear: Set(Some(game.clear.unwrap_or(Self::DEFAULT_PLAY_STATUS))),
+            le_launch: game.le_launch.map_or_else(
+                || defaults.le_launch.then_some(1).map(|v| Set(Some(v))).unwrap_or(NotSet),
+                |value| Set(Some(value)),
+            ),
+            magpie: game.magpie.map_or_else(
+                || defaults.magpie.then_some(1).map(|v| Set(Some(v))).unwrap_or(NotSet),
+                |value| Set(Some(value)),
+            ),
+            custom_data: Set(game.custom_data.clone()),
+            user_rating: NotSet,
+            created_at: Set(Some(now)),
+            updated_at: Set(Some(now)),
+        }
+    }
+
+    fn build_update_active_model(
+        game_id: i32,
+        updates: &UpdateGameData,
+        now: i32,
+    ) -> games::ActiveModel {
+        games::ActiveModel {
+            id: Set(game_id),
+            id_type: updates.id_type.clone().map_or(NotSet, Set),
+            date: updates.date.clone().map_or(NotSet, Set),
+            localpath: updates.localpath.clone().map_or(NotSet, Set),
+            executable: updates.executable.clone().map_or(NotSet, Set),
+            launch_type: updates.launch_type.clone().map_or(NotSet, Set),
+            steam_launch_id: updates.steam_launch_id.clone().map_or(NotSet, Set),
+            savepath: updates.savepath.clone().map_or(NotSet, Set),
+            autosave: updates.autosave.map_or(NotSet, Set),
+            maxbackups: updates.maxbackups.map_or(NotSet, Set),
+            clear: updates.clear.map_or(NotSet, Set),
+            le_launch: updates.le_launch.map_or(NotSet, Set),
+            magpie: updates.magpie.map_or(NotSet, Set),
+            custom_data: updates.custom_data.clone().map_or(NotSet, Set),
+            user_rating: NotSet,
+            updated_at: Set(Some(now)),
+            ..Default::default()
+        }
+    }
+
+    fn build_source_active_model(
+        game_id: i32,
+        source: &UpsertGameSourceData,
+    ) -> game_sources::ActiveModel {
+        game_sources::ActiveModel {
+            game_id: Set(game_id),
+            source: Set(source.source.clone()),
+            external_id: Set(source.external_id.clone()),
+            data: Set(source.data.clone()),
+            score: NotSet,
+            rank: NotSet,
+        }
+    }
+
+    async fn upsert_sources<C>(
+        db: &C,
+        game_id: i32,
+        sources: &[UpsertGameSourceData],
+    ) -> Result<(), DbErr>
+    where
+        C: ConnectionTrait,
+    {
+        for source in sources {
+            GameSources::insert(Self::build_source_active_model(game_id, source))
+                .on_conflict(
+                    OnConflict::columns([
+                        game_sources::Column::GameId,
+                        game_sources::Column::Source,
+                    ])
+                    .update_columns([game_sources::Column::ExternalId, game_sources::Column::Data])
+                    .to_owned(),
+                )
+                .exec(db)
+                .await?;
+        }
+        Ok(())
+    }
+
+    async fn remove_sources<C>(db: &C, game_id: i32, sources: &[String]) -> Result<(), DbErr>
+    where
+        C: ConnectionTrait,
+    {
+        if sources.is_empty() {
+            return Ok(());
+        }
+
+        GameSources::delete_many()
+            .filter(game_sources::Column::GameId.eq(game_id))
+            .filter(game_sources::Column::Source.is_in(sources.iter().cloned()))
+            .exec(db)
+            .await?;
+        Ok(())
+    }
+
+    pub(crate) async fn insert_aggregate<C>(
+        db: &C,
+        mut game: InsertGameData,
+        now: i32,
+        defaults: ToolLaunchDefaults,
+    ) -> Result<FullGameData, DbErr>
+    where
+        C: ConnectionTrait,
+    {
+        Self::validate_source_changes(&game.sources, &[])?;
+        Self::validate_path_state(game.localpath.as_deref(), game.executable.as_deref())?;
+        Self::normalize_insert_launch_state(&mut game)?;
+        Self::normalize_insert_date(&mut game);
+
+        let model = Self::build_insert_active_model(&game, now, defaults)
+            .insert(db)
+            .await?;
+        Self::upsert_sources(db, model.id, &game.sources).await?;
+
+        Self::find_full_by_id(db, model.id)
+            .await?
+            .ok_or_else(|| DbErr::RecordNotFound(format!("game {} not found", model.id)))
+    }
+
+    // ==================== 游戏 CRUD 操作 ====================
+
+    pub async fn insert(
+        db: &DatabaseConnection,
+        game: InsertGameData,
+    ) -> Result<FullGameData, DbErr> {
+        let transaction = db.begin().await?;
+        let defaults = Self::tool_launch_defaults(&transaction).await?;
+        let result = Self::insert_aggregate(
+            &transaction,
+            game.cleaned(),
+            chrono::Utc::now().timestamp() as i32,
+            defaults,
+        )
+        .await?;
+        transaction.commit().await?;
+        Ok(result)
+    }
+
+    pub async fn insert_batch(
+        db: &DatabaseConnection,
+        games: Vec<InsertGameData>,
+    ) -> BatchOperationResult {
+        let total = games.len();
+        let transaction = match db.begin().await {
+            Ok(transaction) => transaction,
+            Err(error) => return Self::build_batch_failure_result(total, error.to_string()),
+        };
+        let defaults = match Self::tool_launch_defaults(&transaction).await {
+            Ok(defaults) => defaults,
+            Err(error) => return Self::build_batch_failure_result(total, error.to_string()),
+        };
+        let now = chrono::Utc::now().timestamp() as i32;
+        let mut ids = Vec::with_capacity(total);
+        let mut inserted_games = Vec::with_capacity(total);
+        let mut errors = Vec::new();
+
+        for (index, game) in games.into_iter().enumerate() {
+            let nested = match transaction.begin().await {
+                Ok(nested) => nested,
+                Err(error) => {
+                    errors.push(BatchOperationError {
+                        index,
+                        message: error.to_string(),
+                    });
+                    continue;
+                }
+            };
+
+            match Self::insert_aggregate(&nested, game.cleaned(), now, defaults).await {
+                Ok(result) => {
+                    if let Err(error) = nested.commit().await {
+                        errors.push(BatchOperationError {
+                            index,
+                            message: error.to_string(),
+                        });
+                    } else {
+                        ids.push(result.id);
+                        inserted_games.push(result);
+                    }
+                }
+                Err(error) => {
+                    let _ = nested.rollback().await;
+                    errors.push(BatchOperationError {
+                        index,
+                        message: error.to_string(),
+                    });
+                }
+            }
+        }
+
+        if let Err(error) = transaction.commit().await {
+            return Self::build_batch_failure_result(total, error.to_string());
+        }
+
+        BatchOperationResult {
+            total,
+            success: ids.len(),
+            failed: errors.len(),
+            ids,
+            games: inserted_games,
+            errors,
+        }
+    }
+
+    pub(crate) async fn update_aggregate<C>(
+        db: &C,
+        game_id: i32,
+        updates: UpdateGameData,
+        now: i32,
+    ) -> Result<FullGameData, DbErr>
+    where
+        C: ConnectionTrait,
+    {
+        Self::validate_source_changes(
+            updates.upsert_sources.as_deref().unwrap_or_default(),
+            updates.remove_sources.as_deref().unwrap_or_default(),
+        )?;
+        let updates = Self::normalize_update_date(db, game_id, updates).await?;
+        let updates = Self::normalize_update_path_state(db, game_id, updates).await?;
+        let updates = Self::normalize_update_launch_state(db, game_id, updates).await?;
+
+        Self::build_update_active_model(game_id, &updates, now)
+            .update(db)
+            .await?;
+        Self::remove_sources(
+            db,
+            game_id,
+            updates.remove_sources.as_deref().unwrap_or_default(),
+        )
+        .await?;
+        Self::upsert_sources(
+            db,
+            game_id,
+            updates.upsert_sources.as_deref().unwrap_or_default(),
+        )
+        .await?;
+
+        Self::find_full_by_id(db, game_id)
+            .await?
+            .ok_or_else(|| DbErr::RecordNotFound(format!("game {} not found", game_id)))
+    }
+
+    pub async fn update(
+        db: &DatabaseConnection,
+        game_id: i32,
+        updates: UpdateGameData,
+    ) -> Result<FullGameData, DbErr> {
+        let transaction = db.begin().await?;
+        let result = Self::update_aggregate(
+            &transaction,
+            game_id,
+            updates.cleaned(),
+            chrono::Utc::now().timestamp() as i32,
+        )
+        .await?;
+        transaction.commit().await?;
+        Ok(result)
+    }
+
+    pub async fn update_batch(
+        db: &DatabaseConnection,
+        updates: Vec<(i32, UpdateGameData)>,
+    ) -> Result<Vec<FullGameData>, DbErr> {
+        if updates.is_empty() {
+            return Ok(Vec::new());
+        }
+
+        let transaction = db.begin().await?;
+        let now = chrono::Utc::now().timestamp() as i32;
+        let mut updated_games = Vec::with_capacity(updates.len());
+
+        for (game_id, update) in updates {
+            updated_games
+                .push(Self::update_aggregate(&transaction, game_id, update.cleaned(), now).await?);
+        }
+
+        transaction.commit().await?;
+        Ok(updated_games)
+    }
+
+    async fn find_full_by_id<C>(db: &C, id: i32) -> Result<Option<FullGameData>, DbErr>
+    where
+        C: ConnectionTrait,
+    {
+        let sql = format!("{} WHERE g.id = {}", Self::FULL_GAME_SELECT, id);
+        db.query_one(Statement::from_string(db.get_database_backend(), sql))
+            .await?
+            .map(Self::full_game_from_row)
+            .transpose()
+    }
+
+    pub async fn find_by_id(
+        db: &DatabaseConnection,
+        id: i32,
+    ) -> Result<Option<FullGameData>, DbErr> {
+        Self::find_full_by_id(db, id).await
+    }
+
+    pub async fn find_all(
+        db: &DatabaseConnection,
+        game_type: GameType,
+        sort_option: SortOption,
+        sort_order: SortOrder,
+        language: Option<String>,
+    ) -> Result<Vec<FullGameData>, DbErr> {
+        let ids = Self::find_ids(db, game_type, sort_option, sort_order, language.clone()).await?;
+        Self::find_full_games_in_order(db, &ids).await
+    }
+
+    pub async fn find_ids(
+        db: &DatabaseConnection,
+        game_type: GameType,
+        sort_option: SortOption,
+        sort_order: SortOrder,
+        language: Option<String>,
+    ) -> Result<Vec<i32>, DbErr> {
+        // 名称排序：应用层排序，名称来自 JSON 列
+        if matches!(sort_option, SortOption::Namesort) {
+            return Self::find_name_sorted_ids(db, game_type, sort_order, language).await;
+        }
+
+        Self::find_ids_sql(db, game_type, sort_option, sort_order).await
+    }
+
+    // ==================== 查询操作 ====================
+
+    async fn find_full_games_in_order<C>(db: &C, ids: &[i32]) -> Result<Vec<FullGameData>, DbErr>
+    where
+        C: ConnectionTrait,
+    {
+        if ids.is_empty() {
+            return Ok(Vec::new());
+        }
+
+        let id_list = ids
+            .iter()
+            .map(ToString::to_string)
+            .collect::<Vec<_>>()
+            .join(",");
+        let sql = format!("{} WHERE g.id IN ({})", Self::FULL_GAME_SELECT, id_list);
+        let mut by_id = HashMap::new();
+        for row in db
+            .query_all(Statement::from_string(db.get_database_backend(), sql))
+            .await?
+        {
+            let game = Self::full_game_from_row(row)?;
+            by_id.insert(game.id, game);
+        }
+
+        Ok(ids.iter().filter_map(|id| by_id.remove(id)).collect())
+    }
+
+    fn full_game_from_row(row: QueryResult) -> Result<FullGameData, DbErr> {
+        let custom_data = row
+            .try_get::<Option<String>>("", "custom_data")?
+            .map(|data| {
+                serde_json::from_str(&data)
+                    .map_err(|error| DbErr::Custom(format!("custom_data 解析失败: {}", error)))
+            })
+            .transpose()?;
+        let sources_json: String = row.try_get("", "sources_json")?;
+        let sources = serde_json::from_str::<Vec<GameSourceData>>(&sources_json)
+            .map_err(|error| DbErr::Custom(format!("sources 聚合结果解析失败: {}", error)))?;
+
+        Ok(FullGameData {
+            id: row.try_get("", "id")?,
+            id_type: row.try_get("", "id_type")?,
+            date: row.try_get("", "date")?,
+            localpath: row.try_get("", "localpath")?,
+            executable: row.try_get("", "executable")?,
+            launch_type: row.try_get("", "launch_type")?,
+            steam_launch_id: row.try_get("", "steam_launch_id")?,
+            savepath: row.try_get("", "savepath")?,
+            autosave: row.try_get("", "autosave")?,
+            maxbackups: row.try_get("", "maxbackups")?,
+            clear: row.try_get("", "clear")?,
+            le_launch: row.try_get("", "le_launch")?,
+            magpie: row.try_get("", "magpie")?,
+            custom_data,
+            sources,
+            created_at: row.try_get("", "created_at")?,
+            updated_at: row.try_get("", "updated_at")?,
+        })
+    }
+
+    pub async fn delete(db: &DatabaseConnection, id: i32) -> Result<DeleteResult, DbErr> {
+        Games::delete_by_id(id).exec(db).await
+    }
+
+    pub async fn delete_many(
+        db: &DatabaseConnection,
+        ids: Vec<i32>,
+    ) -> Result<DeleteResult, DbErr> {
+        Games::delete_many()
+            .filter(games::Column::Id.is_in(ids))
+            .exec(db)
+            .await
+    }
+
+    pub async fn count(db: &DatabaseConnection) -> Result<u64, DbErr> {
+        Games::find().count(db).await
+    }
+
+    pub async fn get_source_bindings(
+        db: &DatabaseConnection,
+        source: &str,
+    ) -> Result<Vec<(i32, String)>, DbErr> {
+        GameSources::find()
+            .select_only()
+            .column(game_sources::Column::GameId)
+            .column(game_sources::Column::ExternalId)
+            .filter(game_sources::Column::Source.eq(source))
+            .filter(game_sources::Column::ExternalId.is_not_null())
+            .into_tuple::<(i32, String)>()
+            .all(db)
+            .await
+    }
+
+    /// 获取所有非空游戏目录，用于扫描去重
+    ///
+    /// 返回数据库中所有 `localpath` 字段的集合（仅非 NULL 值），
+    /// 使用 `HashSet` 以便调用方做 O(1) 精确匹配；前缀检查由调用方负责。
+    pub async fn get_all_game_directories(
+        db: &DatabaseConnection,
+    ) -> Result<HashSet<String>, DbErr> {
+        Games::find()
+            .select_only()
+            .column(games::Column::Localpath)
+            .filter(games::Column::Localpath.is_not_null())
+            .into_tuple::<String>()
+            .all(db)
+            .await
+            .map(|paths| paths.into_iter().collect())
+    }
+
+    /// 获取所有非空 Steam 启动 ID，用于扫库去重。
+    pub async fn get_all_steam_launch_ids(
+        db: &DatabaseConnection,
+    ) -> Result<HashSet<String>, DbErr> {
+        Games::find()
+            .select_only()
+            .column(games::Column::SteamLaunchId)
+            .filter(games::Column::SteamLaunchId.is_not_null())
+            .into_tuple::<String>()
+            .all(db)
+            .await
+            .map(|launch_ids| launch_ids.into_iter().collect())
+    }
+
+    fn build_base_query(game_type: GameType) -> Select<Games> {
+        let query = Games::find();
+        match game_type {
+            GameType::All => query,
+            GameType::Local => query.filter(games::Column::Localpath.is_not_null()),
+            GameType::Online => query.filter(games::Column::Localpath.is_null()),
+            GameType::IsCustom => query.filter(
+                Condition::any()
+                    .add(games::Column::IdType.eq("custom"))
+                    .add(games::Column::IdType.eq("Whitecloud")),
+            ),
+        }
+    }
+
+    /// 发行日期排序：无日期的游戏始终置末尾，升序/降序只影响非空日期。
+    fn apply_date_order(query: Select<Games>, sort_order: SortOrder) -> Select<Games> {
+        let query = query.order_by(Expr::col(games::Column::Date).is_null(), Order::Asc);
+        match sort_order {
+            SortOrder::Asc => query.order_by_asc(games::Column::Date),
+            SortOrder::Desc => query.order_by_desc(games::Column::Date),
+        }
+        .order_by_asc(games::Column::Id)
+    }
+
+    /// 最近游玩排序：无游玩记录始终置末尾，升序按最久优先，降序按最近优先。
+    fn apply_last_played_order(query: Select<Games>, sort_order: SortOrder) -> Select<Games> {
+        let query = query.left_join(game_statistics::Entity).order_by(
+            Expr::col(game_statistics::Column::LastPlayed).is_null(),
+            Order::Asc,
+        );
+        match sort_order {
+            SortOrder::Asc => query.order_by_asc(game_statistics::Column::LastPlayed),
+            SortOrder::Desc => query.order_by_desc(game_statistics::Column::LastPlayed),
+        }
+        .order_by_asc(games::Column::Id)
+    }
+
+    /// 应用层排序：按可选数值键排序，None 值统一置末尾
+    fn apply_optional_expression_order(
+        query: Select<Games>,
+        expression: &str,
+        direction: Order,
+    ) -> Select<Games> {
+        query
+            .order_by(Expr::cust(format!("({expression}) IS NULL")), Order::Asc)
+            .order_by(Expr::cust(format!("({expression})")), direction)
+    }
+
+    async fn find_ids_sql(
+        db: &DatabaseConnection,
+        game_type: GameType,
+        sort_option: SortOption,
+        sort_order: SortOrder,
+    ) -> Result<Vec<i32>, DbErr> {
+        let query = Self::build_base_query(game_type)
+            .select_only()
+            .column(games::Column::Id);
+
+        let query = match sort_option {
+            SortOption::Addtime => match sort_order {
+                SortOrder::Asc => query.order_by_asc(games::Column::Id),
+                SortOrder::Desc => query.order_by_desc(games::Column::Id),
+            },
+            SortOption::Datetime => Self::apply_date_order(query, sort_order),
+            SortOption::LastPlayed => Self::apply_last_played_order(query, sort_order),
+            SortOption::BGMRank => {
+                let score = "SELECT NULLIF(score, 0) FROM game_sources \
+                             WHERE game_id = games.id AND source = 'bgm'";
+                let rank = "SELECT NULLIF(rank, 0) FROM game_sources \
+                            WHERE game_id = games.id AND source = 'bgm'";
+                let (score_order, rank_order) = match sort_order {
+                    SortOrder::Asc => (Order::Desc, Order::Asc),
+                    SortOrder::Desc => (Order::Asc, Order::Desc),
+                };
+                let query = Self::apply_optional_expression_order(query, score, score_order);
+                Self::apply_optional_expression_order(query, rank, rank_order)
+                    .order_by_asc(games::Column::Id)
+            }
+            SortOption::VNDBRank => {
+                let score = "SELECT NULLIF(score, 0) FROM game_sources \
+                             WHERE game_id = games.id AND source = 'vndb'";
+                let direction = match sort_order {
+                    SortOrder::Asc => Order::Desc,
+                    SortOrder::Desc => Order::Asc,
+                };
+                Self::apply_optional_expression_order(query, score, direction)
+                    .order_by_asc(games::Column::Id)
+            }
+            SortOption::UserRatingRank => {
+                let direction = match sort_order {
+                    SortOrder::Asc => Order::Desc,
+                    SortOrder::Desc => Order::Asc,
+                };
+                query
+                    .order_by(
+                        Expr::cust("(games.user_rating IS NULL OR games.user_rating <= 0)"),
+                        Order::Asc,
+                    )
+                    .order_by(games::Column::UserRating, direction)
+                    .order_by_asc(games::Column::Id)
+            }
+            SortOption::Namesort => unreachable!(),
+        };
+
+        query.into_tuple::<i32>().all(db).await
+    }
+
+    /// 从游戏记录中提取用于排序的显示名称
+    ///
+    /// 优先级与前端 `getGameDisplayName` 保持一致：
+    /// `custom_data.name_cn` > 数据源 `name_cn` > 自定义原名 > 数据源原名
+    ///
+    /// 返回值为排序键字符串：zh-CN 时汉字转拼音，其他情况转小写
+    async fn find_name_sorted_ids(
+        db: &DatabaseConnection,
+        game_type: GameType,
+        sort_order: SortOrder,
+        language: Option<String>,
+    ) -> Result<Vec<i32>, DbErr> {
+        let where_clause = match game_type {
+            GameType::All => "",
+            GameType::Local => "WHERE g.localpath IS NOT NULL",
+            GameType::Online => "WHERE g.localpath IS NULL",
+            GameType::IsCustom => "WHERE g.id_type IN ('custom', 'Whitecloud')",
+        };
+        let sql = format!(
+            r#"
+            SELECT
+                g.id,
+                g.id_type,
+                json_extract(g.custom_data, '$.name') AS custom_name,
+                json_extract(g.custom_data, '$.name_cn') AS custom_name_cn,
+                s.source,
+                json_extract(s.data, '$.name') AS source_name,
+                json_extract(s.data, '$.name_cn') AS source_name_cn
+            FROM games AS g
+            LEFT JOIN game_sources AS s ON s.game_id = g.id
+            {where_clause}
+            ORDER BY g.id, s.source
+            "#
+        );
+
+        let rows = db
+            .query_all(Statement::from_string(DatabaseBackend::Sqlite, sql))
+            .await?;
+        let mut entries: Vec<NameSortEntry> = Vec::new();
+
+        for row in rows {
+            let game_id = row.try_get::<i32>("", "id")?;
+            let entry = match entries.last_mut() {
+                Some(entry) if entry.id == game_id => entry,
+                _ => {
+                    entries.push(NameSortEntry {
+                        id: game_id,
+                        id_type: row.try_get("", "id_type")?,
+                        custom_name: row.try_get("", "custom_name")?,
+                        custom_name_cn: row.try_get("", "custom_name_cn")?,
+                        sources: HashMap::new(),
+                    });
+                    entries.last_mut().expect("刚插入的名称排序项应存在")
+                }
+            };
+
+            if let Some(source) = row.try_get::<Option<String>>("", "source")? {
+                entry.sources.insert(
+                    source,
+                    (
+                        row.try_get("", "source_name")?,
+                        row.try_get("", "source_name_cn")?,
+                    ),
+                );
+            }
+        }
+
+        let use_cn = language.as_deref() == Some("zh-CN");
+        let descending = matches!(sort_order, SortOrder::Desc);
+        entries.sort_by(|left, right| {
+            let left_key = Self::name_sort_key(left, use_cn);
+            let right_key = Self::name_sort_key(right, use_cn);
+            match (left_key, right_key) {
+                (None, None) => left.id.cmp(&right.id),
+                (None, Some(_)) => Ordering::Greater,
+                (Some(_), None) => Ordering::Less,
+                (Some(left_key), Some(right_key)) => {
+                    let order = left_key.cmp(&right_key);
+                    let order = if descending { order.reverse() } else { order };
+                    order.then_with(|| left.id.cmp(&right.id))
+                }
+            }
+        });
+
+        Ok(entries.into_iter().map(|entry| entry.id).collect())
+    }
+
+    fn name_sort_key(entry: &NameSortEntry, use_cn: bool) -> Option<String> {
+        if let Some(custom_name_cn) = non_empty(entry.custom_name_cn.as_deref()) {
+            return Some(Self::to_sort_key(custom_name_cn, true));
+        }
+
+        let source_name_cn = |source: &str| {
+            entry
+                .sources
+                .get(source)
+                .and_then(|(_, name_cn)| non_empty(name_cn.as_deref()))
+        };
+        let preferred_source_name_cn = if entry.sources.contains_key(entry.id_type.as_str())
+            && !matches!(entry.id_type.as_str(), "mixed" | "custom" | "Whitecloud")
+        {
+            source_name_cn(&entry.id_type)
+        } else {
+            Self::MIXED_NAME_PRIORITY
+                .iter()
+                .find_map(|source| source_name_cn(source))
+        };
+        if let Some(name_cn) = preferred_source_name_cn {
+            return Some(Self::to_sort_key(name_cn, true));
+        }
+
+        if let Some(custom_name) = non_empty(entry.custom_name.as_deref()) {
+            return Some(Self::to_sort_key(custom_name, use_cn));
+        }
+
+        let source_name = |source: &str| {
+            entry.sources.get(source).and_then(|(name, name_cn)| {
+                if use_cn {
+                    non_empty(name_cn.as_deref()).or_else(|| non_empty(name.as_deref()))
+                } else {
+                    non_empty(name.as_deref())
+                }
+            })
+        };
+
+        let name = if entry.sources.contains_key(entry.id_type.as_str())
+            && !matches!(entry.id_type.as_str(), "mixed" | "custom" | "Whitecloud")
+        {
+            source_name(&entry.id_type)
+        } else {
+            Self::MIXED_NAME_PRIORITY
+                .iter()
+                .find_map(|source| source_name(source))
+        };
+
+        name.map(|name| Self::to_sort_key(name, use_cn))
+    }
+
+    fn to_sort_key(value: &str, use_cn: bool) -> String {
+        if !use_cn {
+            return value.to_lowercase();
+        }
+
+        use pinyin::ToPinyin;
+        let mut result = String::with_capacity(value.len() * 2);
+        for (character, pinyin) in value.chars().zip(value.to_pinyin()) {
+            match pinyin {
+                Some(pinyin) => result.push_str(pinyin.plain()),
+                None => result.extend(character.to_lowercase()),
+            }
+        }
+        result
+    }
+
+    // ==================== 存档备份相关操作 ====================
+
+    pub async fn save_savedata_record(
+        db: &DatabaseConnection,
+        game_id: i32,
+        file_name: &str,
+        backup_time: i32,
+        file_size: i32,
+    ) -> Result<i32, DbErr> {
+        let savedata_record = savedata::ActiveModel {
+            id: NotSet,
+            game_id: Set(game_id),
+            file: Set(file_name.to_string()),
+            backup_time: Set(backup_time),
+            file_size: Set(file_size),
+        };
+        let result = savedata_record.insert(db).await?;
+        Ok(result.id)
+    }
+
+    pub async fn get_savedata_count(db: &DatabaseConnection, game_id: i32) -> Result<u64, DbErr> {
+        Savedata::find()
+            .filter(savedata::Column::GameId.eq(game_id))
+            .count(db)
+            .await
+    }
+
+    pub async fn get_savedata_records(
+        db: &DatabaseConnection,
+        game_id: i32,
+    ) -> Result<Vec<savedata::Model>, DbErr> {
+        Savedata::find()
+            .filter(savedata::Column::GameId.eq(game_id))
+            .order_by_desc(savedata::Column::BackupTime)
+            .all(db)
+            .await
+    }
+
+    pub async fn get_savedata_record_by_id(
+        db: &DatabaseConnection,
+        backup_id: i32,
+    ) -> Result<Option<savedata::Model>, DbErr> {
+        Savedata::find_by_id(backup_id).one(db).await
+    }
+
+    pub async fn delete_savedata_record(
+        db: &DatabaseConnection,
+        backup_id: i32,
+    ) -> Result<DeleteResult, DbErr> {
+        Savedata::delete_by_id(backup_id).exec(db).await
+    }
+}
+
+fn non_empty(value: Option<&str>) -> Option<&str> {
+    value.map(str::trim).filter(|value| !value.is_empty())
+}
+
+struct NameSortEntry {
+    id: i32,
+    id_type: String,
+    custom_name: Option<String>,
+    custom_name_cn: Option<String>,
+    sources: HashMap<String, (Option<String>, Option<String>)>,
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::entity::custom_data::CustomData;
+    use sea_orm::Database;
+    use serde_json::json;
+
+    async fn setup_database() -> DatabaseConnection {
+        let database = Database::connect("sqlite::memory:").await.unwrap();
+        database
+            .execute_unprepared(
+                r#"
+                PRAGMA foreign_keys = ON;
+                CREATE TABLE games (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    id_type TEXT NOT NULL,
+                    date TEXT,
+                    localpath TEXT,
+                    executable TEXT,
+                    launch_type TEXT NOT NULL DEFAULT 'local'
+                        CHECK (launch_type IN ('local', 'steam')),
+                    steam_launch_id TEXT
+                        CHECK (
+                            (launch_type = 'local' AND steam_launch_id IS NULL)
+                            OR (launch_type = 'steam' AND steam_launch_id IS NOT NULL)
+                        ),
+                    savepath TEXT,
+                    autosave INTEGER DEFAULT 0,
+                    maxbackups INTEGER DEFAULT 20,
+                    clear INTEGER,
+                    le_launch INTEGER DEFAULT 0,
+                    magpie INTEGER DEFAULT 0,
+                    custom_data TEXT,
+                    user_rating REAL GENERATED ALWAYS AS (
+                        CAST(json_extract(custom_data, '$.user_rating') AS REAL)
+                    ) VIRTUAL,
+                    created_at INTEGER,
+                    updated_at INTEGER
+                );
+                CREATE TABLE game_sources (
+                    game_id INTEGER NOT NULL,
+                    source TEXT NOT NULL,
+                    external_id TEXT,
+                    data TEXT,
+                    score REAL GENERATED ALWAYS AS (
+                        CAST(json_extract(data, '$.score') AS REAL)
+                    ) VIRTUAL,
+                    rank INTEGER GENERATED ALWAYS AS (
+                        CAST(json_extract(data, '$.rank') AS INTEGER)
+                    ) VIRTUAL,
+                    PRIMARY KEY (game_id, source),
+                    FOREIGN KEY (game_id) REFERENCES games(id) ON DELETE CASCADE,
+                    CHECK (external_id IS NOT NULL OR data IS NOT NULL),
+                    CHECK (data IS NULL OR json_valid(data))
+                );
+                CREATE TABLE game_statistics (
+                    game_id INTEGER PRIMARY KEY,
+                    total_time INTEGER NOT NULL DEFAULT 0,
+                    session_count INTEGER NOT NULL DEFAULT 0,
+                    last_played INTEGER,
+                    daily_stats TEXT,
+                    FOREIGN KEY (game_id) REFERENCES games(id) ON DELETE CASCADE
+                );
+                CREATE TABLE savedata (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    game_id INTEGER NOT NULL,
+                    file TEXT NOT NULL,
+                    backup_time INTEGER NOT NULL,
+                    file_size INTEGER NOT NULL,
+                    FOREIGN KEY (game_id) REFERENCES games(id) ON DELETE CASCADE
+                );
+                "#,
+            )
+            .await
+            .unwrap();
+        database
+    }
+
+    fn insert_data(
+        id_type: &str,
+        custom_data: Option<CustomData>,
+        sources: Vec<UpsertGameSourceData>,
+    ) -> InsertGameData {
+        InsertGameData {
+            id_type: id_type.to_string(),
+            date: None,
+            localpath: None,
+            executable: None,
+            launch_type: "local".to_string(),
+            steam_launch_id: None,
+            savepath: None,
+            autosave: None,
+            maxbackups: None,
+            clear: None,
+            le_launch: None,
+            magpie: None,
+            custom_data,
+            sources,
+        }
+    }
+
+    fn source(source: &str, id: &str, data: serde_json::Value) -> UpsertGameSourceData {
+        UpsertGameSourceData {
+            source: source.to_string(),
+            external_id: Some(id.to_string()),
+            data: Some(data),
+        }
+    }
+
+    #[tokio::test]
+    async fn insert_and_batch_use_database_defaults() {
+        let database = setup_database().await;
+
+        let defaulted = GamesRepository::insert(&database, insert_data("custom", None, Vec::new()))
+            .await
+            .unwrap();
+        assert_eq!(defaulted.autosave, Some(0));
+        assert_eq!(defaulted.maxbackups, Some(20));
+        assert_eq!(defaulted.le_launch, Some(0));
+        assert_eq!(defaulted.magpie, Some(0));
+        assert_eq!(defaulted.launch_type, "local");
+        assert_eq!(defaulted.steam_launch_id, None);
+
+        let batch =
+            GamesRepository::insert_batch(&database, vec![insert_data("custom", None, Vec::new())])
+                .await;
+        assert_eq!(batch.success, 1);
+        assert_eq!(batch.failed, 0);
+        assert_eq!(batch.games[0].autosave, Some(0));
+        assert_eq!(batch.games[0].maxbackups, Some(20));
+        assert_eq!(batch.games[0].le_launch, Some(0));
+        assert_eq!(batch.games[0].magpie, Some(0));
+        assert_eq!(batch.games[0].launch_type, "local");
+    }
+
+    #[tokio::test]
+    async fn validates_normalizes_allows_shared_and_clears_steam_launch_state() {
+        let database = setup_database().await;
+        let mut steam = insert_data("custom", None, Vec::new());
+        steam.launch_type = "steam".to_string();
+        steam.steam_launch_id = Some(" 000730 ".to_string());
+
+        let inserted = GamesRepository::insert(&database, steam).await.unwrap();
+        assert_eq!(inserted.launch_type, "steam");
+        assert_eq!(inserted.steam_launch_id.as_deref(), Some("730"));
+        let mut duplicate = insert_data("custom", None, Vec::new());
+        duplicate.launch_type = "steam".to_string();
+        duplicate.steam_launch_id = Some("730".to_string());
+        let duplicate = GamesRepository::insert(&database, duplicate).await.unwrap();
+        assert_eq!(duplicate.steam_launch_id.as_deref(), Some("730"));
+
+        let switched = GamesRepository::update(
+            &database,
+            inserted.id,
+            UpdateGameData {
+                launch_type: Some("local".to_string()),
+                ..Default::default()
+            },
+        )
+        .await
+        .unwrap();
+        assert_eq!(switched.launch_type, "local");
+        assert_eq!(switched.steam_launch_id, None);
+    }
+
+    #[tokio::test]
+    async fn rejects_invalid_or_incomplete_steam_launch_state() {
+        let database = setup_database().await;
+
+        for invalid_id in ["0", "not-a-number", "18446744073709551616"] {
+            let mut game = insert_data("custom", None, Vec::new());
+            game.launch_type = "steam".to_string();
+            game.steam_launch_id = Some(invalid_id.to_string());
+            assert!(
+                GamesRepository::insert(&database, game).await.is_err(),
+                "{invalid_id}"
+            );
+        }
+
+        let mut missing_id = insert_data("custom", None, Vec::new());
+        missing_id.launch_type = "steam".to_string();
+        assert!(
+            GamesRepository::insert(&database, missing_id)
+                .await
+                .is_err()
+        );
+
+        let mut stale_id = insert_data("custom", None, Vec::new());
+        stale_id.steam_launch_id = Some("730".to_string());
+        assert!(GamesRepository::insert(&database, stale_id).await.is_err());
+
+        let local = GamesRepository::insert(&database, insert_data("custom", None, Vec::new()))
+            .await
+            .unwrap();
+        assert!(
+            GamesRepository::update(
+                &database,
+                local.id,
+                UpdateGameData {
+                    launch_type: Some("steam".to_string()),
+                    ..Default::default()
+                },
+            )
+            .await
+            .is_err()
+        );
+        assert!(
+            GamesRepository::update(
+                &database,
+                local.id,
+                UpdateGameData {
+                    steam_launch_id: Some(Some("730".to_string())),
+                    ..Default::default()
+                },
+            )
+            .await
+            .is_err()
+        );
+        assert!(
+            GamesRepository::update(
+                &database,
+                local.id,
+                UpdateGameData {
+                    launch_type: Some("remote".to_string()),
+                    ..Default::default()
+                },
+            )
+            .await
+            .is_err()
+        );
+    }
+
+    #[tokio::test]
+    async fn cleans_empty_source_metadata_before_insert_and_update() {
+        let database = setup_database().await;
+        let inserted = GamesRepository::insert(
+            &database,
+            insert_data(
+                "vndb",
+                None,
+                vec![source(
+                    "vndb",
+                    "v1",
+                    json!({
+                        "name": "标题",
+                        "tags": [],
+                        "aliases": null,
+                        "developer": "",
+                        "nested": { "empty": [] },
+                        "score": 0,
+                        "nsfw": false
+                    }),
+                )],
+            ),
+        )
+        .await
+        .unwrap();
+
+        assert_eq!(
+            inserted.sources[0].data,
+            Some(json!({
+                "name": "标题",
+                "score": 0,
+                "nsfw": false
+            }))
+        );
+
+        let updated = GamesRepository::update(
+            &database,
+            inserted.id,
+            UpdateGameData {
+                upsert_sources: Some(vec![source(
+                    "vndb",
+                    "v1",
+                    json!({
+                        "name": "新标题",
+                        "all_titles": [],
+                        "average_hours": null
+                    }),
+                )]),
+                ..Default::default()
+            },
+        )
+        .await
+        .unwrap();
+
+        assert_eq!(
+            updated.sources[0].data,
+            Some(json!({
+                "name": "新标题"
+            }))
+        );
+    }
+
+    #[tokio::test]
+    async fn writes_and_updates_game_aggregate_transactionally() {
+        let database = setup_database().await;
+        let inserted = GamesRepository::insert(
+            &database,
+            insert_data(
+                "mixed",
+                None,
+                vec![
+                    source("bgm", "1", json!({"name": "标题", "date": "2024-01-02"})),
+                    source("vndb", "v1", json!({"name": "Title"})),
+                ],
+            ),
+        )
+        .await
+        .unwrap();
+
+        assert_eq!(inserted.date.as_deref(), Some("2024-01-02"));
+        assert_eq!(inserted.sources.len(), 2);
+
+        let updated = GamesRepository::update(
+            &database,
+            inserted.id,
+            UpdateGameData {
+                upsert_sources: Some(vec![source(
+                    "bgm",
+                    "1",
+                    json!({"name": "新标题", "date": "2025-01-01"}),
+                )]),
+                ..Default::default()
+            },
+        )
+        .await
+        .unwrap();
+
+        assert_eq!(updated.date.as_deref(), Some("2025-01-01"));
+        assert_eq!(updated.sources.len(), 2);
+        assert_eq!(
+            updated
+                .sources
+                .iter()
+                .find(|source| source.source == "bgm")
+                .unwrap()
+                .data
+                .as_ref()
+                .and_then(|data| data.get("name"))
+                .and_then(|name| name.as_str()),
+            Some("新标题")
+        );
+
+        let normalized = GamesRepository::update(
+            &database,
+            inserted.id,
+            UpdateGameData {
+                date: Some(None),
+                ..Default::default()
+            },
+        )
+        .await
+        .unwrap();
+        assert_eq!(normalized.date.as_deref(), Some("2025-01-01"));
+
+        let switched = GamesRepository::update(
+            &database,
+            inserted.id,
+            UpdateGameData {
+                id_type: Some("vndb".to_string()),
+                ..Default::default()
+            },
+        )
+        .await
+        .unwrap();
+        assert_eq!(switched.id_type, "vndb");
+        assert_eq!(switched.sources.len(), 2);
+
+        let removed = GamesRepository::update(
+            &database,
+            inserted.id,
+            UpdateGameData {
+                remove_sources: Some(vec!["bgm".to_string()]),
+                ..Default::default()
+            },
+        )
+        .await
+        .unwrap();
+        assert_eq!(removed.date, None);
+        assert_eq!(removed.sources.len(), 1);
+    }
+
+    #[tokio::test]
+    async fn preserves_split_path_fields_and_cascades_directory_clear() {
+        let database = setup_database().await;
+        let first_directory = Path::new("games")
+            .join("first")
+            .to_string_lossy()
+            .to_string();
+        let second_directory = Path::new("games")
+            .join("second")
+            .to_string_lossy()
+            .to_string();
+        let mut game = insert_data("custom", None, Vec::new());
+        game.localpath = Some(first_directory);
+        game.executable = Some("  game.exe  ".to_string());
+
+        let inserted = GamesRepository::insert(&database, game).await.unwrap();
+        assert_eq!(inserted.executable.as_deref(), Some("game.exe"));
+
+        let moved = GamesRepository::update(
+            &database,
+            inserted.id,
+            UpdateGameData {
+                localpath: Some(Some(second_directory.clone())),
+                ..Default::default()
+            },
+        )
+        .await
+        .unwrap();
+        assert_eq!(moved.localpath.as_deref(), Some(second_directory.as_str()));
+        assert_eq!(moved.executable.as_deref(), Some("game.exe"));
+
+        let cleared = GamesRepository::update(
+            &database,
+            inserted.id,
+            UpdateGameData {
+                localpath: Some(None),
+                executable: Some(Some("ignored.exe".to_string())),
+                ..Default::default()
+            },
+        )
+        .await
+        .unwrap();
+        assert_eq!(cleared.localpath, None);
+        assert_eq!(cleared.executable, None);
+    }
+
+    #[tokio::test]
+    async fn rejects_orphan_and_non_basename_executables() {
+        let database = setup_database().await;
+        let mut orphan = insert_data("custom", None, Vec::new());
+        orphan.executable = Some("game.exe".to_string());
+        assert!(
+            GamesRepository::insert(&database, orphan)
+                .await
+                .unwrap_err()
+                .to_string()
+                .contains("localpath")
+        );
+
+        for invalid in [".", "..", "bin/game.exe", r"bin\game.exe"] {
+            let mut game = insert_data("custom", None, Vec::new());
+            game.localpath = Some("games".to_string());
+            game.executable = Some(invalid.to_string());
+            assert!(
+                GamesRepository::insert(&database, game)
+                    .await
+                    .unwrap_err()
+                    .to_string()
+                    .contains("单个文件名"),
+                "{invalid}"
+            );
+        }
+    }
+
+    #[tokio::test]
+    async fn directory_only_game_is_local_and_empty_executable_becomes_null() {
+        let database = setup_database().await;
+        let mut local = insert_data("custom", None, Vec::new());
+        local.localpath = Some("games".to_string());
+        local.executable = Some("   ".to_string());
+        let inserted = GamesRepository::insert(&database, local).await.unwrap();
+        assert_eq!(inserted.executable, None);
+
+        let local_ids = GamesRepository::find_ids(
+            &database,
+            GameType::Local,
+            SortOption::Addtime,
+            SortOrder::Asc,
+            None,
+        )
+        .await
+        .unwrap();
+        let online_ids = GamesRepository::find_ids(
+            &database,
+            GameType::Online,
+            SortOption::Addtime,
+            SortOrder::Asc,
+            None,
+        )
+        .await
+        .unwrap();
+        assert_eq!(local_ids, vec![inserted.id]);
+        assert!(online_ids.is_empty());
+    }
+
+    #[tokio::test]
+    async fn sorts_names_with_custom_override_and_stable_id_tie_breaker() {
+        let database = setup_database().await;
+        let first = GamesRepository::insert(
+            &database,
+            insert_data(
+                "bgm",
+                None,
+                vec![source("bgm", "1", json!({"name": "Beta", "name_cn": "乙"}))],
+            ),
+        )
+        .await
+        .unwrap();
+        let second = GamesRepository::insert(
+            &database,
+            insert_data(
+                "bgm",
+                Some(CustomData {
+                    name: Some("Alpha".to_string()),
+                    ..Default::default()
+                }),
+                vec![source("bgm", "2", json!({"name": "Zulu", "name_cn": "甲"}))],
+            ),
+        )
+        .await
+        .unwrap();
+
+        let ids = GamesRepository::find_ids(
+            &database,
+            GameType::All,
+            SortOption::Namesort,
+            SortOrder::Asc,
+            Some("en-US".to_string()),
+        )
+        .await
+        .unwrap();
+        assert_eq!(ids, vec![second.id, first.id]);
+    }
+
+    #[tokio::test]
+    async fn sorts_user_rating_from_generated_column() {
+        let database = setup_database().await;
+        let low = GamesRepository::insert(
+            &database,
+            insert_data(
+                "custom",
+                Some(CustomData {
+                    name: Some("Low".to_string()),
+                    user_rating: Some(4.0),
+                    ..Default::default()
+                }),
+                Vec::new(),
+            ),
+        )
+        .await
+        .unwrap();
+        let high = GamesRepository::insert(
+            &database,
+            insert_data(
+                "custom",
+                Some(CustomData {
+                    name: Some("High".to_string()),
+                    user_rating: Some(9.0),
+                    ..Default::default()
+                }),
+                Vec::new(),
+            ),
+        )
+        .await
+        .unwrap();
+
+        let ids = GamesRepository::find_ids(
+            &database,
+            GameType::All,
+            SortOption::UserRatingRank,
+            SortOrder::Asc,
+            None,
+        )
+        .await
+        .unwrap();
+        assert_eq!(ids, vec![high.id, low.id]);
+    }
+
+    #[tokio::test]
+    async fn sorts_last_played_chronologically_with_unplayed_last() {
+        let database = setup_database().await;
+        let oldest = GamesRepository::insert(&database, insert_data("custom", None, Vec::new()))
+            .await
+            .unwrap();
+        let newest = GamesRepository::insert(&database, insert_data("custom", None, Vec::new()))
+            .await
+            .unwrap();
+        let unplayed = GamesRepository::insert(&database, insert_data("custom", None, Vec::new()))
+            .await
+            .unwrap();
+
+        for (game_id, last_played) in [(oldest.id, 100), (newest.id, 200)] {
+            game_statistics::ActiveModel {
+                game_id: Set(game_id),
+                total_time: Set(Some(0)),
+                session_count: Set(Some(1)),
+                last_played: Set(Some(last_played)),
+                daily_stats: Set(None),
+            }
+            .insert(&database)
+            .await
+            .unwrap();
+        }
+
+        let ascending = GamesRepository::find_ids(
+            &database,
+            GameType::All,
+            SortOption::LastPlayed,
+            SortOrder::Asc,
+            None,
+        )
+        .await
+        .unwrap();
+        assert_eq!(ascending, vec![oldest.id, newest.id, unplayed.id]);
+
+        let descending = GamesRepository::find_ids(
+            &database,
+            GameType::All,
+            SortOption::LastPlayed,
+            SortOrder::Desc,
+            None,
+        )
+        .await
+        .unwrap();
+        assert_eq!(descending, vec![newest.id, oldest.id, unplayed.id]);
+    }
+}
