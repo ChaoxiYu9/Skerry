@@ -22,8 +22,6 @@ import ArticleIcon from "@mui/icons-material/Article";
 import DeleteIcon from "@mui/icons-material/Delete";
 import FolderOpenIcon from "@mui/icons-material/FolderOpen";
 import PlayCircleOutlineIcon from "@mui/icons-material/PlayCircleOutline";
-import PlaylistAddIcon from "@mui/icons-material/PlaylistAdd";
-import PlaylistRemoveIcon from "@mui/icons-material/PlaylistRemove";
 import RemoveCircleOutlineIcon from "@mui/icons-material/RemoveCircleOutline";
 import SyncIcon from "@mui/icons-material/Sync";
 import {
@@ -78,9 +76,6 @@ const RightMenu: React.FC<RightMenuProps> = ({
 	categoryId,
 }) => {
 	const setSelectedGameId = useStore((state) => state.setSelectedGameId);
-	const nextUpGameIds = useStore((state) => state.nextUpGameIds);
-	const addNextUpGame = useStore((state) => state.addNextUpGame);
-	const removeNextUpGame = useStore((state) => state.removeNextUpGame);
 	const deleteGameMutation = useDeleteGame();
 	const removeGamesFromCategoryMutation = useRemoveGamesFromCategory();
 	const { selectedGame } = useGameById(id);
@@ -90,7 +85,6 @@ const RightMenu: React.FC<RightMenuProps> = ({
 	const [isRemoving, setIsRemoving] = useState(false);
 	const { t } = useTranslation();
 	const hasLocalPath = Boolean(selectedGame?.localpath);
-	const isInNextUp = nextUpGameIds.includes(id);
 
 	// 使用 Feature Facade 更新游戏状态
 	const { updatePlayStatus } = useGameStatusActions();
@@ -211,33 +205,6 @@ const RightMenu: React.FC<RightMenuProps> = ({
 						/>
 					</MenuItem>
 				</LinkWithScrollSave>
-
-				<MenuItem
-					disabled={!selectedGame}
-					onClick={() => {
-						if (isInNextUp) {
-							removeNextUpGame(id);
-						} else {
-							addNextUpGame(id);
-						}
-						onClose();
-					}}
-				>
-					<ListItemIcon>
-						{isInNextUp ? (
-							<PlaylistRemoveIcon fontSize="small" />
-						) : (
-							<PlaylistAddIcon fontSize="small" />
-						)}
-					</ListItemIcon>
-					<ListItemText
-						primary={
-							isInNextUp
-								? t("components.RightMenu.removeNextUp", "移出接下来玩")
-								: t("components.RightMenu.addNextUp", "加入接下来玩")
-						}
-					/>
-				</MenuItem>
 
 				{/* 收藏夹只允许移除当前分类，游戏库才允许删除游戏 */}
 				{collectionContext ? (canRemoveFromCategory ? (

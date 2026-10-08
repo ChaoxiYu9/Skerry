@@ -562,16 +562,6 @@ export function AnnualReport() {
 	const loading = gamesLoading || statsQuery.isLoading;
 
 	useScrollRestore("/report", { isLoading: loading });
-
-	useEffect(() => {
-		const main = document.querySelector<HTMLElement>("main");
-		if (!main) return;
-		return () => {
-			if (main.scrollHeight > main.clientHeight) {
-				saveScrollPosition("/report");
-			}
-		};
-	}, []);
 	const peakMonthIndex = report.monthlyMinutes.reduce(
 		(peak, value, index) => (value > report.monthlyMinutes[peak] ? index : peak),
 		0,

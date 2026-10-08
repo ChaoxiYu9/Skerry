@@ -3,7 +3,7 @@ members = ["reina-path", "migration"]
 
 [package]
 name = "Skerry"
-version = "1.0.0-beta"
+version = "1.0.0"
 default-run = "Skerry"
 description = "Skerry is a local visual novel launcher and downloader based on ReinaManager workflows, with PotatoVN import support."
 authors = ["Skerry contributors"]

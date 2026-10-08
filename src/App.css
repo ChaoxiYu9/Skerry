@@ -1162,11 +1162,15 @@ html[data-mui-color-scheme="light"] .detail-hero-scrim {
 
 		to top,
 
-		rgba(243, 239, 231, 0.92) 0%,
+		#f3efe7 0%,
 
-		rgba(243, 239, 231, 0.66) 28%,
+		#f3efe7 10%,
 
-		rgba(243, 239, 231, 0.18) 62%,
+		rgba(243, 239, 231, 0.92) 16%,
+
+		rgba(243, 239, 231, 0.68) 32%,
+
+		rgba(243, 239, 231, 0.22) 62%,
 
 		transparent 100%
 

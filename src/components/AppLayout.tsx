@@ -29,6 +29,7 @@ import { WindowControls, WindowDragRegion, beginWindowResizeOptimization } from 
 import {
 	saveScrollPosition,
 	scrollToTop,
+	setScrollPosition,
 } from "@/hooks/common/useScrollRestore";
 import { setSkerryNavigate } from "@/providers/navigationBridge";
 import { useStore } from "@/store/appStore";
@@ -386,6 +387,7 @@ export const Layout: React.FC = () => {
 		location.pathname.startsWith("/next-up/");
 	const navigateFromDock = (path: string) => {
 		if (path === location.pathname) return;
+		setScrollPosition("/report", 0);
 		const commitNavigation = () =>
 			animateDetailClose({ onComplete: () => navigate(path) });
 		if (path === "/") {
