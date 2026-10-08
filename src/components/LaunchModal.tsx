@@ -122,9 +122,7 @@ function LaunchModalContent({ selectedGame }: LaunchModalContentProps) {
 				<Button
 					startIcon={<StopIcon />}
 					onClick={handleStopGame}
-					className="skerry-launch-action-button skerry-launch-running rounded-2xl"
-					color="error"
-					variant="outlined"
+					className="skerry-launch-action-button skerry-launch-running"
 				>
 					<span className="skerry-launch-timer-value">
 						<RunningGameTimer {...realTimeState} compact />

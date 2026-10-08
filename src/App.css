@@ -23562,12 +23562,15 @@ html[data-mui-color-scheme="dark"] .atlas-timeline-date-text {
 }
 
 /* Dark Mode Detail Action Buttons */
-/* Dark Mode Detail Action Buttons - Matching 图2 "+ 添加游戏" */
 html[data-toolpad-color-scheme="dark"] .detail-action-group .skerry-launch-action-button.skerry-launch-start.MuiButton-root:not(.Mui-disabled),
 html[data-mui-color-scheme="dark"] .detail-action-group .skerry-launch-action-button.skerry-launch-start.MuiButton-root:not(.Mui-disabled),
 html[data-toolpad-color-scheme="dark"] .detail-action-group .detail-primary-button.MuiButton-root:not(.Mui-disabled),
-html[data-mui-color-scheme="dark"] .detail-action-group .detail-primary-button.MuiButton-root:not(.Mui-disabled) {
+html[data-mui-color-scheme="dark"] .detail-action-group .detail-primary-button.MuiButton-root:not(.Mui-disabled),
+html[data-toolpad-color-scheme="dark"] .detail-action-group .skerry-launch-action-button.skerry-launch-running.MuiButton-root,
+html[data-mui-color-scheme="dark"] .detail-action-group .skerry-launch-action-button.skerry-launch-running.MuiButton-root {
 	border: 0 !important;
+	border-color: transparent !important;
+	outline: none !important;
 	background-color: transparent !important;
 	background: linear-gradient(
 		135deg,
@@ -23584,8 +23587,12 @@ html[data-mui-color-scheme="dark"] .detail-action-group .detail-primary-button.M
 html[data-toolpad-color-scheme="dark"] .detail-action-group .skerry-launch-action-button.skerry-launch-start.MuiButton-root:hover:not(.Mui-disabled),
 html[data-mui-color-scheme="dark"] .detail-action-group .skerry-launch-action-button.skerry-launch-start.MuiButton-root:hover:not(.Mui-disabled),
 html[data-toolpad-color-scheme="dark"] .detail-action-group .detail-primary-button.MuiButton-root:hover:not(.Mui-disabled),
-html[data-mui-color-scheme="dark"] .detail-action-group .detail-primary-button.MuiButton-root:hover:not(.Mui-disabled) {
+html[data-mui-color-scheme="dark"] .detail-action-group .detail-primary-button.MuiButton-root:hover:not(.Mui-disabled),
+html[data-toolpad-color-scheme="dark"] .detail-action-group .skerry-launch-action-button.skerry-launch-running.MuiButton-root:hover,
+html[data-mui-color-scheme="dark"] .detail-action-group .skerry-launch-action-button.skerry-launch-running.MuiButton-root:hover {
 	border: 0 !important;
+	border-color: transparent !important;
+	outline: none !important;
 	background-color: transparent !important;
 	background: linear-gradient(
 		135deg,
@@ -23603,35 +23610,18 @@ html[data-mui-color-scheme="dark"] .detail-action-group .detail-primary-button.M
 		0 0 32px color-mix(in srgb, var(--skerry-rose) 18%, transparent) !important;
 }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 /* Light Mode Detail Action Buttons */
 html[data-toolpad-color-scheme="light"] .detail-action-group .skerry-launch-action-button.skerry-launch-start.MuiButton-root:not(.Mui-disabled),
 html[data-mui-color-scheme="light"] .detail-action-group .skerry-launch-action-button.skerry-launch-start.MuiButton-root:not(.Mui-disabled),
 html[data-toolpad-color-scheme="light"] .detail-action-group .detail-primary-button.MuiButton-root:not(.Mui-disabled),
-html[data-mui-color-scheme="light"] .detail-action-group .detail-primary-button.MuiButton-root:not(.Mui-disabled) {
+html[data-mui-color-scheme="light"] .detail-action-group .detail-primary-button.MuiButton-root:not(.Mui-disabled),
+html[data-toolpad-color-scheme="light"] .detail-action-group .skerry-launch-action-button.skerry-launch-running.MuiButton-root,
+html[data-mui-color-scheme="light"] .detail-action-group .skerry-launch-action-button.skerry-launch-running.MuiButton-root {
 	background: linear-gradient(135deg, #9a3412 0%, #c2410c 58%, #7c2d12 100%) !important;
 	color: #ffffff !important;
 	border: 0 !important;
+	border-color: transparent !important;
+	outline: none !important;
 	border-radius: 8px !important;
 	box-shadow: 0 10px 24px rgba(161, 98, 7, 0.18) !important;
 }
@@ -23639,13 +23629,40 @@ html[data-mui-color-scheme="light"] .detail-action-group .detail-primary-button.
 html[data-toolpad-color-scheme="light"] .detail-action-group .skerry-launch-action-button.skerry-launch-start.MuiButton-root:hover:not(.Mui-disabled),
 html[data-mui-color-scheme="light"] .detail-action-group .skerry-launch-action-button.skerry-launch-start.MuiButton-root:hover:not(.Mui-disabled),
 html[data-toolpad-color-scheme="light"] .detail-action-group .detail-primary-button.MuiButton-root:hover:not(.Mui-disabled),
-html[data-mui-color-scheme="light"] .detail-action-group .detail-primary-button.MuiButton-root:hover:not(.Mui-disabled) {
+html[data-mui-color-scheme="light"] .detail-action-group .detail-primary-button.MuiButton-root:hover:not(.Mui-disabled),
+html[data-toolpad-color-scheme="light"] .detail-action-group .skerry-launch-action-button.skerry-launch-running.MuiButton-root:hover,
+html[data-mui-color-scheme="light"] .detail-action-group .skerry-launch-action-button.skerry-launch-running.MuiButton-root:hover {
 	background: linear-gradient(135deg, #9a3412 0%, #c2410c 58%, #7c2d12 100%) !important;
 	color: #ffffff !important;
 	border: 0 !important;
+	border-color: transparent !important;
+	outline: none !important;
 	border-radius: 8px !important;
 	filter: saturate(1.08) brightness(1.02) !important;
 	box-shadow: 0 12px 26px rgba(161, 98, 7, 0.2) !important;
+}
+
+/* Detail Running Timer Button Content & Icon */
+.detail-action-group .skerry-launch-action-button.skerry-launch-running.MuiButton-root .MuiButton-startIcon {
+	color: #ffffff !important;
+	margin-right: 6px !important;
+}
+
+.detail-action-group .skerry-launch-action-button.skerry-launch-running.MuiButton-root .MuiButton-startIcon svg {
+	color: #ffffff !important;
+	fill: currentColor !important;
+}
+
+html[data-toolpad-color-scheme="light"] .detail-action-group .skerry-launch-running .skerry-launch-timer-value,
+html[data-mui-color-scheme="light"] .detail-action-group .skerry-launch-running .skerry-launch-timer-value {
+	color: #ffffff !important;
+	text-shadow: 0 1px 2px rgba(0, 0, 0, 0.25) !important;
+}
+
+html[data-toolpad-color-scheme="dark"] .detail-action-group .skerry-launch-running .skerry-launch-timer-value,
+html[data-mui-color-scheme="dark"] .detail-action-group .skerry-launch-running .skerry-launch-timer-value {
+	color: #ffffff !important;
+	text-shadow: 0 1px 2px rgba(9, 27, 58, 0.42), 0 0 10px rgba(112, 199, 255, 0.5) !important;
 }
 
 /* 批量删除按钮：彻底去除红框与背景，保持文字与垃圾桶图标为警告红色 */
