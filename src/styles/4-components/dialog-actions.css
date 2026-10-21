@@ -1,0 +1,48 @@
+.MuiDialog-root .MuiDialogActions-root {
+	padding: 14px 18px 18px;
+	gap: 8px;
+	min-width: 0;
+	flex-wrap: wrap;
+	border-top: 1px solid
+		color-mix(in srgb, var(--skerry-glass-border) 76%, transparent);
+}
+
+html:is([data-toolpad-color-scheme="light"], [data-mui-color-scheme="light"])
+	.MuiDialogActions-root {
+	border-top-color: var(--skerry-glass-border);
+}
+
+.MuiDialogActions-root > *,
+.MuiDialogActions-root .MuiButton-root {
+	min-width: 0;
+	max-width: 100%;
+	flex: 0 1 auto;
+}
+
+.skerry-danger-confirm-dialog.skerry-danger-confirm-dialog
+	.skerry-dialog-danger-button.MuiButton-root:not(.Mui-disabled) {
+	border: 1px solid var(--skerry-btn-danger-border);
+	background: var(--skerry-btn-danger-bg);
+	color: var(--skerry-btn-danger-text);
+	--skerry-btn-shadow: var(--skerry-btn-danger-shadow, none);
+}
+
+.skerry-danger-confirm-dialog
+	.skerry-dialog-danger-button.MuiButton-root:not(.Mui-disabled):hover {
+	background: var(--skerry-btn-danger-hover-bg);
+	filter: none;
+}
+.skerry-danger-confirm-dialog
+	.MuiDialogActions-root
+	.MuiButton-root.MuiButton-root:not(.skerry-dialog-danger-button) {
+	--skerry-btn-radius: 10px;
+
+	border: 1px solid var(--mui-palette-divider);
+	padding-inline: 14px;
+}
+
+.skerry-danger-confirm-dialog
+	.MuiDialogActions-root
+	.MuiButton-root.MuiButton-root:not(.skerry-dialog-danger-button):hover {
+	border-color: var(--mui-palette-divider);
+}

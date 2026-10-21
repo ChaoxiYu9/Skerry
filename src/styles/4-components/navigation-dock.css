@@ -1,0 +1,383 @@
+/* Shared navigation dock styles. */
+
+.skerry-dock-divider {
+	width: 34px;
+
+	height: 1px;
+
+	background: color-mix(
+		in srgb,
+		var(--skerry-glass-border) 88%,
+		var(--mui-palette-text-primary)
+	);
+
+	opacity: 0.62;
+}
+
+.skerry-dock-navigation-region {
+	display: flex;
+	flex: 1 1 auto;
+	align-items: center;
+	justify-content: center;
+	width: 100%;
+	min-height: 0;
+}
+
+.skerry-dock-track {
+	--skerry-dock-button-size: 42px;
+	--skerry-dock-track-gap: 8px;
+	--skerry-dock-track-step: 50px;
+	position: relative;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	gap: var(--skerry-dock-track-gap);
+	width: 54px;
+	padding: 6px;
+	border: 1px solid
+		color-mix(in srgb, var(--skerry-glass-border) 90%, transparent);
+	border-radius: 18px;
+	background: color-mix(
+		in srgb,
+		var(--mui-palette-background-paper) 44%,
+		transparent
+	);
+	box-shadow:
+		inset 0 1px 0 rgba(255, 255, 255, 0.28),
+		0 5px 16px rgba(24, 37, 53, 0.055);
+	backdrop-filter: blur(16px) saturate(140%);
+}
+
+.skerry-dock-indicator {
+	position: absolute;
+	top: 6px;
+	left: 6px;
+	z-index: 0;
+	width: var(--skerry-dock-button-size);
+	height: var(--skerry-dock-button-size);
+	border: 1px solid
+		color-mix(
+			in srgb,
+			var(--mui-palette-primary-main) 30%,
+			var(--skerry-glass-border)
+		);
+	border-radius: 15px;
+	background: color-mix(
+		in srgb,
+		var(--mui-palette-primary-main) 16%,
+		var(--mui-palette-background-paper)
+	);
+	box-shadow:
+		inset 0 1px 0 rgba(255, 255, 255, 0.46),
+		0 3px 9px
+		color-mix(in srgb, var(--mui-palette-primary-main) 12%, transparent);
+	backdrop-filter: blur(14px) saturate(150%);
+	transform: translateY(0);
+	transition:
+		transform 250ms cubic-bezier(0.16, 1, 0.3, 1),
+		opacity 150ms ease;
+	pointer-events: none;
+}
+
+.skerry-dock-track[data-active-index="1"] .skerry-dock-indicator {
+	transform: translateY(var(--skerry-dock-track-step));
+}
+
+.skerry-dock-track[data-active-index="2"] .skerry-dock-indicator {
+	transform: translateY(
+		calc(var(--skerry-dock-track-step) + var(--skerry-dock-track-step))
+	);
+}
+
+.skerry-dock-track[data-active-index="3"] .skerry-dock-indicator {
+	transform: translateY(
+		calc(
+			var(--skerry-dock-track-step) +
+			var(--skerry-dock-track-step) +
+			var(--skerry-dock-track-step)
+		)
+	);
+}
+
+.skerry-dock-track[data-active-index="4"] .skerry-dock-indicator {
+	transform: translateY(
+		calc(
+			var(--skerry-dock-track-step) +
+			var(--skerry-dock-track-step) +
+			var(--skerry-dock-track-step) +
+			var(--skerry-dock-track-step)
+		)
+	);
+}
+
+.skerry-dock-track[data-active-index="5"] .skerry-dock-indicator {
+	transform: translateY(
+		calc(
+			var(--skerry-dock-track-step) +
+			var(--skerry-dock-track-step) +
+			var(--skerry-dock-track-step) +
+			var(--skerry-dock-track-step) +
+			var(--skerry-dock-track-step)
+		)
+	);
+}
+
+.skerry-dock-track[data-active-index="-1"] .skerry-dock-indicator {
+	opacity: 0;
+}
+
+.skerry-dock-utilities {
+	display: flex;
+	flex: 0 0 auto;
+	flex-direction: column;
+	align-items: center;
+	gap: 10px;
+}
+
+@media (prefers-reduced-transparency: reduce) {
+	.skerry-dock-track {
+		background: var(--mui-palette-background-paper);
+		backdrop-filter: none;
+	}
+
+	.skerry-dock-indicator {
+		backdrop-filter: none;
+	}
+}
+
+.skerry-dock > .MuiIconButton-root,
+.skerry-dock-utilities .MuiIconButton-root {
+	border: 1px solid
+		color-mix(in srgb, var(--skerry-glass-border) 64%, transparent);
+
+	border-radius: 14px;
+
+	color: color-mix(
+		in srgb,
+		var(--mui-palette-text-primary) 86%,
+		var(--mui-palette-primary-main)
+	);
+
+	background: color-mix(
+		in srgb,
+		var(--mui-palette-background-paper) 64%,
+		transparent
+	);
+
+	box-shadow:
+		inset 0 1px 0 rgba(255, 255, 255, 0.3),
+		0 4px 12px rgba(18, 47, 82, 0.05);
+
+	transition:
+		transform 170ms ease,
+		background-color 170ms ease,
+		border-color 170ms ease,
+		box-shadow 170ms ease;
+}
+
+.skerry-dock .MuiIconButton-root[data-skerry-dock-icon="home"] {
+	--skerry-dock-icon-color: #b45309;
+}
+
+.skerry-dock .MuiIconButton-root[data-skerry-dock-icon="library"] {
+	--skerry-dock-icon-color: #2563eb;
+}
+
+.skerry-dock .MuiIconButton-root[data-skerry-dock-icon="collection"] {
+	--skerry-dock-icon-color: #7e22ce;
+}
+
+.skerry-dock .MuiIconButton-root[data-skerry-dock-icon="report"] {
+	--skerry-dock-icon-color: #0e7490;
+}
+
+.skerry-dock .MuiIconButton-root[data-skerry-dock-icon="import"] {
+	--skerry-dock-icon-color: #15803d;
+}
+
+.skerry-dock .MuiIconButton-root[data-skerry-dock-icon="settings"] {
+	--skerry-dock-icon-color: #be185d;
+}
+
+.skerry-dock .MuiIconButton-root[data-skerry-dock-icon="back"] {
+	--skerry-dock-icon-color: #475569;
+}
+
+html:is([data-toolpad-color-scheme="dark"], [data-mui-color-scheme="dark"])
+	.skerry-dock
+	.MuiIconButton-root[data-skerry-dock-icon="home"] {
+	--skerry-dock-icon-color: #fdba74;
+}
+
+html:is([data-toolpad-color-scheme="dark"], [data-mui-color-scheme="dark"])
+	.skerry-dock
+	.MuiIconButton-root[data-skerry-dock-icon="library"] {
+	--skerry-dock-icon-color: #60a5fa;
+}
+
+html:is([data-toolpad-color-scheme="dark"], [data-mui-color-scheme="dark"])
+	.skerry-dock
+	.MuiIconButton-root[data-skerry-dock-icon="collection"] {
+	--skerry-dock-icon-color: #c084fc;
+}
+
+html:is([data-toolpad-color-scheme="dark"], [data-mui-color-scheme="dark"])
+	.skerry-dock
+	.MuiIconButton-root[data-skerry-dock-icon="report"] {
+	--skerry-dock-icon-color: #5eead4;
+}
+
+html:is([data-toolpad-color-scheme="dark"], [data-mui-color-scheme="dark"])
+	.skerry-dock
+	.MuiIconButton-root[data-skerry-dock-icon="import"] {
+	--skerry-dock-icon-color: #4ade80;
+}
+
+html:is([data-toolpad-color-scheme="dark"], [data-mui-color-scheme="dark"])
+	.skerry-dock
+	.MuiIconButton-root[data-skerry-dock-icon="settings"] {
+	--skerry-dock-icon-color: #f472b6;
+}
+
+html:is([data-toolpad-color-scheme="dark"], [data-mui-color-scheme="dark"])
+	.skerry-dock
+	.MuiIconButton-root[data-skerry-dock-icon="back"] {
+	--skerry-dock-icon-color: #93c5fd;
+}
+
+.skerry-dock
+	.MuiIconButton-root[data-skerry-dock-icon]:not(
+		[data-skerry-dock-icon="theme"]
+	)
+	.MuiSvgIcon-root {
+	color: var(--skerry-dock-icon-color);
+}
+
+.skerry-dock .skerry-theme-sun {
+	color: #d97706;
+}
+
+.skerry-dock .skerry-theme-moon {
+	color: #818cf8;
+}
+
+html:is([data-toolpad-color-scheme="dark"], [data-mui-color-scheme="dark"])
+	.skerry-dock
+	.skerry-theme-moon {
+	color: #a5b4fc;
+}
+
+html:is([data-toolpad-color-scheme="dark"], [data-mui-color-scheme="dark"])
+	.skerry-dock
+	> .MuiIconButton-root,
+html:is([data-toolpad-color-scheme="dark"], [data-mui-color-scheme="dark"])
+	.skerry-dock-utilities
+	.MuiIconButton-root {
+	color: color-mix(
+		in srgb,
+		var(--mui-palette-text-primary) 88%,
+		var(--skerry-accent)
+	);
+
+	background: color-mix(
+		in srgb,
+		var(--mui-palette-background-paper) 54%,
+		rgba(255, 255, 255, 0.04)
+	);
+
+	border-color: color-mix(
+		in srgb,
+		var(--skerry-glass-border) 76%,
+		rgba(255, 255, 255, 0.08)
+	);
+
+	box-shadow:
+		inset 0 1px 0 rgba(255, 255, 255, 0.1),
+		0 5px 14px rgba(0, 0, 0, 0.14);
+}
+
+.skerry-dock > .MuiIconButton-root:hover,
+.skerry-dock > .MuiIconButton-root:focus-visible,
+.skerry-dock-utilities .MuiIconButton-root:hover,
+.skerry-dock-utilities .MuiIconButton-root:focus-visible {
+	transform: translateY(-1px) scale(1.015);
+
+	color: var(--mui-palette-primary-main);
+
+	background: color-mix(
+		in srgb,
+		var(--mui-palette-primary-main) 20%,
+		var(--mui-palette-background-paper)
+	);
+
+	border-color: color-mix(
+		in srgb,
+		var(--mui-palette-primary-main) 32%,
+		transparent
+	);
+
+	box-shadow:
+		inset 0 1px 0 rgba(255, 255, 255, 0.36),
+		0 8px 18px
+		color-mix(in srgb, var(--mui-palette-primary-main) 14%, transparent);
+}
+
+html:is([data-toolpad-color-scheme="dark"], [data-mui-color-scheme="dark"])
+	.skerry-dock
+	> .MuiIconButton-root:is(:hover, :focus-visible),
+html:is([data-toolpad-color-scheme="dark"], [data-mui-color-scheme="dark"])
+	.skerry-dock-utilities
+	.MuiIconButton-root:is(:hover, :focus-visible) {
+	color: var(--skerry-accent);
+
+	background: color-mix(
+		in srgb,
+		var(--mui-palette-primary-main) 22%,
+		rgba(255, 255, 255, 0.08)
+	);
+
+	border-color: color-mix(
+		in srgb,
+		var(--skerry-accent) 34%,
+		rgba(255, 255, 255, 0.12)
+	);
+}
+
+.skerry-dock .skerry-dock-track .skerry-dock-route-button {
+	position: relative;
+	z-index: 1;
+	width: var(--skerry-dock-button-size);
+	height: var(--skerry-dock-button-size);
+	border: 1px solid transparent;
+	border-radius: 14px;
+	background: transparent;
+	box-shadow: none;
+	transition: outline-color 150ms ease;
+}
+
+.skerry-dock .skerry-dock-track .skerry-dock-route-button:hover {
+	border-color: transparent;
+	background: transparent;
+	box-shadow: none;
+}
+
+.skerry-dock .skerry-dock-track .skerry-dock-route-button:focus-visible {
+	border-color: transparent;
+	background: transparent;
+	box-shadow: none;
+	outline: 2px solid var(--mui-palette-primary-main);
+	outline-offset: 1px;
+}
+
+.skerry-dock .MuiBadge-badge {
+	box-shadow: 0 0 0 2px
+		color-mix(in srgb, var(--mui-palette-background-paper) 92%, transparent);
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.skerry-dock,
+	.skerry-dock .MuiIconButton-root,
+	.skerry-dock .skerry-dock-indicator {
+		transition: none;
+	}
+}

@@ -1,0 +1,93 @@
+/* Shared MUI outlined fields and select control defaults. */
+
+.MuiInputBase-root.MuiOutlinedInput-root {
+	border-radius: 14px;
+
+	background: color-mix(
+		in srgb,
+		var(--mui-palette-background-paper) 86%,
+		var(--skerry-canvas)
+	);
+
+	backdrop-filter: blur(14px) saturate(125%);
+
+	transition:
+		background-color 170ms ease,
+		border-color 170ms ease,
+		box-shadow 170ms ease;
+}
+
+.MuiOutlinedInput-root:hover {
+	background: color-mix(
+		in srgb,
+		var(--mui-palette-background-paper) 91%,
+		var(--skerry-canvas)
+	);
+}
+
+.MuiOutlinedInput-root.Mui-focused {
+	background: color-mix(
+		in srgb,
+		var(--mui-palette-background-paper) 96%,
+		var(--skerry-canvas)
+	);
+}
+
+.MuiInputBase-root.MuiOutlinedInput-root.Mui-disabled {
+	background: color-mix(
+		in srgb,
+		var(--mui-palette-action-disabledBackground) 42%,
+		transparent
+	);
+
+	opacity: 0.72;
+}
+
+.MuiInputLabel-root.MuiInputLabel-root {
+	transition:
+		transform 190ms cubic-bezier(0.16, 1, 0.3, 1),
+		color 170ms ease,
+		opacity 170ms ease;
+}
+
+.MuiInputLabel-root.Mui-disabled {
+	opacity: 0.62;
+}
+
+.MuiOutlinedInput-notchedOutline.MuiOutlinedInput-notchedOutline {
+	--skerry-input-outline-border-color: color-mix(
+		in srgb,
+		var(--skerry-glass-border) 86%,
+		transparent
+	);
+
+	transition: border-color 170ms ease;
+}
+
+.MuiOutlinedInput-root:hover .MuiOutlinedInput-notchedOutline,
+.MuiOutlinedInput-root.Mui-focused .MuiOutlinedInput-notchedOutline {
+	--skerry-input-outline-border-color: color-mix(
+		in srgb,
+		var(--skerry-glass-border) 94%,
+		transparent
+	);
+}
+
+.MuiInputBase-root.MuiOutlinedInput-root
+	.MuiOutlinedInput-notchedOutline.MuiOutlinedInput-notchedOutline {
+	border-color: var(--skerry-input-outline-border-color);
+}
+
+.MuiInputBase-root .MuiSelect-select.MuiInputBase-input {
+	min-height: 1.35em;
+
+	font-weight: 650;
+
+	min-width: 0;
+
+	overflow: hidden;
+
+	text-overflow: ellipsis;
+
+	white-space: nowrap;
+}

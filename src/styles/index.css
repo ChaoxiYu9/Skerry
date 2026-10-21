@@ -1,0 +1,66 @@
+/* ==========================================================================
+   Skerry style entry: tokens, base, MUI adapters, components, then pages.
+   These imports establish source order; they do not create CSS @layer rules.
+   ========================================================================== */
+
+/* Layer 0: Design Tokens (单点真理与深浅模式变量) */
+@import "./1-tokens/theme.css";
+
+/* Layer 1: Base & Reset */
+@import "./2-base/reset.css";
+@import "./2-base/layout.css";
+
+/* Layer 2: Vendor Components Overrides (MUI Global Clean Pass) */
+@import "./3-vendor/mui-overrides.css";
+@import "./3-vendor/mui-input-controls.css";
+@import "./3-vendor/mui-toggle-buttons.css";
+@import "./3-vendor/mui-choice-controls.css";
+@import "./3-vendor/mui-menu.css";
+@import "./3-vendor/mui-list-options.css";
+@import "./3-vendor/mui-popups.css";
+@import "./3-vendor/mui-accent-states.css";
+
+/* Layer 3: Reusable Business Components */
+@import "./4-components/buttons.css";
+@import "./4-components/game-metadata-edit-form.css";
+@import "./4-components/filter-sort-modal.css";
+@import "./4-components/select-menus.css";
+@import "./4-components/collection-toolbar.css";
+@import "./4-components/cards-grid.css";
+@import "./4-components/game-card-interactions.css";
+@import "./4-components/game-card.css";
+@import "./4-components/context-menu.css";
+@import "./4-components/popup-surfaces.css";
+@import "./4-components/menu-item-properties.css";
+@import "./4-components/feedback-indicators.css";
+@import "./4-components/game-list-state.css";
+@import "./4-components/button-theme.css";
+@import "./4-components/play-status.css";
+@import "./4-components/cards-batch-actions.css";
+@import "./4-components/bulk-import.css";
+@import "./4-components/launch-action.css";
+@import "./4-components/date-picker.css";
+@import "./4-components/dialog-actions.css";
+@import "./4-components/dialog-surfaces.css";
+@import "./4-components/page-heading.css";
+@import "./4-components/motion-preferences.css";
+@import "./4-components/route-motion.css";
+@import "./4-components/theme-transition.css";
+@import "./4-components/navigation-dock.css";
+@import "./4-components/window-interactions.css";
+
+/* Layer 4: Independent Page Styles */
+@import "./5-pages/home.css";
+/* Component styles colocated with their Home page implementation. */
+@import "../pages/Home/HomeActivityTimeline.css";
+@import "../pages/Home/HomeRandomLaunch.css";
+@import "../pages/Home/HomeQuoteBar.css";
+@import "../pages/Home/HomeMonthSelect.css";
+@import "../pages/Home/HomeCurrentEmpty.css";
+@import "../pages/Home/HomeHeroLaunch.css";
+@import "./5-pages/library.css";
+@import "./5-pages/detail.css";
+@import "./5-pages/annual.css";
+@import "./5-pages/settings.css";
+@import "../pages/Settings/AccountSettings.css";
+@import "./5-pages/collection.css";

@@ -1,0 +1,74 @@
+/* Temporary surface changes while the native window is moving or resizing. */
+
+/* Allocate the expensive glass/compositor layers once during idle time. */
+
+html.skerry-window-prewarm .skerry-primary-route-layer.is-active,
+html.skerry-window-prewarm .skerry-dock,
+html.skerry-window-prewarm .skerry-window-chrome {
+	will-change: transform;
+
+	transform: translateZ(0);
+}
+
+/* Moving or resizing the frameless window repeatedly repaints the WebView.
+ * Pause expensive surface effects until the gesture ends. */
+
+html:is(
+	.skerry-window-resizing.skerry-window-resizing,
+	.skerry-window-dragging.skerry-window-dragging
+) .MuiPaper-root,
+html:is(
+		.skerry-window-resizing.skerry-window-resizing,
+		.skerry-window-dragging.skerry-window-dragging
+	)
+	.skerry-dock,
+html:is(
+		.skerry-window-resizing.skerry-window-resizing,
+		.skerry-window-dragging.skerry-window-dragging
+	)
+	.atlas-section,
+html:is(
+		.skerry-window-resizing.skerry-window-resizing,
+		.skerry-window-dragging.skerry-window-dragging
+	)
+	.atlas-current,
+html:is(
+		.skerry-window-resizing.skerry-window-resizing,
+		.skerry-window-dragging.skerry-window-dragging
+	)
+	.atlas-inspector,
+html:is(
+		.skerry-window-resizing.skerry-window-resizing,
+		.skerry-window-dragging.skerry-window-dragging
+	)
+	.settings-workspace {
+	backdrop-filter: none;
+
+	-webkit-backdrop-filter: none;
+
+	box-shadow: none;
+
+	transition: none;
+}
+
+/* Cached routes stay mounted for instant navigation, but they should not
+
+ * participate in layout or paint while the native window is being resized.
+
+ * This keeps the first resize frame focused on the visible page only. */
+
+html.skerry-window-resizing .skerry-primary-route-layer:not(.is-active) {
+	content-visibility: hidden;
+
+	contain: strict;
+
+	contain-intrinsic-size: 1px 1px;
+
+	visibility: hidden;
+
+	pointer-events: none;
+}
+
+html:is(.skerry-window-dragging, .skerry-window-resizing) .MuiSkeleton-root {
+	animation-play-state: paused;
+}

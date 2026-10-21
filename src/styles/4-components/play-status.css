@@ -1,0 +1,45 @@
+/* Shared play status icon colors */
+:is(.MuiSvgIcon-root, .MuiBox-root).play-status-icon-wish {
+	color: #d97706;
+}
+
+html:is([data-toolpad-color-scheme="dark"], [data-mui-color-scheme="dark"])
+	:is(.MuiSvgIcon-root, .MuiBox-root).play-status-icon-wish {
+	color: #facc15;
+}
+
+:is(.MuiSvgIcon-root, .MuiBox-root).play-status-icon-playing {
+	color: #2563eb;
+}
+
+html:is([data-toolpad-color-scheme="dark"], [data-mui-color-scheme="dark"])
+	:is(.MuiSvgIcon-root, .MuiBox-root).play-status-icon-playing {
+	color: #60a5fa;
+}
+
+:is(.MuiSvgIcon-root, .MuiBox-root).play-status-icon-played {
+	color: #059669;
+}
+
+html:is([data-toolpad-color-scheme="dark"], [data-mui-color-scheme="dark"])
+	:is(.MuiSvgIcon-root, .MuiBox-root).play-status-icon-played {
+	color: #34d399;
+}
+
+:is(.MuiSvgIcon-root, .MuiBox-root).play-status-icon-hold {
+	color: #ea580c;
+}
+
+html:is([data-toolpad-color-scheme="dark"], [data-mui-color-scheme="dark"])
+	:is(.MuiSvgIcon-root, .MuiBox-root).play-status-icon-hold {
+	color: #fb923c;
+}
+
+:is(.MuiSvgIcon-root, .MuiBox-root).play-status-icon-dropped {
+	color: #dc2626;
+}
+
+html:is([data-toolpad-color-scheme="dark"], [data-mui-color-scheme="dark"])
+	:is(.MuiSvgIcon-root, .MuiBox-root).play-status-icon-dropped {
+	color: #f87171;
+}

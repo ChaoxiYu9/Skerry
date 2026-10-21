@@ -1,0 +1,14 @@
+/* MUI controls share the primary accent across focused and selected states. */
+.MuiFormLabel-root.MuiFormLabel-root.Mui-focused,
+.MuiSwitch-root .MuiSwitch-switchBase.MuiSwitch-switchBase.Mui-checked {
+	color: var(--mui-palette-primary-main);
+}
+
+.MuiSwitch-switchBase.MuiSwitch-switchBase.Mui-checked + .MuiSwitch-track.MuiSwitch-track,
+.MuiTabs-root .MuiTabs-indicator.MuiTabs-indicator {
+	background: linear-gradient(
+		90deg,
+		var(--mui-palette-primary-main),
+		var(--skerry-accent)
+	);
+}

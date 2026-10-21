@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 148 32" width="148" height="32" fill="#0f172a">
+  <title>KunGal</title>
+  <!-- 灵动小鲸鱼矢量图形 -->
+  <g transform="translate(1, 4)">
+    <path d="M14.5,17 C9,17 4,14 1.5,10 C0.5,8 1.2,6 3.5,4.8 C5.8,3.6 9.8,4 14.5,6 C17.8,7.2 21,7.5 23.5,6.2 C24.8,5.5 25.2,4 24.5,2.8 C23.8,1.8 22.5,1.7 21.2,2.2 C19.2,3 16.8,2.5 14.8,1.5 C11.5,-0.2 7.5,-0.2 4.2,1.5 C1,3 -1,6.5 0.5,10.2 C2.2,15.2 7.5,19.5 15,19.5 C19,19.5 22.8,17.8 24.8,15.8 C25.2,15.4 24.8,14.8 24.2,15 C21.5,15.8 18.5,16.2 15.8,16.2 Z" fill="currentColor"/>
+    <path d="M23.5,10.5 C24,8 25.5,6 27.5,4.8 C28.2,4.4 29,5 28.7,5.8 C28.2,7.5 27.4,9 26.8,10.8 C27.8,9.8 29.5,9.2 30.8,9.5 C31.5,9.7 31.8,10.5 31.2,11 C29.4,12.5 27.2,13.5 24.8,14 C24.2,14.1 23.8,13.6 23.9,13 C24.1,12.2 23.9,11.3 23.5,10.5 Z" fill="currentColor"/>
+    <circle cx="5.5" cy="8.8" r="1.1" fill="currentColor"/>
+  </g>
+  <!-- KunGal 品牌字标 (无多余方框，无方块字) -->
+  <text x="38" y="22" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif" font-size="20" font-weight="800" letter-spacing="-0.4" fill="currentColor">
+    Kun<tspan font-weight="700" fill="currentColor" opacity="0.9">Gal</tspan>
+  </text>
+</svg>

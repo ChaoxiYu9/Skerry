@@ -1,0 +1,131 @@
+/* Cloud import selection actions: select all and clear. */
+.skerry-cloud-import-layout {
+	min-width: 0;
+}
+
+.skerry-cloud-import-toolbar {
+	display: grid !important;
+	grid-template-columns: minmax(150px, 0.75fr) auto minmax(220px, 1.6fr) minmax(
+			140px,
+			0.7fr
+		) minmax(140px, 0.7fr);
+	align-items: center;
+	gap: 10px !important;
+}
+
+.skerry-cloud-import-toolbar > * {
+	min-width: 0;
+}
+
+.skerry-cloud-import-toolbar .MuiButton-root {
+	min-height: 40px;
+	white-space: nowrap;
+}
+
+.skerry-cloud-import-selection {
+	min-height: 40px;
+	padding: 7px 10px;
+	border: 1px solid var(--skerry-dialog-divider);
+	border-radius: 13px;
+	background: color-mix(in srgb, var(--skerry-ink) 2%, transparent);
+}
+
+.skerry-cloud-import-list {
+	border-radius: 15px;
+	background: color-mix(in srgb, var(--skerry-dialog-surface) 68%, transparent);
+}
+
+.skerry-cloud-import-row {
+	min-height: 72px;
+	transition: background-color 150ms ease;
+}
+
+.skerry-cloud-import-row:hover {
+	background: color-mix(in srgb, var(--skerry-accent) 4%, transparent);
+}
+
+.skerry-cloud-import-row:last-child {
+	border-bottom: 0;
+}
+
+@media (max-width: 1000px) {
+	.skerry-cloud-import-toolbar {
+		grid-template-columns: minmax(140px, 1fr) auto minmax(200px, 1.5fr);
+	}
+
+	.skerry-cloud-import-toolbar .MuiFormControl-root:nth-last-child(-n + 2) {
+		grid-row: 2;
+	}
+}
+
+@media (max-width: 680px) {
+	.skerry-cloud-import-toolbar {
+		grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+	}
+
+	.skerry-cloud-import-toolbar > :nth-child(3) {
+		grid-column: 1 / -1;
+	}
+
+	.skerry-cloud-import-toolbar .MuiFormControl-root:nth-last-child(-n + 2) {
+		grid-row: auto;
+	}
+
+	.skerry-cloud-import-row {
+		grid-template-columns: auto 38px minmax(0, 1fr) auto;
+		gap: 8px;
+		padding-inline: 8px;
+	}
+}
+
+/* Cloud import selection actions: select all and clear. */
+
+html:is([data-mui-color-scheme="light"], [data-toolpad-color-scheme="light"])
+.cloud-collection-action-btn,
+:root:not([data-mui-color-scheme="dark"]):not(
+		[data-toolpad-color-scheme="dark"]
+	)
+	.cloud-collection-action-btn {
+	--cloud-collection-action-background: #f7f4ee;
+	--cloud-collection-action-border: rgba(0, 0, 0, 0.22);
+	--cloud-collection-action-color: #1a202c;
+	--cloud-collection-action-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+	--skerry-btn-background: var(--cloud-collection-action-background);
+	--skerry-btn-border: 1px solid var(--cloud-collection-action-border);
+	--skerry-btn-text: var(--cloud-collection-action-color);
+	--skerry-btn-shadow: var(--cloud-collection-action-shadow);
+}
+
+html:is([data-mui-color-scheme="light"], [data-toolpad-color-scheme="light"])
+	.cloud-collection-action-btn:hover:not(.Mui-disabled),
+:root:not([data-mui-color-scheme="dark"]):not(
+		[data-toolpad-color-scheme="dark"]
+	)
+	.cloud-collection-action-btn:hover:not(.Mui-disabled) {
+	--cloud-collection-action-background: #ede6db;
+	--cloud-collection-action-border: #c4b7a2;
+	--cloud-collection-action-color: #c2410c;
+	--skerry-btn-background: var(--cloud-collection-action-background);
+	--skerry-btn-border: 1px solid var(--cloud-collection-action-border);
+	--skerry-btn-text: var(--cloud-collection-action-color);
+}
+
+html:is([data-mui-color-scheme="dark"], [data-toolpad-color-scheme="dark"])
+	.cloud-collection-action-btn {
+	--cloud-collection-action-background: rgba(255, 255, 255, 0.05);
+	--cloud-collection-action-border: rgba(255, 255, 255, 0.32);
+	--cloud-collection-action-color: #cbd5e1;
+	--skerry-btn-background: var(--cloud-collection-action-background);
+	--skerry-btn-border: 1px solid var(--cloud-collection-action-border);
+	--skerry-btn-text: var(--cloud-collection-action-color);
+}
+
+html:is([data-mui-color-scheme="dark"], [data-toolpad-color-scheme="dark"])
+	.cloud-collection-action-btn:hover:not(.Mui-disabled) {
+	--cloud-collection-action-background: rgba(255, 255, 255, 0.09);
+	--cloud-collection-action-border: rgba(56, 189, 248, 0.5);
+	--cloud-collection-action-color: #38bdf8;
+	--skerry-btn-background: var(--cloud-collection-action-background);
+	--skerry-btn-border: 1px solid var(--cloud-collection-action-border);
+	--skerry-btn-text: var(--cloud-collection-action-color);
+}

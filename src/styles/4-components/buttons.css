@@ -1,0 +1,323 @@
+/* ==========================================================================
+   Skerry Universal Button System (全站规范按钮体系)
+   颜色来自共享等级令牌；A/B 使用统一扫光，点击不缩放或滤镜变色
+   ========================================================================== */
+
+/* 1. 基础重置铁律：彻底关闭所有继承的发光、阴影与多余上浮 */
+.skerry-btn,
+.MuiButton-root {
+	--skerry-btn-radius: 999px;
+	font-family: inherit;
+}
+
+.skerry-btn.skerry-btn,
+.MuiButton-root.MuiButton-root {
+	text-transform: none;
+	letter-spacing: var(--skerry-btn-letter-spacing, 0.01em);
+	font-weight: var(--skerry-btn-font-weight, 600);
+	line-height: var(--skerry-btn-line-height, 1);
+	transition:
+		background var(--skerry-duration-normal) ease,
+		border-color var(--skerry-duration-normal) ease,
+		color var(--skerry-duration-normal) ease,
+		box-shadow var(--skerry-duration-normal) ease,
+		transform var(--skerry-duration-normal) var(--skerry-ease-standard);
+}
+
+/* Shared icon alignment for MUI buttons. */
+.MuiButton-startIcon,
+.MuiButton-endIcon {
+	margin-top: 1px;
+}
+
+.MuiButton-startIcon {
+	--skerry-btn-icon-margin-inline-end: 7px;
+}
+
+.MuiButton-endIcon {
+	--skerry-btn-icon-margin-inline-end: -2px;
+}
+
+.MuiButton-root.MuiButton-root .MuiButton-startIcon {
+	margin-inline-end: var(--skerry-btn-icon-margin-inline-end);
+}
+
+.MuiButton-root.MuiButton-root .MuiButton-endIcon {
+	margin-inline-start: 7px;
+	margin-inline-end: var(--skerry-btn-icon-margin-inline-end);
+}
+
+/* 2. 按钮尺寸规范 (Sizes) */
+/* 大尺寸 (lg: 40px, 8px 方形微圆角，专属详细页/大卡片) */
+.skerry-btn-lg {
+	--skerry-btn-size-height: var(--skerry-btn-h-lg);
+	--skerry-btn-padding: 0 16px;
+	--skerry-btn-size-font-size: 13.5px;
+}
+
+/* 中尺寸 (md: 36px，顶栏胶囊或弹窗微圆角) */
+.skerry-btn-md {
+	--skerry-btn-size-height: var(--skerry-btn-h-md);
+	--skerry-btn-padding: 0 14px;
+	--skerry-btn-size-font-size: 13px;
+}
+.skerry-btn-md.skerry-btn-pill {
+	--skerry-btn-radius: var(--skerry-radius-pill);
+}
+.skerry-btn-lg,
+.skerry-btn-md.skerry-btn-square {
+	--skerry-btn-radius: var(--skerry-radius-md);
+}
+
+/* 小尺寸 (sm: 28px, 紧凑小标签) */
+.skerry-btn-sm {
+	--skerry-btn-size-height: var(--skerry-btn-h-sm);
+	--skerry-btn-padding: 0 10px;
+	--skerry-btn-size-font-size: 12px;
+	--skerry-btn-radius: var(--skerry-radius-sm);
+}
+
+/* Size tokens feed one geometry output for each shared button property. */
+.skerry-btn.skerry-btn-lg,
+.skerry-btn.skerry-btn-md,
+.skerry-btn.skerry-btn-sm {
+	height: var(--skerry-btn-size-height);
+	min-height: var(--skerry-btn-size-height);
+	font-size: var(--skerry-btn-size-font-size);
+}
+
+/* Shared IconButton motion baseline; page owners may provide more specific transitions. */
+.MuiIconButton-root.MuiIconButton-root {
+	transition:
+		transform 170ms cubic-bezier(0.2, 0.8, 0.2, 1),
+		background-color 170ms ease,
+		box-shadow 170ms ease,
+		border-color 170ms ease;
+}
+
+/* 图标按钮正方形宽高比 */
+.skerry-btn-icon,
+.MuiIconButton-root {
+	--skerry-btn-padding: 0;
+}
+.skerry-btn-icon.skerry-btn-lg {
+	--skerry-btn-icon-width: var(--skerry-btn-h-lg);
+}
+.skerry-btn-icon.skerry-btn-md {
+	--skerry-btn-icon-width: var(--skerry-btn-h-md);
+}
+.skerry-btn.skerry-btn-icon.skerry-btn-lg,
+.skerry-btn.skerry-btn-icon.skerry-btn-md {
+	width: var(--skerry-btn-icon-width);
+	min-width: var(--skerry-btn-icon-width);
+}
+
+.MuiButton-root.skerry-btn-lg,
+.MuiButton-root.skerry-btn-md,
+.MuiButton-root.skerry-btn-sm,
+.MuiButton-root.skerry-btn-icon {
+	padding: var(--skerry-btn-padding);
+}
+
+.MuiIconButton-root.MuiIconButton-root {
+	padding: var(--skerry-btn-padding);
+}
+
+/* Size and shape classes choose one shared border-radius value. */
+.skerry-btn.skerry-btn,
+.MuiButton-root.MuiButton-root,
+.MuiButton-root.MuiButton-root:hover,
+.MuiButton-root.MuiButton-root.Mui-disabled,
+.MuiButton-root.MuiButton-root.skerry-btn-md.skerry-btn-pill,
+.MuiButton-root.MuiButton-root.skerry-btn-lg,
+.MuiButton-root.MuiButton-root.skerry-btn-md.skerry-btn-square,
+.MuiButton-root.MuiButton-root.skerry-btn-sm {
+	border-radius: var(--skerry-btn-radius);
+}
+
+/* --------------------------------------------------------------------------
+   3. 语义层级角色 (Levels) - 100% 消费 Design Tokens 单点真理色卡
+   -------------------------------------------------------------------------- */
+
+/* A: main action. Static color is held on hover; the shared sheen gives feedback. */
+.skerry-btn-primary {
+	--skerry-btn-background: var(--skerry-btn-primary-bg);
+	--skerry-btn-text: var(--skerry-btn-primary-text);
+	--skerry-btn-shadow: var(--skerry-btn-primary-shadow);
+	--skerry-btn-border: 1px solid var(--skerry-btn-primary-border);
+}
+
+/* B: secondary action. Its resting surface is the former library hover state. */
+.skerry-btn-secondary {
+	--skerry-btn-background: var(--skerry-btn-secondary-bg);
+	--skerry-btn-text: var(--skerry-btn-secondary-text);
+	--skerry-btn-shadow: var(--skerry-btn-secondary-shadow);
+	--skerry-btn-border: 1px solid var(--skerry-btn-secondary-border);
+}
+
+/* Icon-only buttons keep their geometry while consuming the same B palette. */
+.skerry-btn-icon {
+	--skerry-btn-background: var(--skerry-btn-icon-bg);
+	--skerry-btn-text: var(--skerry-btn-icon-text);
+	--skerry-btn-border: 1px solid var(--skerry-btn-icon-border);
+}
+
+/* C: ordinary surfaced action. It stays flat and has no shared sheen. */
+.skerry-btn-tertiary {
+	--skerry-btn-background: var(--skerry-btn-level-c-background);
+	--skerry-btn-text: var(--skerry-btn-level-c-text);
+	--skerry-btn-shadow: var(--skerry-btn-level-c-shadow);
+	--skerry-btn-border: 1px solid var(--skerry-btn-level-c-border);
+}
+
+/* D: low emphasis text action. Its hover wash stays quieter than C. */
+.skerry-btn-ghost {
+	--skerry-btn-background: var(--skerry-btn-ghost-bg);
+	--skerry-btn-text: var(--skerry-btn-ghost-text);
+	--skerry-btn-shadow: var(--skerry-btn-ghost-shadow);
+	--skerry-btn-border: 1px solid var(--skerry-btn-ghost-border);
+}
+
+/* Danger: destructive actions use a separate palette outside A/B/C/D. */
+.skerry-btn-danger {
+	--skerry-btn-background: var(--skerry-btn-danger-bg);
+	--skerry-btn-text: var(--skerry-btn-danger-text);
+	--skerry-btn-shadow: var(--skerry-btn-danger-shadow);
+	--skerry-btn-border: 1px solid var(--skerry-btn-danger-border);
+}
+
+/* Semantic levels choose --skerry-btn-shadow above; the common output follows disabled state values. */
+
+/* Repeated root, variant, and semantic classes keep this owner ahead of MUI theme borders. */
+.MuiButton-root.MuiButton-root.MuiButton-contained.MuiButton-contained:is(
+	.skerry-btn-primary.skerry-btn-primary,
+	.skerry-btn-secondary.skerry-btn-secondary,
+	.skerry-btn-icon.skerry-btn-icon,
+	.skerry-btn-tertiary.skerry-btn-tertiary,
+	.skerry-btn-ghost.skerry-btn-ghost,
+	.skerry-btn-danger.skerry-btn-danger
+) {
+	border: var(--skerry-btn-border);
+}
+
+/* Text variants use root and semantic classes as their ordinary border owner. */
+.MuiButton-root.MuiButton-text.skerry-btn-primary.skerry-btn-primary:is(
+	:enabled,
+	:disabled
+),
+.MuiButton-root.MuiButton-text.skerry-btn-secondary.skerry-btn-secondary:is(
+	:enabled,
+	:disabled
+),
+.MuiButton-root.MuiButton-text.skerry-btn-icon.skerry-btn-icon:is(
+	:enabled,
+	:disabled
+),
+.MuiButton-root.MuiButton-text.skerry-btn-tertiary.skerry-btn-tertiary:is(
+	:enabled,
+	:disabled
+),
+.MuiButton-root.MuiButton-text.skerry-btn-ghost.skerry-btn-ghost:is(
+	:enabled,
+	:disabled
+),
+.MuiButton-root.MuiButton-text.skerry-btn-danger.skerry-btn-danger:is(
+	:enabled,
+	:disabled
+) {
+	border: var(--skerry-btn-border);
+}
+
+/* Keep primary gradients inside their semantic border, including transparent dark-mode borders. */
+.MuiButton-root.skerry-btn-primary.skerry-btn-primary {
+	background-clip: padding-box;
+}
+
+/* MUI variant plus semantic level owns shared color and surface output. */
+.MuiButton-root.MuiButton-root.MuiButton-contained.MuiButton-contained:is(
+	.skerry-btn-primary.skerry-btn-primary,
+	.skerry-btn-secondary.skerry-btn-secondary,
+	.skerry-btn-icon.skerry-btn-icon,
+	.skerry-btn-tertiary.skerry-btn-tertiary,
+	.skerry-btn-ghost.skerry-btn-ghost,
+	.skerry-btn-danger.skerry-btn-danger
+),
+.MuiButton-root.MuiButton-root.MuiButton-text.MuiButton-text:is(
+	.skerry-btn-primary.skerry-btn-primary,
+	.skerry-btn-secondary.skerry-btn-secondary,
+	.skerry-btn-icon.skerry-btn-icon,
+	.skerry-btn-tertiary.skerry-btn-tertiary,
+	.skerry-btn-ghost.skerry-btn-ghost,
+	.skerry-btn-danger.skerry-btn-danger
+) {
+	color: var(--skerry-btn-text);
+	background: var(--skerry-btn-background);
+}
+
+.skerry-launch-action-button {
+	--skerry-button-focus-shadow-output: none;
+}
+
+/* 4. 禁用态通则 */
+.Mui-disabled.Mui-disabled,
+.MuiButtonBase-root.MuiButtonBase-root.Mui-disabled.Mui-disabled {
+	--skerry-button-disabled-opacity-output: 0.45;
+	--skerry-button-disabled-filter-output: grayscale(0.4);
+	--skerry-btn-shadow: none;
+	opacity: var(--skerry-button-disabled-opacity-output);
+	filter: var(--skerry-button-disabled-filter-output);
+	cursor: var(--skerry-button-disabled-cursor, not-allowed);
+}
+
+.skerry-btn.skerry-btn,
+.MuiButton-root.MuiButton-root.MuiButton-root,
+.skerry-btn-secondary.skerry-btn-secondary:hover:not(.Mui-disabled.Mui-disabled.Mui-disabled),
+.Mui-disabled.Mui-disabled.Mui-disabled,
+.MuiButton-root.MuiButton-root.MuiButton-root.Mui-disabled.Mui-disabled.Mui-disabled,
+.skerry-btn.skerry-btn.Mui-disabled.Mui-disabled.Mui-disabled {
+	box-shadow: var(--skerry-btn-shadow, none);
+}
+
+.MuiButton-root:has(.MuiCircularProgress-root).Mui-disabled {
+	--skerry-button-disabled-opacity-output: 0.9;
+	--skerry-button-disabled-filter-output: saturate(0.9) brightness(0.98);
+}
+
+.skerry-btn-primary,
+.skerry-btn-secondary,
+.skerry-btn-danger:hover:not(.Mui-disabled),
+.Mui-disabled,
+.MuiButton-root.Mui-disabled,
+.skerry-btn.Mui-disabled {
+	--skerry-btn-transform: none;
+}
+
+/* Semantic interaction and disabled transforms share one forced output. */
+.skerry-btn-primary.skerry-btn-primary:active:not(.Mui-disabled),
+.skerry-btn-secondary.skerry-btn-secondary:hover:not(.Mui-disabled),
+.skerry-btn-secondary.skerry-btn-secondary:active:not(.Mui-disabled),
+.skerry-btn-icon.skerry-btn-icon:hover:not(.Mui-disabled),
+.skerry-btn-danger.skerry-btn-danger:hover:not(.Mui-disabled),
+.MuiButton-root.MuiButton-root.Mui-disabled.Mui-disabled,
+.skerry-btn.skerry-btn.Mui-disabled.Mui-disabled,
+.Mui-disabled.Mui-disabled {
+	transform: var(--skerry-btn-transform, none);
+}
+
+/* Level A keeps its base surface while the shared sheen provides hover feedback. */
+.MuiButton-root.skerry-button-level-a {
+	--skerry-btn-transform: none;
+}
+
+.MuiButton-root.skerry-button-level-a:not(.Mui-disabled):hover,
+.MuiButton-root.skerry-button-level-a:not(.Mui-disabled):active {
+	filter: none;
+}
+
+.MuiButton-root.skerry-button-level-a:not(.Mui-disabled):active {
+	transform: none;
+}
+
+.MuiButton-root.skerry-button-level-a-gradient {
+	--skerry-btn-shadow: none;
+}

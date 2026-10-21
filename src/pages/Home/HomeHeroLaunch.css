@@ -1,0 +1,131 @@
+/* Start/stop action and recording timer owned by HomePage's current-game card. */
+
+.atlas-page .atlas-launch-main-button.MuiButton-root {
+	width: 124px;
+	min-width: 124px;
+}
+
+:where(.atlas-page) .atlas-launch-recording-button.MuiButton-root {
+	gap: 7px;
+}
+
+.atlas-page .atlas-launch-recording-timer {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	width: 54px;
+	min-width: 54px;
+	padding: 0;
+	color: #f5fbff;
+	text-shadow:
+		0 1px 2px rgba(9, 27, 58, 0.42),
+		0 0 10px rgba(112, 199, 255, 0.58),
+		0 0 18px rgba(255, 122, 168, 0.24);
+}
+
+:where(.atlas-page)
+	.atlas-launch-recording-button.MuiButton-root
+	.MuiButton-startIcon {
+	margin-right: 5px;
+}
+
+html:is([data-toolpad-color-scheme], [data-mui-color-scheme])
+	.atlas-page
+	.atlas-current-copy
+	.atlas-launch-main-button.MuiButton-root {
+	--atlas-hero-launch-background-color: transparent;
+	--atlas-hero-launch-image:
+		linear-gradient(
+			135deg,
+			rgba(255, 255, 255, 0.26) 0%,
+			transparent 31%,
+			rgba(255, 255, 255, 0.12) 64%,
+			transparent 100%
+		),
+		linear-gradient(135deg, #0284c7 0%, #06b6d4 45%, #14b8a6 80%, #6366f1 100%);
+	--atlas-hero-launch-border: 1px solid var(--atlas-hero-launch-border-color);
+	--atlas-hero-launch-border-color: rgba(6, 182, 212, 0.75);
+	--atlas-hero-launch-color: #ffffff;
+	--atlas-hero-launch-shadow:
+		0 0 0 1px rgba(6, 182, 212, 0.45), 0 10px 24px rgba(2, 132, 199, 0.35),
+		0 0 26px rgba(20, 184, 166, 0.3);
+	--skerry-btn-radius: 9999px;
+	--skerry-btn-primary-shadow: var(--atlas-hero-launch-shadow);
+	--skerry-btn-shadow: var(--atlas-hero-launch-shadow);
+	--skerry-contained-error-shadow-output: var(--atlas-hero-launch-shadow);
+	--skerry-button-focus-shadow-output: var(--atlas-hero-launch-shadow);
+	--skerry-motion-transition-duration: 200ms, 200ms, 200ms, 200ms;
+	height: 35px;
+	min-height: 35px;
+	transition:
+		filter 0.2s ease,
+		background-image 0.2s ease,
+		box-shadow 0.2s ease,
+		border-color 0.2s ease;
+	padding-top: 0;
+	padding-bottom: 2px;
+}
+
+/* Keep the action icon on the global reduced-motion duration. */
+.atlas-page
+	.atlas-current-copy
+	.atlas-launch-main-button.MuiButton-root
+	.MuiButton-startIcon {
+	--skerry-motion-transition-duration: initial;
+}
+
+html:is([data-toolpad-color-scheme], [data-mui-color-scheme])
+	.atlas-page
+	.atlas-current-copy
+	:is(
+		.atlas-launch-main-button.MuiButton-containedPrimary,
+		.atlas-launch-main-button.MuiButton-containedPrimary:hover
+	) {
+	--skerry-contained-primary-background-color-output: var(
+		--atlas-hero-launch-background-color
+	);
+	--skerry-contained-primary-image-output: var(--atlas-hero-launch-image);
+	--skerry-contained-primary-border-output: var(--atlas-hero-launch-border);
+	--skerry-contained-primary-border-color-output: var(
+		--atlas-hero-launch-border-color
+	);
+	--skerry-btn-primary-text: var(--atlas-hero-launch-color);
+}
+
+html:is([data-toolpad-color-scheme], [data-mui-color-scheme])
+	.atlas-page
+	.atlas-current-copy
+	:is(
+		.atlas-launch-main-button.MuiButton-containedPrimary,
+		.atlas-launch-main-button.MuiButton-containedPrimary:hover,
+		.atlas-launch-main-button.MuiButton-containedError,
+		.atlas-launch-main-button.MuiButton-containedError:hover
+	) {
+	border: var(--atlas-hero-launch-border);
+}
+
+html:is([data-toolpad-color-scheme], [data-mui-color-scheme])
+	.atlas-page
+	.atlas-current-copy
+	:is(
+		.atlas-launch-main-button.MuiButton-containedError,
+		.atlas-launch-main-button.MuiButton-containedError:hover
+	) {
+	background-color: var(--atlas-hero-launch-background-color);
+	background-image: var(--atlas-hero-launch-image);
+	color: var(--atlas-hero-launch-color);
+}
+
+.atlas-page .atlas-launch-main-button .MuiButton-startIcon {
+	margin-top: 0;
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+}
+
+@media (max-width: 720px) {
+	:where(.atlas-page) .atlas-current-copy .MuiButton-root {
+		min-width: 86px;
+		padding-inline: 10px;
+	}
+}

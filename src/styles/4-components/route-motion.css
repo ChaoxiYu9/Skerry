@@ -1,0 +1,127 @@
+/* Shared route layering and transition surfaces for SkerryMotionOutlet. */
+
+.skerry-motion-root {
+	min-width: 0;
+
+	position: relative;
+
+	isolation: isolate;
+}
+
+.skerry-motion-root-contained {
+	height: 100%;
+
+	min-height: 0;
+}
+
+.skerry-route-live-layer {
+	position: relative;
+
+	z-index: 1;
+
+	min-width: 0;
+}
+
+.skerry-motion-root-contained .skerry-route-live-layer {
+	height: 100%;
+
+	min-height: 0;
+
+	padding: 0;
+}
+
+.skerry-primary-route-layer {
+	min-width: 0;
+
+	position: absolute;
+
+	inset: 0;
+
+	z-index: 0;
+
+	opacity: 0;
+
+	visibility: hidden;
+
+	pointer-events: none;
+
+	transform: translate3d(0, 0, 0);
+
+	backface-visibility: hidden;
+
+	will-change: auto;
+
+	contain: layout style;
+
+	contain-intrinsic-size: 1000px 720px;
+
+	content-visibility: auto;
+}
+
+.skerry-primary-route-layer.is-active {
+	position: relative;
+
+	inset: auto;
+
+	z-index: 1;
+
+	opacity: 1;
+
+	visibility: visible;
+
+	pointer-events: auto;
+
+	will-change: auto;
+
+	content-visibility: visible;
+
+	contain-intrinsic-size: auto;
+}
+
+.skerry-route-veil {
+	pointer-events: none;
+
+	position: absolute;
+
+	inset: -14px 0;
+
+	z-index: 8;
+
+	opacity: 0;
+
+	border-radius: 26px;
+
+	background: linear-gradient(
+		100deg,
+		rgba(255, 255, 255, 0) 0%,
+		rgba(255, 255, 255, 0.34) 28%,
+		rgba(112, 199, 255, 0.2) 48%,
+		rgba(125, 116, 255, 0.13) 66%,
+		rgba(255, 255, 255, 0) 100%
+	);
+
+	box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.28);
+
+	transform-origin: center;
+
+	will-change: transform, opacity;
+}
+
+html:is([data-toolpad-color-scheme="dark"], [data-mui-color-scheme="dark"])
+	.skerry-route-veil {
+	background: linear-gradient(
+		100deg,
+		rgba(255, 255, 255, 0) 0%,
+		rgba(117, 201, 255, 0.15) 30%,
+		rgba(125, 116, 255, 0.16) 52%,
+		rgba(255, 122, 168, 0.1) 70%,
+		rgba(255, 255, 255, 0) 100%
+	);
+}
+
+.skerry-motion-root .MuiPaper-root,
+.skerry-motion-root .MuiCard-root,
+.skerry-motion-root .game-card-cover,
+.skerry-motion-root .skerry-telemetry-cell {
+	transform-origin: center center;
+}

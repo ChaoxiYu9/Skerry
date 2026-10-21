@@ -1,0 +1,60 @@
+/* Provider identity colors are shared by OAuth actions and connected badges. */
+
+/* Account cards use a quiet, border-defined surface in both color schemes. */
+.skerry-settings-page-scroll .account-provider-card.MuiPaper-root {
+	--skerry-paper-fallback-shadow: none;
+	box-shadow: none;
+}
+
+/* Remove the global white glass sheen that reads as a shadow in dark mode. */
+html:is([data-toolpad-color-scheme="dark"], [data-mui-color-scheme="dark"])
+	.skerry-settings-page-scroll
+	.account-provider-card.MuiPaper-root {
+	background-image: none;
+}
+
+.oauth-status-badge--bgm {
+	--oauth-provider-color: #b42332;
+}
+
+.oauth-status-badge--hikarinagi {
+	--oauth-provider-color: #16734a;
+}
+
+.oauth-status-badge--kungal {
+	--oauth-provider-color: #2563eb;
+}
+
+.oauth-status-badge.MuiChip-root {
+	--skerry-chip-font-weight: 600;
+	border-radius: 9999px;
+	transition:
+		background-color 160ms ease,
+		border-color 160ms ease,
+		color 160ms ease;
+	padding: 0 4px;
+	height: 24px;
+	backdrop-filter: none;
+	-webkit-backdrop-filter: none;
+	box-shadow: none;
+}
+
+.oauth-status-badge.MuiChip-root:is(
+	.oauth-status-badge--bgm,
+	.oauth-status-badge--hikarinagi,
+	.oauth-status-badge--kungal
+) {
+	--skerry-chip-background: color-mix(
+		in srgb,
+		var(--oauth-provider-color) 10%,
+		var(--skerry-glass-surface)
+	);
+	--skerry-chip-border-color: color-mix(
+		in srgb,
+		var(--oauth-provider-color) 38%,
+		transparent
+	);
+	background: var(--skerry-chip-background);
+	color: color-mix(in srgb, var(--oauth-provider-color) 82%, var(--skerry-ink));
+}
+

@@ -1,0 +1,595 @@
+.skerry-context-menu {
+	transform-origin: top left;
+}
+
+.skerry-play-status-submenu.is-open {
+	animation: skerry-submenu-enter 160ms cubic-bezier(0.2, 0.75, 0.3, 1) both;
+}
+
+@keyframes skerry-submenu-enter {
+	from {
+		opacity: 0;
+		transform: translateY(4px) scale(0.985);
+	}
+
+	to {
+		opacity: 1;
+		transform: translateY(0) scale(1);
+	}
+}
+
+.MuiTooltip-tooltip.skerry-clean-tooltip {
+	font-family: inherit;
+	letter-spacing: 0.02em;
+}
+
+.skerry-context-menu-paper,
+.skerry-submenu-paper {
+	position: relative;
+
+	overflow: hidden;
+
+	--skerry-popup-background-color: transparent;
+
+	--skerry-popup-background-image:
+		linear-gradient(
+			145deg,
+			rgba(255, 255, 255, 0.985),
+			rgba(246, 251, 255, 0.95) 46%,
+			rgba(226, 242, 255, 0.92)
+		),
+		linear-gradient(
+			135deg,
+			color-mix(in srgb, var(--mui-palette-primary-main) 16%, transparent),
+			color-mix(in srgb, var(--skerry-accent) 9%, transparent)
+		);
+
+	--skerry-popup-background-clip: border-box, border-box;
+
+	--skerry-popup-backdrop-filter: blur(20px) saturate(138%);
+
+	--skerry-popup-border: 1px solid var(--skerry-popup-border-color);
+
+	--skerry-popup-border-color: color-mix(
+		in srgb,
+		var(--mui-palette-primary-main) 30%,
+		rgba(255, 255, 255, 0.52)
+	);
+
+	--skerry-popup-shadow:
+		inset 0 1px 0 rgba(255, 255, 255, 0.78), 0 18px 48px rgba(28, 61, 112, 0.2),
+		0 5px 16px rgba(112, 199, 255, 0.16);
+}
+
+.MuiPaper-root.skerry-context-menu-paper,
+.MuiPaper-root.skerry-submenu-paper {
+	border-radius: 10px;
+}
+
+.skerry-context-menu-paper::before,
+.skerry-submenu-paper::before {
+	content: "";
+
+	position: absolute;
+
+	inset: 1px;
+
+	border-radius: inherit;
+
+	background:
+		linear-gradient(135deg, rgba(255, 255, 255, 0.62), transparent 34%),
+		radial-gradient(
+			120px 80px at 16px 10px,
+			color-mix(in srgb, var(--skerry-accent) 28%, transparent),
+			transparent 72%
+		),
+		linear-gradient(
+			90deg,
+			color-mix(in srgb, var(--mui-palette-primary-main) 22%, transparent),
+			transparent 42%,
+			color-mix(in srgb, var(--skerry-rose) 16%, transparent)
+		);
+
+	opacity: 0.78;
+
+	pointer-events: none;
+}
+
+.skerry-detail-more-menu-list,
+.skerry-submenu-list,
+.skerry-context-menu-paper .MuiMenuList-root,
+.skerry-context-menu-paper .MuiMenu-list,
+.skerry-context-menu-paper .MuiList-root,
+.skerry-submenu-paper .MuiMenuList-root,
+.skerry-submenu-paper .MuiMenu-list,
+.skerry-submenu-paper .MuiList-root {
+	position: relative;
+
+	z-index: 1;
+}
+
+.MuiList-root.skerry-detail-more-menu-list,
+.skerry-detail-more-menu-list.skerry-submenu-list {
+	padding: 9px;
+}
+
+.skerry-submenu-list {
+	box-sizing: border-box;
+
+	width: 100%;
+}
+
+.skerry-submenu-paper .skerry-submenu-list .MuiMenuItem-root {
+	border: 1px solid color-mix(
+		in srgb,
+		var(--mui-palette-primary-main) 22%,
+		var(--mui-palette-divider)
+	);
+}
+
+:is(
+		.skerry-detail-more-menu-paper,
+		.skerry-context-menu-paper,
+		.skerry-submenu-paper
+	)
+	.MuiListItemIcon-root {
+	width: 32px;
+
+	min-width: 32px;
+
+	color: color-mix(
+		in srgb,
+		var(--mui-palette-primary-main) 78%,
+		var(--mui-palette-text-primary)
+	);
+}
+
+:is(
+		.skerry-detail-more-menu-paper,
+		.skerry-context-menu-paper,
+		.skerry-submenu-paper
+	)
+	.MuiListItemText-primary {
+	font-size: 13px;
+
+	font-weight: 760;
+}
+
+:is(
+		.skerry-detail-more-menu-paper,
+		.skerry-context-menu-paper,
+		.skerry-submenu-paper
+	)
+	.MuiMenuItem-root {
+	box-sizing: border-box;
+
+	width: 100%;
+
+	padding-inline: 10px 12px;
+
+	--skerry-menu-item-background-color: transparent;
+
+	--skerry-menu-item-background-image: linear-gradient(
+		90deg,
+		rgba(255, 255, 255, 0.58),
+		rgba(255, 255, 255, 0.26)
+	);
+
+	border-color: rgba(255, 255, 255, 0.34);
+
+	box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.44);
+}
+
+:is(
+		.skerry-detail-more-menu-paper,
+		.skerry-context-menu-paper,
+		.skerry-submenu-paper
+	)
+	.MuiMenuItem-root.MuiMenuItem-root {
+	min-height: 39px;
+
+	margin: 3px 0;
+
+	border-radius: 8px;
+}
+
+:is(
+		.skerry-detail-more-menu-paper,
+		.skerry-context-menu-paper,
+		.skerry-submenu-paper
+	)
+	.MuiMenuItem-root:is(:hover, .Mui-focusVisible) {
+	--skerry-menu-item-border: color-mix(
+		in srgb,
+		var(--mui-palette-primary-main) 36%,
+		rgba(255, 255, 255, 0.42)
+	);
+
+	--skerry-menu-item-background-color: transparent;
+
+	--skerry-menu-item-background-image: linear-gradient(
+		90deg,
+		color-mix(
+			in srgb,
+			var(--mui-palette-primary-main) 20%,
+			rgba(255, 255, 255, 0.66)
+		),
+		color-mix(in srgb, var(--skerry-accent) 13%, rgba(255, 255, 255, 0.38))
+	);
+
+	box-shadow:
+		inset 0 1px 0 rgba(255, 255, 255, 0.54),
+		0 8px 18px
+		color-mix(in srgb, var(--mui-palette-primary-main) 13%, transparent);
+}
+
+.skerry-context-menu-paper .MuiMenuItem-root[color="error"],
+.skerry-context-menu-paper .MuiMenuItem-root.skerry-context-menu-danger-item,
+.skerry-context-menu-paper
+	.MuiMenuItem-root:has(.MuiSvgIcon-root[data-testid="DeleteIcon"]),
+.skerry-context-menu-paper
+	.MuiMenuItem-root:has(
+		.MuiSvgIcon-root[data-testid="DeleteOutlineRoundedIcon"]
+	) {
+	--skerry-menu-item-text: var(--mui-palette-error-main);
+}
+
+.skerry-context-menu-paper
+	.MuiMenuItem-root[color="error"]
+	.MuiListItemIcon-root,
+.skerry-context-menu-paper .skerry-context-menu-danger-icon,
+.skerry-context-menu-paper
+	.MuiMenuItem-root:has(.MuiSvgIcon-root[data-testid="DeleteIcon"])
+	.MuiListItemIcon-root,
+.skerry-context-menu-paper
+	.MuiMenuItem-root:has(
+		.MuiSvgIcon-root[data-testid="DeleteOutlineRoundedIcon"]
+	)
+	.MuiListItemIcon-root,
+.skerry-context-menu-paper .skerry-context-menu-remove-category-icon {
+	color: var(--mui-palette-error-main);
+}
+
+.skerry-context-menu-paper .MuiMenuItem-root[color="error"]:hover,
+.skerry-context-menu-paper
+	.MuiMenuItem-root:has(.MuiSvgIcon-root[data-testid="DeleteIcon"]):hover,
+.skerry-context-menu-paper
+	.MuiMenuItem-root:has(
+		.MuiSvgIcon-root[data-testid="DeleteOutlineRoundedIcon"]
+	):hover {
+	--skerry-menu-item-border: color-mix(
+		in srgb,
+		var(--mui-palette-error-main) 30%,
+		rgba(255, 255, 255, 0.36)
+	);
+
+	--skerry-menu-item-background-color: transparent;
+
+	--skerry-menu-item-background-image: linear-gradient(
+		90deg,
+		color-mix(
+			in srgb,
+			var(--mui-palette-error-main) 16%,
+			rgba(255, 255, 255, 0.7)
+		),
+		rgba(255, 255, 255, 0.3)
+	);
+
+	box-shadow:
+		inset 0 1px 0 rgba(255, 255, 255, 0.5),
+		0 8px 18px
+		color-mix(in srgb, var(--mui-palette-error-main) 11%, transparent);
+}
+
+/* Compact sizing for right-click menus and their submenus. */
+
+.MuiPaper-root:is(.skerry-right-menu-paper, .skerry-submenu-paper) {
+	width: 224px;
+
+	max-width: calc(100vw - 16px);
+}
+
+.skerry-submenu-paper {
+	transform-origin: left center;
+}
+
+:is(
+		.skerry-submenu-paper,
+		.skerry-context-menu-paper,
+		.skerry-detail-more-menu-paper
+	)
+	.MuiMenuItem-root
+	> .MuiSvgIcon-root:last-child {
+	margin-left: auto;
+
+	color: color-mix(
+		in srgb,
+		var(--mui-palette-primary-main) 76%,
+		var(--mui-palette-text-secondary)
+	);
+}
+
+html:is([data-toolpad-color-scheme="dark"], [data-mui-color-scheme="dark"])
+	:is(
+		.skerry-detail-more-menu-paper,
+		.skerry-context-menu-paper,
+		.skerry-submenu-paper
+	)
+	.MuiMenuItem-root:not(.Mui-selected) {
+	--skerry-menu-item-text: color-mix(
+		in srgb,
+		var(--mui-palette-text-primary) 78%,
+		transparent
+	);
+
+	--skerry-menu-item-background-color: transparent;
+
+	--skerry-menu-item-background-image: linear-gradient(
+		90deg,
+		rgba(255, 255, 255, 0.055),
+		rgba(255, 255, 255, 0.025)
+	);
+
+	--skerry-menu-item-border: rgba(255, 255, 255, 0.06);
+
+	box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.055);
+}
+
+html:is([data-toolpad-color-scheme="dark"], [data-mui-color-scheme="dark"])
+	:is(
+		.skerry-detail-more-menu-paper,
+		.skerry-context-menu-paper,
+		.skerry-submenu-paper
+	)
+	.MuiMenuItem-root:not(.Mui-selected):is(:hover, .Mui-focusVisible) {
+	--skerry-menu-item-text: var(--mui-palette-text-primary);
+
+	--skerry-menu-item-background-color: transparent;
+
+	--skerry-menu-item-background-image: linear-gradient(
+		90deg,
+		color-mix(
+			in srgb,
+			var(--mui-palette-primary-main) 16%,
+			rgba(255, 255, 255, 0.075)
+		),
+		color-mix(in srgb, var(--skerry-accent) 9%, rgba(255, 255, 255, 0.045))
+	);
+
+	--skerry-menu-item-border: color-mix(
+		in srgb,
+		var(--mui-palette-primary-main) 28%,
+		rgba(255, 255, 255, 0.1)
+	);
+}
+
+html:is([data-toolpad-color-scheme="dark"], [data-mui-color-scheme="dark"])
+	:is(.skerry-context-menu-paper, .skerry-submenu-paper) {
+	--skerry-popup-background-color: transparent;
+	--skerry-popup-background-image:
+		linear-gradient(
+			145deg,
+			rgba(26, 36, 59, 0.985),
+			rgba(16, 28, 47, 0.96) 48%,
+			rgba(9, 19, 34, 0.95)
+		),
+		linear-gradient(
+			135deg,
+			color-mix(in srgb, var(--mui-palette-primary-main) 18%, transparent),
+			color-mix(in srgb, var(--skerry-accent) 10%, transparent)
+		);
+	--skerry-popup-background-clip: border-box, border-box;
+
+	--skerry-popup-border-color: color-mix(
+		in srgb,
+		var(--mui-palette-primary-main) 30%,
+		rgba(255, 255, 255, 0.16)
+	);
+
+	--skerry-popup-shadow:
+		inset 0 1px 0 rgba(255, 255, 255, 0.12), 0 22px 58px rgba(0, 0, 0, 0.54),
+		0 0 28px
+		color-mix(in srgb, var(--mui-palette-primary-main) 10%, transparent);
+}
+
+.skerry-context-menu-paper .MuiMenuItem-root.Mui-selected,
+.skerry-submenu-paper .MuiMenuItem-root.Mui-selected {
+	--skerry-menu-item-text: color-mix(
+		in srgb,
+		var(--mui-palette-primary-main) 88%,
+		var(--mui-palette-text-primary)
+	);
+
+	--skerry-menu-item-border: color-mix(
+		in srgb,
+		var(--mui-palette-primary-main) 42%,
+		rgba(255, 255, 255, 0.36)
+	);
+
+	--skerry-menu-item-background-color: transparent;
+
+	--skerry-menu-item-background-image: linear-gradient(
+		90deg,
+		color-mix(
+			in srgb,
+			var(--mui-palette-primary-main) 22%,
+			rgba(255, 255, 255, 0.72)
+		),
+		color-mix(in srgb, var(--skerry-accent) 16%, rgba(255, 255, 255, 0.42))
+	);
+}
+
+html:is([data-toolpad-color-scheme="dark"], [data-mui-color-scheme="dark"])
+	.skerry-context-menu-paper
+	.MuiMenuItem-root.Mui-selected {
+	--skerry-menu-item-text: color-mix(
+		in srgb,
+		var(--skerry-accent) 86%,
+		var(--mui-palette-text-primary)
+	);
+
+	--skerry-menu-item-border: color-mix(
+		in srgb,
+		var(--mui-palette-primary-main) 38%,
+		rgba(255, 255, 255, 0.12)
+	);
+
+	--skerry-menu-item-background-color: transparent;
+
+	--skerry-menu-item-background-image: linear-gradient(
+		90deg,
+		color-mix(
+			in srgb,
+			var(--mui-palette-primary-main) 24%,
+			rgba(255, 255, 255, 0.1)
+		),
+		color-mix(in srgb, var(--skerry-accent) 12%, rgba(255, 255, 255, 0.05))
+	);
+	box-shadow:
+		inset 3px 0 0 color-mix(in srgb, var(--skerry-accent) 82%, white),
+		inset 0 1px 0 rgba(255, 255, 255, 0.12),
+		0 8px 22px rgba(0, 0, 0, 0.24);
+}
+
+/* Dark selected state for shared submenu items */
+html:is([data-toolpad-color-scheme="dark"], [data-mui-color-scheme="dark"])
+	.skerry-submenu-paper
+	.MuiMenuItem-root.Mui-selected {
+	--skerry-menu-item-text: #ffffff;
+	--skerry-menu-item-background-color: transparent;
+	--skerry-menu-item-background-image: linear-gradient(
+		90deg,
+		rgba(47, 125, 246, 0.62),
+		rgba(112, 199, 255, 0.34) 58%,
+		rgba(125, 116, 255, 0.42)
+	);
+	--skerry-menu-item-border: rgba(174, 232, 246, 0.84);
+	--skerry-menu-item-shadow-output:
+		inset 4px 0 0 rgba(174, 232, 246, 0.98),
+		inset 0 1px 0 rgba(255, 255, 255, 0.22), 0 8px 22px rgba(20, 83, 151, 0.34);
+}
+
+/* Light-theme surfaces and states for MUI menus and custom context menus. */
+
+/* Higher-specificity danger icon rules above remain red over this light tint. */
+html:is([data-toolpad-color-scheme="light"], [data-mui-color-scheme="light"])
+.skerry-context-menu-paper::before,
+html:is([data-toolpad-color-scheme="light"], [data-mui-color-scheme="light"])
+	.skerry-submenu-paper::before {
+	background:
+		linear-gradient(135deg, rgba(255, 255, 255, 0.68), transparent 34%),
+		radial-gradient(
+			120px 80px at 16px 10px,
+			rgba(161, 98, 7, 0.12),
+			transparent 72%
+		);
+}
+
+html:is([data-toolpad-color-scheme="light"], [data-mui-color-scheme="light"])
+	.MuiMenu-paper
+	.MuiMenuItem-root,
+html:is([data-toolpad-color-scheme="light"], [data-mui-color-scheme="light"])
+	.MuiPopover-paper
+	.MuiMenuItem-root,
+html:is([data-toolpad-color-scheme="light"], [data-mui-color-scheme="light"])
+	.skerry-context-menu-paper
+	.MuiMenuItem-root,
+html:is([data-toolpad-color-scheme="light"], [data-mui-color-scheme="light"])
+	.skerry-submenu-paper
+	.MuiMenuItem-root {
+	--skerry-menu-item-text: #1f2937;
+
+	--skerry-menu-item-background-image: linear-gradient(
+		90deg,
+		rgba(255, 255, 255, 0.64),
+		rgba(255, 255, 255, 0.28)
+	);
+
+	--skerry-menu-item-border: rgba(96, 78, 50, 0.12);
+}
+
+html:is([data-toolpad-color-scheme="light"], [data-mui-color-scheme="light"])
+	.MuiMenu-paper
+	.MuiMenuItem-root:is(:hover, .Mui-focusVisible),
+html:is([data-toolpad-color-scheme="light"], [data-mui-color-scheme="light"])
+	.MuiPopover-paper
+	.MuiMenuItem-root:hover,
+html:is([data-toolpad-color-scheme="light"], [data-mui-color-scheme="light"])
+	.skerry-context-menu-paper
+	.MuiMenuItem-root:is(:hover, .Mui-focusVisible),
+html:is([data-toolpad-color-scheme="light"], [data-mui-color-scheme="light"])
+	.skerry-submenu-paper
+	.MuiMenuItem-root:is(:hover, .Mui-focusVisible) {
+	--skerry-menu-item-text: #7c2d12;
+
+	--skerry-menu-item-background-image: linear-gradient(
+		90deg,
+		rgba(217, 119, 6, 0.14),
+		rgba(255, 247, 214, 0.52)
+	);
+
+	--skerry-menu-item-border: rgba(161, 98, 7, 0.28);
+	--skerry-menu-item-shadow-output: 0 7px 18px rgba(161, 98, 7, 0.1);
+}
+
+html:is([data-toolpad-color-scheme="dark"], [data-mui-color-scheme="dark"])
+	.skerry-submenu-paper
+	.MuiMenuItem-root.Mui-selected,
+html:is([data-toolpad-color-scheme="light"], [data-mui-color-scheme="light"])
+	.MuiMenu-paper
+	.MuiMenuItem-root:is(:hover, .Mui-focusVisible),
+html:is([data-toolpad-color-scheme="light"], [data-mui-color-scheme="light"])
+	.MuiPopover-paper
+	.MuiMenuItem-root:hover,
+html:is([data-toolpad-color-scheme="light"], [data-mui-color-scheme="light"])
+	.skerry-context-menu-paper
+	.MuiMenuItem-root:is(:hover, .Mui-focusVisible),
+html:is([data-toolpad-color-scheme="light"], [data-mui-color-scheme="light"])
+	.skerry-submenu-paper
+	.MuiMenuItem-root:is(:hover, .Mui-focusVisible) {
+	box-shadow: var(--skerry-menu-item-shadow-output);
+}
+
+html:is([data-toolpad-color-scheme="light"], [data-mui-color-scheme="light"])
+	.MuiMenu-paper
+	.MuiMenuItem-root.Mui-selected,
+html:is([data-toolpad-color-scheme="light"], [data-mui-color-scheme="light"])
+	.MuiPopover-paper
+	.MuiMenuItem-root.Mui-selected,
+html:is([data-toolpad-color-scheme="light"], [data-mui-color-scheme="light"])
+	.MuiAutocomplete-paper
+	.MuiMenuItem-root.Mui-selected,
+html:is([data-toolpad-color-scheme="light"], [data-mui-color-scheme="light"])
+	.skerry-context-menu-paper
+	.MuiMenuItem-root.Mui-selected,
+html:is([data-toolpad-color-scheme="light"], [data-mui-color-scheme="light"])
+	.skerry-submenu-paper
+	.MuiMenuItem-root.Mui-selected {
+	--skerry-menu-item-text: #7c2d12;
+
+	--skerry-menu-item-background-image: linear-gradient(
+		90deg,
+		rgba(217, 119, 6, 0.18),
+		rgba(255, 247, 214, 0.62)
+	);
+
+	--skerry-menu-item-border: rgba(161, 98, 7, 0.34);
+}
+
+html:is([data-toolpad-color-scheme="light"], [data-mui-color-scheme="light"])
+	.skerry-context-menu-paper
+	.MuiListItemIcon-root,
+html:is([data-toolpad-color-scheme="light"], [data-mui-color-scheme="light"])
+	.skerry-submenu-paper
+	.MuiListItemIcon-root {
+	color: #7c2d12;
+}
+
+/* Selected submenu icon contrast belongs to PlayStatusSubmenu. */
+
+html:is([data-toolpad-color-scheme="dark"], [data-mui-color-scheme="dark"])
+	.skerry-submenu-paper
+	.MuiMenuItem-root.Mui-selected
+	.MuiListItemIcon-root {
+	color: #ffffff;
+}

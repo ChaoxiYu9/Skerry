@@ -1,0 +1,124 @@
+/* Shared popup property boundaries. MUI defaults live in mui-popups.css;
+ * custom menu values live in context-menu.css. Theme/state rules provide
+ * ordinary values and keep their existing matching priority. */
+
+/* Shared light surface palette, after component dark values as before. */
+
+html:is([data-toolpad-color-scheme="light"], [data-mui-color-scheme="light"])
+.MuiMenu-paper,
+html:is([data-toolpad-color-scheme="light"], [data-mui-color-scheme="light"])
+	.MuiPopover-paper,
+html:is([data-toolpad-color-scheme="light"], [data-mui-color-scheme="light"])
+	.MuiAutocomplete-paper,
+html:is([data-toolpad-color-scheme="light"], [data-mui-color-scheme="light"])
+	.skerry-context-menu-paper,
+html:is([data-toolpad-color-scheme="light"], [data-mui-color-scheme="light"])
+	.skerry-submenu-paper,
+html:is([data-toolpad-color-scheme="light"], [data-mui-color-scheme="light"])
+	.skerry-detail-more-menu-paper {
+	--skerry-popup-background-color: rgba(253, 251, 246, 0.98);
+
+	--skerry-popup-background-image: linear-gradient(
+		145deg,
+		rgba(255, 255, 255, 0.98),
+		rgba(251, 247, 237, 0.96) 52%,
+		rgba(247, 236, 213, 0.94)
+	);
+
+	--skerry-popup-border-color: rgba(96, 78, 50, 0.2);
+
+	--skerry-popup-text: #1f2937;
+
+	--skerry-popup-shadow: 0 18px 48px rgba(76, 64, 47, 0.16);
+}
+
+/* One ordinary shorthand consumes image and color tokens. Root/variant
+ * specificity keeps the surface owner ahead of MUI Paper and slot sx while
+ * the separate clip owner remains explicit. */
+
+.MuiPaper-root:is(
+	.MuiMenu-paper,
+	.MuiPopover-paper,
+	.MuiDialog-paper,
+	.MuiAutocomplete-paper,
+	.MuiPickersPopper-paper,
+	.MuiSnackbarContent-root,
+	.skerry-context-menu-paper,
+	.skerry-submenu-paper
+) {
+	background:
+		var(--skerry-popup-background-image, none)
+		var(--skerry-popup-background-color, transparent);
+	background-clip: var(--skerry-popup-background-clip, border-box);
+	border: var(--skerry-popup-border);
+}
+
+.MuiTooltip-tooltip.MuiTooltip-tooltip {
+	background:
+		var(--skerry-popup-background-image, none)
+		var(--skerry-popup-background-color, transparent);
+	background-clip: var(--skerry-popup-background-clip, border-box);
+}
+
+/* Standalone detail-more Paper has no popup layer defaults; change only its
+ * color/image tokens so Paper/SX sizing and clipping remain untouched. */
+html:is([data-toolpad-color-scheme="light"], [data-mui-color-scheme="light"])
+	.MuiPaper-root.skerry-detail-more-menu-paper {
+	background-color: var(--skerry-popup-background-color, transparent);
+	background-image: var(--skerry-popup-background-image, none);
+}
+
+/* A standalone detail-more Paper has no base popup border token. Keep its
+ * light border color while allowing the Paper's own width/style to remain. */
+html:is([data-toolpad-color-scheme="light"], [data-mui-color-scheme="light"])
+	.MuiPaper-root.skerry-detail-more-menu-paper {
+	border-color: var(--skerry-popup-border-color);
+}
+
+/* Paper root + slot/owner classes preserve popup shadow over MUI sx. */
+.MuiPaper-root.MuiMenu-paper,
+.MuiPaper-root.MuiPopover-paper,
+.MuiPaper-root.MuiDialog-paper,
+.MuiPaper-root.MuiAutocomplete-paper,
+.MuiPaper-root.MuiPickersPopper-paper,
+.MuiPaper-root.MuiSnackbarContent-root,
+.MuiPaper-root.skerry-context-menu-paper,
+.MuiPaper-root.skerry-submenu-paper,
+.MuiPaper-root.skerry-detail-more-menu-paper {
+	box-shadow: var(--skerry-popup-shadow);
+}
+
+/* Root-class specificity preserves MUI slot sx while allowing ordinary text output. */
+.MuiTooltip-tooltip.MuiTooltip-tooltip,
+html:is([data-toolpad-color-scheme="light"], [data-mui-color-scheme="light"])
+	:is(
+		.MuiMenu-paper.MuiMenu-paper,
+		.MuiPopover-paper.MuiPopover-paper,
+		.MuiAutocomplete-paper.MuiAutocomplete-paper,
+		.skerry-context-menu-paper.skerry-context-menu-paper,
+		.skerry-submenu-paper.skerry-submenu-paper,
+		.skerry-detail-more-menu-paper.skerry-detail-more-menu-paper
+	) {
+	color: var(--skerry-popup-text);
+}
+
+/* Tooltip keeps its ordinary blur outside reduced transparency. */
+
+.MuiPaper-root.MuiMenu-paper,
+.MuiPaper-root.MuiPopover-paper,
+.MuiPaper-root.MuiDialog-paper,
+.MuiPaper-root.MuiAutocomplete-paper,
+.MuiPaper-root.MuiPickersPopper-paper,
+.MuiPaper-root.MuiSnackbarContent-root,
+.MuiPaper-root.skerry-context-menu-paper,
+.MuiPaper-root.skerry-submenu-paper {
+	backdrop-filter: var(--skerry-popup-backdrop-filter);
+	-webkit-backdrop-filter: var(--skerry-popup-backdrop-filter);
+}
+
+@media (prefers-reduced-transparency: reduce) {
+	.MuiTooltip-tooltip.MuiTooltip-tooltip {
+		backdrop-filter: var(--skerry-popup-backdrop-filter);
+		-webkit-backdrop-filter: var(--skerry-popup-backdrop-filter);
+	}
+}

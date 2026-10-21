@@ -1,0 +1,147 @@
+/* Shared loading, empty, and retained-list states */
+.skerry-loading-state {
+	position: relative;
+	display: grid;
+	place-items: center;
+	flex: 1 1 auto;
+	min-height: 460px;
+	padding: 34px;
+	overflow: hidden;
+	border: 1px solid
+		color-mix(in srgb, var(--skerry-glass-border) 76%, transparent);
+	border-radius: 28px;
+	background: var(--skerry-glass-liquid);
+	backdrop-filter: blur(24px) saturate(145%);
+	box-shadow: var(--skerry-glass-rim), var(--skerry-glow-soft);
+}
+
+.skerry-loading-state--soft {
+	display: inline-flex;
+	flex: 0 0 auto;
+	align-items: center;
+	justify-content: center;
+	gap: 12px;
+	width: min(380px, calc(100% - 28px));
+	min-height: 78px;
+	margin: 24px auto 0;
+	padding: 13px 16px;
+	border-radius: 18px;
+	background: color-mix(in srgb, var(--skerry-glass-liquid) 72%, transparent);
+	box-shadow:
+		var(--skerry-glass-rim),
+		0 14px 34px rgba(87, 132, 205, 0.12);
+}
+
+.game-list-state-with-children {
+	position: relative;
+	display: flex;
+	flex: 1 1 auto;
+	flex-direction: column;
+	min-width: 0;
+	min-height: 0;
+}
+
+.game-list-loading-inline {
+	position: absolute;
+	top: 14px;
+	right: 14px;
+	z-index: 6;
+	display: inline-flex;
+	align-items: center;
+	gap: 8px;
+	max-width: calc(100% - 28px);
+	padding: 7px 11px;
+	border: 1px solid
+		color-mix(in srgb, var(--skerry-glass-border) 70%, transparent);
+	border-radius: 999px;
+	background: color-mix(
+		in srgb,
+		var(--mui-palette-background-paper) 72%,
+		transparent
+	);
+	backdrop-filter: blur(18px) saturate(142%);
+	box-shadow:
+		var(--skerry-glass-rim),
+		0 10px 26px rgba(78, 125, 198, 0.12);
+	opacity: 0.86;
+	pointer-events: none;
+	animation: skerry-loading-hint-in 220ms ease-out both;
+}
+
+@keyframes skerry-loading-hint-in {
+	from {
+		opacity: 0;
+		transform: translateY(-5px) scale(0.98);
+	}
+
+	to {
+		opacity: 0.86;
+		transform: translateY(0) scale(1);
+	}
+}
+
+.game-list-empty-overlay {
+	position: absolute;
+	inset: 82px 0 0;
+	display: grid;
+	place-items: center;
+	padding: 24px;
+	pointer-events: none;
+	z-index: 2;
+}
+
+.game-list-empty-overlay .MuiAlert-root {
+	width: min(560px, 100%);
+	min-height: 52px;
+	box-sizing: border-box;
+	pointer-events: auto;
+	box-shadow: var(--skerry-glass-rim), var(--skerry-glow-soft);
+}
+
+.game-list-empty-overlay > * {
+	pointer-events: auto;
+}
+
+html:is([data-toolpad-color-scheme="dark"], [data-mui-color-scheme="dark"])
+	.skerry-loading-state {
+	background: var(--skerry-glass-liquid-dark);
+}
+
+.skerry-loading-orb {
+	display: grid;
+	place-items: center;
+	width: 70px;
+	height: 70px;
+	border-radius: 999px;
+	background:
+		radial-gradient(
+			circle at 34% 28%,
+			rgba(255, 255, 255, 0.82),
+			transparent 28%
+		),
+		linear-gradient(
+			145deg,
+			color-mix(in srgb, var(--mui-palette-primary-main) 16%, transparent),
+			color-mix(in srgb, var(--skerry-accent) 20%, transparent)
+		);
+	box-shadow: 0 0 44px color-mix(in srgb, var(--skerry-accent) 24%, transparent);
+}
+
+.skerry-loading-state--soft .skerry-loading-orb {
+	width: 38px;
+	height: 38px;
+	flex: 0 0 38px;
+	box-shadow: 0 0 24px color-mix(in srgb, var(--skerry-accent) 18%, transparent);
+}
+
+.skerry-loading-copy {
+	position: relative;
+	z-index: 1;
+	margin-top: 16px;
+	text-align: center;
+}
+
+.skerry-loading-state--soft .skerry-loading-copy {
+	margin-top: 0;
+	text-align: left;
+}

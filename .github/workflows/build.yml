@@ -1,0 +1,189 @@
+name: Build & Test Common
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: windows-latest
+            rust_target: x86_64-pc-windows-msvc
+          - os: windows-latest
+            rust_target: aarch64-pc-windows-msvc
+    # 主仓库可以访问 TAURI_KEY environment，fork PR 访问不到但不会失败
+    environment: ${{ (github.event.pull_request.head.repo.full_name == github.repository || github.event_name != 'pull_request') && 'TAURI_KEY' || '' }}
+    permissions:
+      contents: read
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v7
+      - name: Install Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: 24
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v6
+        with:
+          run_install: false
+
+      - name: Install Rust
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: ${{ matrix.rust_target }}
+
+      - name: Rust cache
+        uses: swatinem/rust-cache@v2
+        with:
+          workspaces: "./src-tauri -> target"
+          shared-key: ${{ matrix.rust_target }}
+
+      # build.rs 首次构建需要下载 7-Zip；单独缓存其 target 目录，降低外部下载不可用对 CI 的影响。
+      - name: 7-Zip cache
+        uses: actions/cache@v6
+        with:
+          path: src-tauri/target/7zip
+          key: 7zip-${{ runner.os }}-${{ matrix.rust_target }}-${{ hashFiles('src-tauri/build.rs') }}
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Get version
+        id: get_version
+        shell: bash
+        run: |
+          VERSION=$(node -p "require('./package.json').version")
+          echo "VERSION=$VERSION" >> $GITHUB_OUTPUT
+          echo "Version is $VERSION"
+
+      - name: Compute short target name
+        id: short
+        shell: bash
+        run: |
+          case "${{ matrix.rust_target }}" in
+            *x86_64-pc-windows*) SHORT=win_x64 ;;
+            *aarch64-pc-windows*) SHORT=win_arm64 ;;
+            *) SHORT=unknown ;;
+          esac
+          echo "SHORT=$SHORT" >> $GITHUB_OUTPUT
+
+      # 配置链接器 (核心逻辑)
+      - name: Configure Rust linker
+        shell: bash
+        run: |
+          mkdir -p .cargo
+
+          echo "Configuring lld for Windows..."
+          cat >> .cargo/config.toml <<EOF
+          [target.x86_64-pc-windows-msvc]
+          linker = "rust-lld.exe"
+
+          [target.aarch64-pc-windows-msvc]
+          linker = "rust-lld.exe"
+          EOF
+
+      - name: Build with Tauri Action
+        uses: tauri-apps/tauri-action@v0
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_PRIVATE_KEY }}
+          TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ secrets.TAURI_KEY_PASSWORD }}
+          BGM_APP_SECRET: ${{ secrets.BGM_APP_SECRET }}
+          KUNGAL_CLIENT_SECRET: ${{ secrets.KUNGAL_CLIENT_SECRET }}
+          CARGO_INCREMENTAL: 0
+        with:
+          # 不在这里创建 GitHub release，仅构建
+          args: >-
+            --target ${{ matrix.rust_target }}
+            ${{
+              (github.event.pull_request.head.repo.full_name == github.repository || github.event_name != 'pull_request')
+              && ''
+              || '-c ''{"bundle": {"createUpdaterArtifacts": false}}'''
+            }}
+          tagName: ""
+          releaseName: ""
+          releaseBody: ""
+          releaseDraft: false
+          prerelease: false
+          includeDebug: false
+          includeRelease: true
+          tauriScript: pnpm tauri
+
+      - name: Prepare portable package (Windows)
+        if: matrix.os == 'windows-latest'
+        shell: pwsh
+        run: |
+          $version = "${{ steps.get_version.outputs.VERSION }}"
+          $short = "${{ steps.short.outputs.SHORT }}"
+          $target = "${{ matrix.rust_target }}"
+          $portableRoot = "src-tauri/target/$target/release/portable/Skerry-$version-$short"
+          $bundledRoot = "src-tauri/target/$target/release"
+          $bundledSevenZip = Join-Path $bundledRoot "tools/7zip"
+          $portableResources = Join-Path $portableRoot "resources"
+          $portableSevenZip = Join-Path $portableRoot "tools/7zip"
+          $resourcesDataDir = Join-Path $portableResources "data"
+
+          if (Test-Path $portableRoot) {
+            Remove-Item $portableRoot -Recurse -Force
+          }
+
+          if (-not (Test-Path $bundledRoot)) {
+            throw "Tauri 构建目录不存在: $bundledRoot"
+          }
+          if (-not (Test-Path $bundledSevenZip)) {
+            throw "Tauri 构建资源中缺少 7-Zip: $bundledSevenZip"
+          }
+
+          New-Item -ItemType Directory -Path $portableSevenZip -Force | Out-Null
+          Get-ChildItem -LiteralPath $bundledSevenZip -Force |
+            Copy-Item -Destination $portableSevenZip -Recurse -Force
+          if (-not (Test-Path $portableSevenZip)) {
+            throw "便携版资源中缺少 7-Zip: $portableSevenZip"
+          }
+          New-Item -ItemType Directory -Path $resourcesDataDir -Force | Out-Null
+          @"
+          该文件夹为数据库文件夹，删除该文件夹则退出便携模式，反之则保持便携模式。
+          This folder stores the database. Deleting this folder exits portable mode; keeping it preserves portable mode.
+          "@ | Set-Content -Path (Join-Path $resourcesDataDir "readme.txt") -Encoding UTF8
+          Copy-Item "src-tauri/target/$target/release/Skerry.exe" "$portableRoot/Skerry.exe"
+
+      # 显示构建状态
+      - name: Build status
+        shell: bash
+        run: |
+          if [ "${{ github.event_name }}" == "pull_request" ] && [ "${{ github.event.pull_request.head.repo.full_name }}" != "${{ github.repository }}" ]; then
+            echo "⚠️ Fork PR: Build completed WITHOUT signing"
+            echo "   The application will work normally but won't support auto-updates"
+          else
+            echo "✅ Build completed with signing enabled and auto-update support"
+          fi
+
+      # Upload build artifacts for testings
+      - name: Upload Portable Package (Artifact)
+        if: matrix.os == 'windows-latest'
+        uses: actions/upload-artifact@v7
+        with:
+          name: Skerry-${{ steps.get_version.outputs.VERSION }}-${{ steps.short.outputs.SHORT }}-portable
+          path: src-tauri/target/${{ matrix.rust_target }}/release/portable/Skerry-${{ steps.get_version.outputs.VERSION }}-${{ steps.short.outputs.SHORT }}
+          if-no-files-found: warn
+
+      - name: Upload MSI Installer (Artifact)
+        if: matrix.os == 'windows-latest'
+        uses: actions/upload-artifact@v7
+        with:
+          name: Skerry-${{ steps.get_version.outputs.VERSION }}-${{ steps.short.outputs.SHORT }}-msi
+          path: src-tauri/target/${{ matrix.rust_target }}/release/bundle/msi/*.msi
+          if-no-files-found: warn
+
+      - name: Upload NSIS Installer (Artifact)
+        if: matrix.os == 'windows-latest'
+        uses: actions/upload-artifact@v7
+        with:
+          name: Skerry-${{ steps.get_version.outputs.VERSION }}-${{ steps.short.outputs.SHORT }}-setup
+          path: src-tauri/target/${{ matrix.rust_target }}/release/bundle/nsis/*.exe
+          if-no-files-found: warn

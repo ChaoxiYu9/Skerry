@@ -1,0 +1,1826 @@
+/* Annual Report - Wave Spline Chart & Energy Rails (Proposal B) */
+
+/* Annual report page frame and core content layout. */
+.annual-report-stage {
+	width: 100%;
+	height: auto;
+	aspect-ratio: auto;
+	min-height: 0;
+	overflow: visible;
+	overscroll-behavior: contain;
+	display: flex;
+	flex-direction: column;
+	gap: clamp(12px, 1.2vw, 20px);
+	background: transparent;
+	border: 0;
+	border-radius: 0;
+	box-shadow: none;
+	padding: 0;
+	backdrop-filter: none;
+	-webkit-backdrop-filter: none;
+}
+
+.annual-report-header {
+	display: flex;
+	justify-content: space-between;
+	align-items: flex-end;
+	flex: 0 0 auto;
+}
+
+.annual-report-body {
+	display: flex;
+	flex: 1 1 auto;
+	flex-direction: column;
+	gap: clamp(10px, 1vw, 16px);
+	min-height: 0;
+}
+
+.annual-report-metrics {
+	display: grid;
+	grid-template-columns: repeat(4, minmax(0, 1fr));
+	gap: clamp(8px, 0.7vw, 12px);
+	flex: 0 0 auto;
+}
+
+.annual-report-stage .annual-report-metric {
+	display: flex;
+	align-items: center;
+	gap: 10px;
+	min-width: 0;
+	padding: clamp(10px, 0.85vw, 14px);
+	border-radius: 14px;
+	background: color-mix(
+		in srgb,
+		var(--mui-palette-background-paper) 76%,
+		transparent
+	);
+}
+
+.annual-report-metric-icon {
+	display: grid;
+	place-items: center;
+	flex: 0 0 auto;
+	width: 30px;
+	height: 30px;
+	border: 1px solid var(--skerry-glass-border);
+	border-radius: 10px;
+	background: color-mix(in srgb, var(--skerry-glint) 12%, transparent);
+}
+
+.annual-report-charts {
+	display: grid;
+	grid-template-columns: minmax(0, 1.55fr) minmax(0, 1fr);
+	gap: clamp(8px, 0.7vw, 12px);
+	flex: 0 0 auto;
+}
+
+.annual-report-panel {
+	display: flex;
+	min-width: 0;
+	flex-direction: column;
+	padding: clamp(10px, 0.85vw, 14px);
+}
+
+.annual-wave-chart-container {
+	width: 100%;
+
+	height: 280px;
+
+	position: relative;
+
+	display: flex;
+
+	align-items: center;
+
+	justify-content: center;
+
+	overflow: hidden;
+}
+
+.annual-wave-svg {
+	width: 100%;
+
+	height: 100%;
+
+	overflow: visible;
+}
+
+.annual-wave-grid-line {
+	stroke: var(--mui-palette-divider);
+
+	stroke-dasharray: 4 4;
+
+	stroke-width: 1;
+
+	opacity: 0.6;
+}
+
+html:is([data-toolpad-color-scheme="dark"], [data-mui-color-scheme="dark"])
+	.annual-wave-grid-line {
+	stroke: rgba(255, 255, 255, 0.08);
+}
+
+.annual-wave-grid-text {
+	font-size: 11px;
+
+	font-weight: 500;
+
+	fill: var(--mui-palette-text-secondary);
+
+	opacity: 0.75;
+}
+
+/* Wave Area Path */
+
+html:is([data-toolpad-color-scheme="light"], [data-mui-color-scheme="light"])
+.annual-wave-area-path {
+	fill: url(#annualWaveGradLight);
+}
+
+html:is([data-toolpad-color-scheme="dark"], [data-mui-color-scheme="dark"])
+	.annual-wave-area-path {
+	fill: url(#annualWaveGradDark);
+}
+
+/* Wave Stroke Path */
+
+.annual-wave-stroke-path {
+	fill: none;
+
+	stroke-width: 3.2px;
+
+	stroke-linecap: round;
+
+	stroke-linejoin: round;
+}
+
+html:is([data-toolpad-color-scheme="light"], [data-mui-color-scheme="light"])
+	.annual-wave-stroke-path {
+	stroke: #d97706;
+}
+
+html:is([data-toolpad-color-scheme="dark"], [data-mui-color-scheme="dark"])
+	.annual-wave-stroke-path {
+	stroke: #00e5ff;
+
+	filter: url(#annualWaveGlow);
+}
+
+/* Wave Dots */
+
+.annual-wave-dot {
+	fill: #ffffff;
+
+	stroke-width: 2.2px;
+
+	transition:
+		r 0.2s ease,
+		stroke-width 0.2s ease;
+}
+
+html[data-toolpad-color-scheme="light"] .annual-wave-dot {
+	stroke: #d97706;
+}
+
+html[data-toolpad-color-scheme="dark"] .annual-wave-dot {
+	stroke: #00e5ff;
+}
+
+.annual-wave-dot.is-peak {
+	r: 5.5px;
+
+	stroke-width: 3px;
+}
+
+html[data-toolpad-color-scheme="dark"] .annual-wave-dot.is-peak {
+	stroke: #38bdf8;
+
+	filter: drop-shadow(0 0 6px rgba(0, 229, 255, 0.8));
+}
+
+/* ========================================================
+   总结页月度波形图：峰值光环与悬停气泡修复
+   ======================================================== */
+/* 峰值月份常驻外环与中心核 */
+.annual-wave-peak-beacon {
+	fill: none;
+	stroke: #38bdf8;
+	opacity: 0.65;
+	pointer-events: none;
+}
+.annual-wave-peak-ring {
+	fill: none;
+	stroke: #38bdf8;
+	stroke-width: 1.5px;
+	opacity: 0.9;
+	pointer-events: none;
+}
+.annual-wave-peak-core {
+	fill: #ffffff;
+	pointer-events: none;
+}
+html:is([data-toolpad-color-scheme="light"], [data-mui-color-scheme="light"])
+	.annual-wave-peak-beacon {
+	stroke: #ea580c;
+	opacity: 0.55;
+}
+html:is([data-toolpad-color-scheme="light"], [data-mui-color-scheme="light"])
+	.annual-wave-peak-ring {
+	stroke: #ea580c;
+	opacity: 0.88;
+}
+html:is([data-toolpad-color-scheme="light"], [data-mui-color-scheme="light"])
+	.annual-wave-peak-core {
+	fill: #ea580c;
+}
+
+/* 悬停气泡与指针容器：严禁 CSS transform 覆盖 SVG transform */
+.annual-wave-tooltip-group {
+	pointer-events: none;
+}
+
+/* 深色模式悬停气泡：蓝黑底 + 青光描边 + 投影 */
+.annual-wave-tooltip-pill {
+	fill: rgba(10, 24, 40, 0.94);
+	stroke: #00e5ff;
+	stroke-width: 1.2px;
+	filter: drop-shadow(0 4px 14px rgba(0, 229, 255, 0.38));
+}
+.annual-wave-tooltip-arrow {
+	fill: rgba(10, 24, 40, 0.94);
+	stroke: #00e5ff;
+	stroke-width: 1.2px;
+}
+.annual-wave-tooltip-text {
+	font-size: 11px;
+	font-weight: 700;
+	fill: #ffffff;
+}
+.annual-wave-tooltip-num {
+	fill: #ffffff;
+}
+.annual-wave-tooltip-star {
+	fill: #00e5ff;
+}
+
+/* 浅色模式悬停气泡：纯白底 + 暖橙描边 + 橙字 */
+html:is([data-toolpad-color-scheme="light"], [data-mui-color-scheme="light"])
+.annual-wave-tooltip-pill {
+	fill: rgba(255, 255, 255, 0.98);
+	stroke: #ea580c;
+	filter: drop-shadow(0 4px 14px rgba(234, 88, 12, 0.26));
+}
+html:is([data-toolpad-color-scheme="light"], [data-mui-color-scheme="light"])
+	.annual-wave-tooltip-arrow {
+	fill: rgba(255, 255, 255, 0.98);
+	stroke: #ea580c;
+}
+html:is([data-toolpad-color-scheme="light"], [data-mui-color-scheme="light"])
+	.annual-wave-tooltip-text {
+	fill: #c2410c;
+}
+html:is([data-toolpad-color-scheme="light"], [data-mui-color-scheme="light"])
+	.annual-wave-tooltip-num {
+	fill: #c2410c;
+}
+html:is([data-toolpad-color-scheme="light"], [data-mui-color-scheme="light"])
+	.annual-wave-tooltip-star {
+	fill: #ea580c;
+}
+
+.annual-wave-dot-halo {
+	fill: none;
+
+	stroke: #00e5ff;
+
+	stroke-width: 2px;
+
+	opacity: 0.6;
+
+	animation: annualWaveHaloPulse 1.2s ease-out infinite;
+
+	pointer-events: none;
+}
+
+html:is([data-toolpad-color-scheme="light"], [data-mui-color-scheme="light"])
+	.annual-wave-dot-halo {
+	stroke: #ea580c;
+
+	opacity: 0.5;
+}
+
+@keyframes annualWaveHaloPulse {
+	0% {
+		r: 6px;
+
+		opacity: 0.7;
+	}
+
+	100% {
+		r: 12px;
+
+		opacity: 0;
+	}
+}
+
+.annual-wave-dot.is-hovered {
+	filter: drop-shadow(0 0 8px rgba(0, 229, 255, 0.9));
+}
+
+html:is([data-toolpad-color-scheme="light"], [data-mui-color-scheme="light"])
+	.annual-wave-dot.is-hovered {
+	filter: drop-shadow(0 0 8px rgba(234, 88, 12, 0.85));
+}
+
+.annual-report-stage .annual-wave-month-label.is-hovered {
+	font-weight: 800;
+
+	fill: #00e5ff;
+}
+
+html:is([data-toolpad-color-scheme="light"], [data-mui-color-scheme="light"])
+	.annual-report-stage
+	.annual-wave-month-label.is-hovered {
+	fill: #ea580c;
+}
+
+.annual-wave-month-label {
+	font-size: 11.5px;
+
+	font-weight: 600;
+
+	fill: var(--mui-palette-text-secondary);
+}
+
+.annual-wave-month-label.is-peak {
+	font-weight: 800;
+
+	fill: var(--mui-palette-text-primary);
+}
+
+/* Weekly Energy Rails */
+
+.annual-energy-rails-list {
+	display: flex;
+
+	flex-direction: column;
+
+	justify-content: space-around;
+
+	height: 280px;
+
+	padding: 8px 4px 12px;
+
+	box-sizing: border-box;
+}
+
+.annual-energy-rail-row {
+	display: flex;
+
+	align-items: center;
+
+	gap: 12px;
+
+	width: 100%;
+}
+
+.annual-report-stage .annual-energy-rail-label {
+	font-size: 12.5px;
+
+	font-weight: 600;
+
+	color: var(--mui-palette-text-secondary);
+
+	width: 32px;
+
+	flex-shrink: 0;
+}
+
+.annual-report-stage .annual-energy-rail-row.is-peak .annual-energy-rail-label {
+	font-weight: 800;
+
+	color: var(--mui-palette-text-primary);
+}
+
+.annual-energy-rail-track {
+	flex: 1;
+
+	height: 12px;
+
+	border-radius: 6px;
+
+	background-color: rgba(0, 0, 0, 0.05);
+
+	overflow: hidden;
+
+	position: relative;
+}
+
+html:is([data-toolpad-color-scheme="dark"], [data-mui-color-scheme="dark"])
+	.annual-energy-rail-track {
+	background-color: rgba(255, 255, 255, 0.06);
+}
+
+.annual-energy-rail-fill {
+	height: 100%;
+
+	border-radius: 6px;
+
+	will-change: width;
+}
+
+html:is([data-toolpad-color-scheme="light"], [data-mui-color-scheme="light"])
+	.annual-energy-rail-fill {
+	background: linear-gradient(90deg, #f59e0b 0%, #ea580c 48%, #d946ef 100%);
+}
+
+html:is([data-toolpad-color-scheme="light"], [data-mui-color-scheme="light"])
+	.annual-energy-rail-fill.is-peak {
+	background: linear-gradient(90deg, #fbbf24 0%, #f43f5e 52%, #c026d3 100%);
+
+	box-shadow: 0 0 10px rgba(244, 63, 94, 0.28);
+}
+
+html:is([data-toolpad-color-scheme="dark"], [data-mui-color-scheme="dark"])
+	.annual-energy-rail-fill {
+	background: linear-gradient(90deg, #7d74ff 0%, #a855f7 60%, #c084fc 100%);
+}
+
+html:is([data-toolpad-color-scheme="dark"], [data-mui-color-scheme="dark"])
+	.annual-energy-rail-fill.is-peak {
+	background: linear-gradient(90deg, #818cf8 0%, #c084fc 50%, #e879f9 100%);
+
+	box-shadow: 0 0 12px rgba(192, 132, 252, 0.45);
+}
+
+.annual-energy-rail-val {
+	font-size: 12.5px;
+
+	font-weight: 700;
+
+	color: var(--mui-palette-text-primary);
+
+	width: 44px;
+
+	text-align: right;
+
+	flex-shrink: 0;
+
+	font-variant-numeric: tabular-nums;
+}
+
+.annual-report-stage .annual-chart-peak-caption {
+	font-size: 11.5px;
+
+	font-weight: 700;
+
+	color: var(--mui-palette-primary-main);
+
+	display: inline-flex;
+
+	align-items: center;
+
+	padding: 2px 8px;
+
+	border-radius: 4px;
+
+	background: rgba(0, 229, 255, 0.1);
+
+	border: 1px solid rgba(0, 229, 255, 0.25);
+}
+
+html[data-toolpad-color-scheme="light"] .annual-chart-peak-caption {
+	color: #c44d18;
+
+	background: rgba(224, 108, 58, 0.1);
+
+	border-color: rgba(224, 108, 58, 0.25);
+}
+
+/* Annual Report - Ranking Section (Full Width Responsive Grid + Gentle Ambient Fade + Hover Lift) */
+
+.annual-report-stage .annual-report-ranking {
+	flex: 0 0 auto;
+
+	min-height: 0;
+
+	overflow: visible;
+
+	width: 100%;
+
+	max-width: 100%;
+
+	margin: 0;
+
+	box-sizing: border-box;
+}
+
+.annual-report-ranking-header {
+	flex: 0 0 auto;
+
+	padding-bottom: 10px;
+
+	border-bottom: 1px solid var(--mui-palette-divider);
+
+	margin-bottom: 10px;
+}
+
+/* 2-column grid on wide screens, responsive 1-column on compact windows */
+
+.annual-report-ranking-list {
+	display: grid;
+
+	grid-template-columns: repeat(auto-fit, minmax(460px, 1fr));
+
+	gap: 10px 14px;
+
+	padding-top: 4px;
+
+	width: 100%;
+
+	box-sizing: border-box;
+}
+
+@media (min-width: 1100px) {
+	.annual-report-ranking-list {
+		grid-template-columns: repeat(2, minmax(0, 1fr));
+	}
+}
+
+.annual-report-ranking-row {
+	position: relative;
+
+	display: flex;
+
+	align-items: center;
+
+	border-radius: 12px;
+
+	text-decoration: none;
+
+	color: inherit;
+
+	overflow: hidden;
+
+	padding: 10px 14px;
+
+	background-color: var(--mui-palette-background-paper);
+
+	border: 1px solid var(--mui-palette-divider);
+
+	box-sizing: border-box;
+
+	cursor: pointer;
+
+	/* Smooth floating lift on hover */
+
+	transition:
+		transform 0.22s cubic-bezier(0.2, 0, 0, 1),
+		border-color 0.22s ease,
+		background-color 0.2s ease;
+
+	will-change: transform;
+}
+
+.annual-report-ranking-row:hover {
+	transform: translateY(-2.5px);
+
+	border-color: rgba(224, 108, 58, 0.45);
+}
+
+html:is([data-toolpad-color-scheme="light"], [data-mui-color-scheme="light"])
+	.annual-report-ranking-row:hover {
+	background-color: #fff;
+}
+
+/* Dark mode ranking colors and borders. */
+
+html:is([data-toolpad-color-scheme="dark"], [data-mui-color-scheme="dark"])
+.annual-report-ranking-row {
+	background-color: rgba(14, 23, 38, 0.88);
+
+	border: 1px solid rgba(117, 201, 255, 0.12);
+
+	backdrop-filter: blur(12px);
+}
+
+html:is([data-toolpad-color-scheme="dark"], [data-mui-color-scheme="dark"])
+	.annual-report-ranking-row.rank-top-1 {
+	border: 1px solid rgba(0, 229, 255, 0.48);
+}
+
+html:is([data-toolpad-color-scheme="dark"], [data-mui-color-scheme="dark"])
+	.annual-report-ranking-row.rank-top-2 {
+	border: 1px solid rgba(125, 116, 255, 0.28);
+}
+
+html:is([data-toolpad-color-scheme="dark"], [data-mui-color-scheme="dark"])
+	.annual-report-ranking-row.rank-top-3 {
+	border: 1px solid rgba(168, 85, 247, 0.25);
+}
+
+html:is([data-toolpad-color-scheme="dark"], [data-mui-color-scheme="dark"])
+	.annual-report-ranking-row:hover {
+	border-color: rgba(0, 229, 255, 0.58);
+
+	background-color: rgba(20, 32, 52, 0.95);
+}
+
+/* Ambient Progress Fill with Feathered Soft Edge at the Right Tip */
+
+.annual-report-ranking-ambient-fill {
+	position: absolute;
+
+	top: 0;
+
+	bottom: 0;
+
+	left: 0;
+
+	width: var(--fill-ratio, 0%);
+
+	pointer-events: none;
+
+	z-index: 0;
+
+	border-radius: 12px 0 0 12px;
+
+	/* Smooth progressive feathering over trailing 70px to eliminate abrupt cutoff lines */
+
+	mask-image: linear-gradient(
+		to right,
+		black 0%,
+		black calc(100% - 70px),
+		rgba(0, 0, 0, 0.45) calc(100% - 25px),
+		transparent 100%
+	);
+
+	-webkit-mask-image: linear-gradient(
+		to right,
+		black 0%,
+		black calc(100% - 70px),
+		rgba(0, 0, 0, 0.45) calc(100% - 25px),
+		transparent 100%
+	);
+
+	transition: opacity 0.25s ease;
+
+	/* Keep the base visible if an entrance animation is cancelled during a theme switch. */
+	transform: scaleX(1);
+
+	transform-origin: left center;
+
+	animation: annual-ranking-fill-breathe 760ms cubic-bezier(0.2, 0.75, 0.3, 1)
+		var(--fill-delay, 0ms) both;
+}
+
+@keyframes annual-ranking-fill-breathe {
+	0% {
+		opacity: 0.32;
+		transform: scaleX(0);
+	}
+
+	72% {
+		opacity: 0.98;
+		transform: scaleX(1.016);
+	}
+
+	86% {
+		opacity: 0.86;
+		transform: scaleX(0.998);
+	}
+
+	100% {
+		opacity: 0.94;
+		transform: scaleX(1);
+	}
+}
+
+html:is([data-toolpad-color-scheme="light"], [data-mui-color-scheme="light"])
+	.annual-report-ranking-ambient-fill {
+	background: linear-gradient(
+		90deg,
+		rgba(224, 108, 58, 0.15) 0%,
+		rgba(245, 158, 11, 0.1) 70%,
+		rgba(245, 158, 11, 0.05) 100%
+	);
+}
+
+html:is([data-toolpad-color-scheme="light"], [data-mui-color-scheme="light"])
+	.annual-report-ranking-row.rank-top-1
+	.annual-report-ranking-ambient-fill {
+	background: linear-gradient(
+		90deg,
+		rgba(224, 108, 58, 0.22) 0%,
+		rgba(245, 158, 11, 0.16) 70%,
+		rgba(245, 158, 11, 0.08) 100%
+	);
+}
+
+/* Dark Mode: Translucent, Subsea Aurora Ambient Glow - Natural & Integrated */
+
+html:is([data-toolpad-color-scheme="dark"], [data-mui-color-scheme="dark"])
+.annual-report-ranking-ambient-fill {
+	background: linear-gradient(
+		90deg,
+		rgba(0, 229, 255, 0.12) 0%,
+		rgba(56, 189, 248, 0.07) 50%,
+		rgba(125, 116, 255, 0.02) 100%
+	);
+
+	opacity: 0.9;
+}
+
+html:is([data-toolpad-color-scheme="dark"], [data-mui-color-scheme="dark"])
+	.annual-report-ranking-row:hover
+	.annual-report-ranking-ambient-fill {
+	opacity: 1;
+
+	background: linear-gradient(
+		90deg,
+		rgba(0, 229, 255, 0.16) 0%,
+		rgba(56, 189, 248, 0.09) 50%,
+		rgba(125, 116, 255, 0.03) 100%
+	);
+}
+
+html:is([data-toolpad-color-scheme="dark"], [data-mui-color-scheme="dark"])
+	.annual-report-ranking-row.rank-top-1
+	.annual-report-ranking-ambient-fill {
+	background: linear-gradient(
+		90deg,
+		rgba(0, 229, 255, 0.19) 0%,
+		rgba(99, 102, 241, 0.11) 60%,
+		rgba(168, 85, 247, 0.03) 100%
+	);
+
+	opacity: 1;
+}
+
+.annual-report-ranking-row-content {
+	position: relative;
+
+	z-index: 1;
+
+	display: flex;
+
+	align-items: center;
+
+	width: 100%;
+
+	gap: 14px;
+}
+
+/* Rank Numbers */
+
+.annual-report-rank-number {
+	width: 32px;
+
+	flex-shrink: 0;
+
+	text-align: center;
+
+	font-size: 15px;
+
+	font-weight: 800;
+
+	font-style: italic;
+
+	color: var(--mui-palette-text-secondary);
+
+	letter-spacing: -0.5px;
+}
+
+.annual-report-rank-number.rank-1 {
+	color: #d97706;
+
+	font-size: 17px;
+}
+
+.annual-report-rank-number.rank-2 {
+	color: #64748b;
+
+	font-size: 16px;
+}
+
+.annual-report-rank-number.rank-3 {
+	color: #b45309;
+
+	font-size: 16px;
+}
+
+/* Dark Mode: Crisp, Luminous Rank Numbers */
+
+html:is([data-toolpad-color-scheme="dark"], [data-mui-color-scheme="dark"])
+.annual-report-rank-number {
+	color: #94a3b8;
+}
+
+html:is([data-toolpad-color-scheme="dark"], [data-mui-color-scheme="dark"])
+	.annual-report-rank-number.rank-1 {
+	color: #38bdf8;
+
+	text-shadow: 0 0 10px rgba(56, 189, 248, 0.5);
+}
+
+html:is([data-toolpad-color-scheme="dark"], [data-mui-color-scheme="dark"])
+	.annual-report-rank-number.rank-2 {
+	color: #cbd5e1;
+
+	text-shadow: 0 0 8px rgba(203, 213, 225, 0.3);
+}
+
+html:is([data-toolpad-color-scheme="dark"], [data-mui-color-scheme="dark"])
+	.annual-report-rank-number.rank-3 {
+	color: #c084fc;
+
+	text-shadow: 0 0 8px rgba(192, 132, 252, 0.35);
+}
+
+.annual-report-ranking-cover {
+	width: 44px;
+
+	height: 60px;
+
+	border-radius: 7px;
+
+	overflow: hidden;
+
+	flex-shrink: 0;
+
+	border: 1px solid var(--mui-palette-divider);
+
+	background: var(--mui-palette-action-hover);
+}
+
+html:is([data-toolpad-color-scheme="dark"], [data-mui-color-scheme="dark"])
+	.annual-report-ranking-cover {
+	border: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+.annual-report-ranking-cover-image {
+	width: 100%;
+
+	height: 100%;
+
+	object-fit: cover;
+
+	display: block;
+}
+
+.annual-report-ranking-info {
+	flex: 1;
+
+	min-width: 0;
+
+	display: flex;
+
+	flex-direction: column;
+
+	gap: 3px;
+}
+
+.annual-report-ranking-title {
+	font-size: 14.5px;
+
+	font-weight: 700;
+
+	line-height: 1.35;
+
+	color: var(--mui-palette-text-primary);
+}
+
+html:is([data-toolpad-color-scheme="dark"], [data-mui-color-scheme="dark"])
+	.annual-report-ranking-title {
+	color: #f1f5f9;
+}
+
+.annual-report-ranking-row.rank-top-1 .annual-report-ranking-title {
+	font-weight: 800;
+
+	color: #c44d18;
+}
+
+html:is([data-toolpad-color-scheme="dark"], [data-mui-color-scheme="dark"])
+	.annual-report-ranking-row.rank-top-1
+	.annual-report-ranking-title {
+	color: #e0f2fe;
+
+	text-shadow: 0 0 10px rgba(56, 189, 248, 0.25);
+}
+
+.annual-report-ranking-meta {
+	font-size: 12px;
+
+	color: var(--mui-palette-text-secondary);
+
+	display: flex;
+
+	align-items: center;
+
+	gap: 8px;
+}
+
+html:is([data-toolpad-color-scheme="dark"], [data-mui-color-scheme="dark"])
+	.annual-report-ranking-meta {
+	color: #94a3b8;
+}
+
+.annual-report-rank-tag-champion {
+	display: inline-flex;
+
+	align-items: center;
+
+	font-size: 10.5px;
+
+	font-weight: 700;
+
+	padding: 1px 6px;
+
+	border-radius: 4px;
+
+	background: rgba(224, 108, 58, 0.12);
+
+	color: #c44d18;
+
+	border: 1px solid rgba(224, 108, 58, 0.2);
+}
+
+html:is([data-toolpad-color-scheme="dark"], [data-mui-color-scheme="dark"])
+	.annual-report-rank-tag-champion {
+	background: rgba(0, 229, 255, 0.16);
+
+	color: #38bdf8;
+
+	border: 1px solid rgba(0, 229, 255, 0.42);
+}
+
+.annual-report-ranking-stats {
+	text-align: right;
+
+	flex-shrink: 0;
+
+	padding-left: 16px;
+
+	display: flex;
+
+	flex-direction: column;
+
+	align-items: flex-end;
+
+	gap: 2px;
+}
+
+.annual-report-ranking-time {
+	font-size: 14.5px;
+
+	font-weight: 800;
+
+	color: var(--mui-palette-text-primary);
+
+	line-height: 1.2;
+}
+
+html:is([data-toolpad-color-scheme="dark"], [data-mui-color-scheme="dark"])
+	.annual-report-ranking-time {
+	color: #f8fafc;
+}
+
+.annual-report-ranking-row.rank-top-1 .annual-report-ranking-time {
+	color: #c44d18;
+
+	font-size: 15.5px;
+}
+
+html:is([data-toolpad-color-scheme="dark"], [data-mui-color-scheme="dark"])
+	.annual-report-ranking-row.rank-top-1
+	.annual-report-ranking-time {
+	color: #38bdf8;
+}
+
+.annual-report-ranking-share {
+	font-size: 11.5px;
+
+	font-weight: 600;
+
+	color: var(--mui-palette-text-secondary);
+}
+
+html:is([data-toolpad-color-scheme="dark"], [data-mui-color-scheme="dark"])
+	.annual-report-ranking-share {
+	color: #94a3b8;
+}
+
+.skerry-report-page-scroll {
+	overflow-y: auto;
+
+	overflow-x: hidden;
+
+	scrollbar-width: none;
+
+	-ms-overflow-style: none;
+
+	will-change: scroll-position;
+
+	overscroll-behavior-y: contain;
+}
+
+.skerry-report-page-scroll::-webkit-scrollbar {
+	display: none;
+
+	width: 0;
+
+	height: 0;
+}
+
+:root {
+	--annual-chart-1: #d98324;
+
+	--annual-chart-2: #7a63d8;
+
+	--annual-rhythm-from: #d9a066;
+
+	--annual-rhythm-mid: #c05f78;
+
+	--annual-rhythm-to: #6d5fc7;
+
+	--annual-card-shadow:
+		0 1px 2px rgba(76, 64, 47, 0.07), 0 6px 16px rgba(76, 64, 47, 0.07);
+}
+
+html[data-toolpad-color-scheme="dark"],
+html[data-mui-color-scheme="dark"] {
+	--annual-chart-1: #00e5ff;
+
+	--annual-chart-2: #7d74ff;
+
+	--annual-rhythm-from: #00e5ff;
+
+	--annual-rhythm-mid: #7d74ff;
+
+	--annual-rhythm-to: #ff9abc;
+
+	--annual-card-shadow:
+		0 1px 2px rgba(0, 0, 0, 0.2), 0 7px 18px rgba(0, 0, 0, 0.18);
+}
+
+.annual-report-hero {
+	display: grid;
+
+	grid-template-columns: minmax(180px, 1.1fr) minmax(220px, 0.7fr) minmax(
+			280px,
+			1fr
+		);
+
+	gap: clamp(10px, 0.9vw, 14px);
+
+	align-items: stretch;
+
+	flex: 0 0 auto;
+
+	min-height: clamp(112px, 11.2vw, 148px);
+
+	padding: clamp(12px, 1vw, 16px);
+
+	box-sizing: border-box;
+
+	border: 1px solid var(--skerry-glass-border);
+
+	border-radius: 16px;
+
+	background: color-mix(
+		in srgb,
+		var(--mui-palette-background-paper) 74%,
+		transparent
+	);
+}
+
+.annual-report-hero-main {
+	display: flex;
+
+	flex-direction: column;
+
+	justify-content: center;
+
+	min-width: 0;
+
+	padding-right: 12px;
+
+	border-right: 1px solid var(--mui-palette-divider);
+}
+
+.annual-hero-kicker {
+	font-size: 10px;
+
+	font-weight: 900;
+
+	letter-spacing: 0.16em;
+
+	color: var(--skerry-accent);
+}
+
+.annual-report-stage .annual-hero-value {
+	margin-top: 5px;
+
+	font-size: clamp(30px, 3.4vw, 46px);
+
+	font-weight: 950;
+
+	line-height: 0.94;
+
+	letter-spacing: -0.055em;
+
+	background: linear-gradient(
+		90deg,
+		var(--mui-palette-text-primary),
+		var(--skerry-accent)
+	);
+
+	-webkit-background-clip: text;
+
+	background-clip: text;
+
+	-webkit-text-fill-color: transparent;
+
+	color: transparent;
+}
+
+.annual-report-stage .annual-hero-label {
+	margin-top: 4px;
+
+	color: var(--skerry-muted);
+}
+
+.annual-report-hero-side {
+	display: grid;
+
+	grid-template-columns: repeat(2, minmax(0, 1fr));
+
+	align-items: center;
+
+	gap: 10px;
+}
+
+.annual-hero-stat-card {
+	display: flex;
+
+	flex-direction: column;
+
+	justify-content: space-between;
+
+	padding: 10px 12px;
+
+	border-radius: 12px;
+
+	border: 1px solid var(--skerry-glass-border);
+
+	background: color-mix(
+		in srgb,
+		var(--mui-palette-background-paper) 68%,
+		transparent
+	);
+
+	box-sizing: border-box;
+
+	min-width: 0;
+
+	transition:
+		border-color 0.2s ease,
+		transform 0.2s ease;
+}
+
+.annual-hero-stat-card:hover {
+	border-color: color-mix(
+		in srgb,
+		var(--skerry-accent) 45%,
+		var(--skerry-glass-border)
+	);
+}
+
+.annual-hero-stat-top {
+	display: flex;
+
+	align-items: center;
+
+	gap: 7px;
+
+	min-width: 0;
+}
+
+.annual-hero-stat-badge {
+	width: 22px;
+
+	height: 22px;
+
+	border-radius: 6px;
+
+	display: flex;
+
+	align-items: center;
+
+	justify-content: center;
+
+	flex-shrink: 0;
+}
+
+.annual-hero-badge-week {
+	background: color-mix(in srgb, var(--mui-palette-info-main) 14%, transparent);
+
+	color: var(--mui-palette-info-main);
+}
+
+.annual-hero-badge-clear {
+	background: color-mix(
+		in srgb,
+		var(--mui-palette-warning-main) 14%,
+		transparent
+	);
+
+	color: var(--mui-palette-warning-main);
+}
+
+.annual-report-stage .annual-hero-stat-label {
+	font-size: 11px;
+
+	font-weight: 700;
+
+	color: var(--skerry-muted);
+
+	letter-spacing: 0.02em;
+
+	white-space: nowrap;
+
+	overflow: hidden;
+
+	text-overflow: ellipsis;
+}
+
+.annual-hero-stat-middle {
+	display: flex;
+
+	align-items: baseline;
+
+	justify-content: space-between;
+
+	gap: 6px;
+
+	margin: 4px 0 6px;
+
+	min-width: 0;
+}
+
+.annual-report-stage .annual-hero-stat-value {
+	font-size: 20px;
+
+	font-weight: 900;
+
+	line-height: 1.1;
+
+	font-variant-numeric: tabular-nums;
+
+	letter-spacing: -0.02em;
+}
+
+.annual-report-stage .annual-hero-stat-unit {
+	font-size: 12px;
+
+	font-weight: 700;
+
+	color: var(--skerry-muted);
+
+	margin-left: 3px;
+}
+
+.annual-report-stage .annual-hero-stat-sub {
+	font-size: 11px;
+
+	font-weight: 700;
+
+	color: var(--skerry-muted);
+
+	font-variant-numeric: tabular-nums;
+
+	white-space: nowrap;
+}
+
+.annual-hero-week-dots {
+	display: grid;
+
+	grid-template-columns: repeat(7, 1fr);
+
+	gap: 4px;
+
+	align-items: center;
+
+	margin-top: auto;
+}
+
+.annual-hero-week-dot {
+	height: 4px;
+
+	border-radius: 99px;
+
+	background: color-mix(
+		in srgb,
+		var(--mui-palette-text-primary) 12%,
+		transparent
+	);
+
+	transition: background 0.3s ease;
+}
+
+.annual-hero-week-dot.is-active {
+	background: linear-gradient(
+		90deg,
+		var(--mui-palette-info-main),
+		var(--skerry-accent)
+	);
+
+	box-shadow: 0 0 6px color-mix(in srgb, var(--skerry-accent) 40%, transparent);
+}
+
+.annual-hero-stat-progress {
+	margin-top: auto;
+}
+
+.annual-report-featured {
+	display: flex;
+
+	align-items: center;
+
+	gap: 12px;
+
+	min-width: 0;
+
+	padding: 8px;
+
+	border: 1px solid var(--skerry-glass-border);
+
+	border-radius: 12px;
+
+	background: linear-gradient(
+		120deg,
+		color-mix(in srgb, var(--skerry-accent) 8%, transparent),
+		color-mix(in srgb, var(--skerry-rose) 5%, transparent)
+	);
+}
+
+.annual-report-featured-cover {
+	width: 52px;
+
+	aspect-ratio: 2 / 3;
+
+	flex: 0 0 auto;
+
+	overflow: hidden;
+
+	border: 1px solid var(--skerry-glass-border);
+
+	border-radius: 8px;
+
+	background: var(--mui-palette-action-hover);
+}
+
+.annual-report-featured-cover img {
+	width: 100%;
+
+	height: 100%;
+
+	object-fit: cover;
+
+	display: block;
+}
+
+.annual-report-featured-info {
+	min-width: 0;
+
+	flex: 1;
+}
+
+.annual-report-featured-kicker {
+	font-size: 9px;
+
+	font-weight: 900;
+
+	letter-spacing: 0.12em;
+
+	color: var(--skerry-accent);
+}
+
+.annual-report-stage .annual-report-featured-name {
+	margin-top: 2px;
+
+	font-weight: 850;
+
+	line-height: 1.2;
+}
+
+.annual-report-stage .annual-report-featured-value {
+	margin-top: 2px;
+
+	font-size: 12px;
+
+	font-weight: 750;
+
+	color: var(--skerry-muted);
+
+	font-variant-numeric: tabular-nums;
+}
+
+.annual-report-rhythm-row {
+	display: grid;
+
+	grid-template-columns: minmax(0, 1.55fr) minmax(0, 1fr);
+
+	gap: clamp(8px, 0.7vw, 12px);
+
+	flex: 0 0 auto;
+}
+
+.annual-report-stage .annual-report-rhythm,
+.annual-report-stage .annual-report-facts {
+	border-radius: 14px;
+
+	background: color-mix(
+		in srgb,
+		var(--mui-palette-background-paper) 78%,
+		transparent
+	);
+}
+
+.annual-report-stage .annual-report-rhythm {
+	display: flex;
+
+	flex-direction: column;
+
+	justify-content: flex-start;
+
+	gap: 10px;
+
+	padding: 12px 14px;
+}
+
+.annual-report-rhythm-header {
+	display: flex;
+
+	align-items: center;
+
+	justify-content: space-between;
+
+	gap: 8px;
+
+	flex: 0 0 auto;
+}
+
+.annual-report-rhythm-track {
+	display: grid;
+
+	grid-template-columns: repeat(12, minmax(0, 1fr));
+
+	gap: 5px;
+
+	align-items: end;
+
+	flex: 1;
+
+	min-height: 52px;
+
+	height: 52px;
+
+	margin-top: 2px;
+}
+
+.annual-rhythm-cell {
+	position: relative;
+
+	width: 100%;
+
+	height: 100%;
+
+	border-radius: 6px;
+
+	background: color-mix(in srgb, var(--mui-palette-divider) 58%, transparent);
+
+	overflow: hidden;
+}
+
+.annual-rhythm-cell::before {
+	content: "";
+
+	position: absolute;
+
+	inset: auto 0 0;
+
+	height: calc(var(--cell-value, 0) * 100%);
+
+	border-radius: inherit;
+
+	background: linear-gradient(
+		to top,
+		var(--annual-rhythm-from),
+		var(--annual-rhythm-mid) 58%,
+		var(--annual-rhythm-to)
+	);
+}
+
+.annual-rhythm-cell.is-peak::after {
+	content: "";
+
+	position: absolute;
+
+	top: 4px;
+
+	right: 4px;
+
+	width: 5px;
+
+	height: 5px;
+
+	border-radius: 50%;
+
+	background: var(--annual-rhythm-to);
+
+	box-shadow: 0 0 0 3px
+		color-mix(in srgb, var(--annual-rhythm-to) 18%, transparent);
+}
+
+.annual-report-stage .annual-report-facts {
+	display: grid;
+
+	grid-template-columns: repeat(3, minmax(0, 1fr));
+
+	gap: 10px;
+
+	align-items: stretch;
+
+	padding: 12px;
+}
+
+.annual-fact-card {
+	display: flex;
+
+	flex-direction: column;
+
+	justify-content: space-between;
+
+	padding: 10px 10px 9px;
+
+	border-radius: 10px;
+
+	border: 1px solid var(--skerry-glass-border);
+
+	background: color-mix(
+		in srgb,
+		var(--mui-palette-background-paper) 65%,
+		transparent
+	);
+
+	transition:
+		border-color 0.2s ease,
+		transform 0.2s ease;
+
+	min-width: 0;
+}
+
+.annual-fact-card:hover {
+	border-color: color-mix(
+		in srgb,
+		var(--skerry-accent) 40%,
+		var(--skerry-glass-border)
+	);
+}
+
+.annual-fact-badge {
+	width: 26px;
+
+	height: 26px;
+
+	border-radius: 7px;
+
+	display: flex;
+
+	align-items: center;
+
+	justify-content: center;
+
+	margin-bottom: 8px;
+
+	flex-shrink: 0;
+}
+
+.annual-fact-badge-calendar {
+	background: color-mix(in srgb, var(--mui-palette-info-main) 14%, transparent);
+
+	color: var(--mui-palette-info-main);
+}
+
+.annual-fact-badge-timer {
+	background: color-mix(
+		in srgb,
+		var(--mui-palette-primary-main) 14%,
+		transparent
+	);
+
+	color: var(--mui-palette-primary-main);
+}
+
+.annual-fact-badge-rate {
+	background: color-mix(
+		in srgb,
+		var(--mui-palette-warning-main) 14%,
+		transparent
+	);
+
+	color: var(--mui-palette-warning-main);
+}
+
+.annual-fact-content {
+	min-width: 0;
+}
+
+.annual-report-stage .annual-fact-label {
+	font-size: 11px;
+
+	font-weight: 600;
+
+	color: var(--skerry-muted);
+
+	line-height: 1.2;
+
+	letter-spacing: 0.02em;
+}
+
+.annual-report-stage .annual-fact-value {
+	margin-top: 4px;
+
+	font-size: 15px;
+
+	font-weight: 850;
+
+	line-height: 1.2;
+
+	letter-spacing: -0.02em;
+
+	font-variant-numeric: tabular-nums;
+
+	white-space: nowrap;
+
+	overflow: hidden;
+
+	text-overflow: ellipsis;
+}
+
+.annual-fact-value-highlight {
+	color: var(--skerry-accent);
+}
+
+.skerry-main.skerry-report-page-scroll {
+	--annual-report-page-pad: clamp(22px, 2vw, 34px);
+
+	padding: var(--annual-report-page-pad);
+
+	padding-top: calc(64px + var(--annual-report-page-pad));
+}
+
+.annual-report-header .atlas-kicker {
+	font-size: 10px;
+
+	font-weight: 900;
+
+	letter-spacing: 0.16em;
+}
+
+.annual-report-stage .annual-report-header .skerry-page-subtitle {
+	display: block;
+
+	margin: 4px 0 0;
+
+	max-width: 640px;
+
+	color: var(--skerry-muted);
+
+	font-size: 15px;
+
+	font-weight: 500;
+
+	line-height: 1.5;
+}
+
+.skerry-report-progress-track {
+	position: relative;
+
+	width: 100%;
+
+	height: 4px;
+
+	border-radius: 99px;
+
+	background: color-mix(
+		in srgb,
+		var(--mui-palette-text-primary) 10%,
+		transparent
+	);
+
+	overflow: hidden;
+}
+
+.skerry-report-progress-fill {
+	height: 100%;
+
+	border-radius: 99px;
+
+	width: 0%;
+
+	will-change: width;
+}
+
+.annual-hero-stat-progress .skerry-report-progress-fill {
+	background: linear-gradient(
+		90deg,
+		var(--mui-palette-warning-main),
+		var(--skerry-accent)
+	);
+}
+
+.annual-report-featured-progress .skerry-report-progress-fill {
+	background: linear-gradient(90deg, var(--skerry-accent), var(--skerry-rose));
+}
+
+html:is([data-toolpad-color-scheme="light"], [data-mui-color-scheme="light"])
+	.annual-hero-stat-progress
+	.skerry-report-progress-fill {
+	background: linear-gradient(90deg, #f59e0b, #06b6d4);
+}
+
+html:is([data-toolpad-color-scheme="light"], [data-mui-color-scheme="light"])
+	.annual-report-featured-progress
+	.skerry-report-progress-fill {
+	background: linear-gradient(90deg, #0284c7, #f43f5e);
+}
+
+html:is([data-toolpad-color-scheme="light"], [data-mui-color-scheme="light"])
+	.annual-hero-week-dot.is-active {
+	background: linear-gradient(90deg, #0284c7, #38bdf8);
+
+	box-shadow: 0 0 6px rgba(2, 132, 199, 0.35);
+}
+
+/* The report uses poster surfaces instead of the app's default glass shadows. */
+body .annual-report-stage *::before,
+body .annual-report-stage *::after,
+body
+	.annual-report-stage.annual-report-stage
+	.MuiPaper-root
+	*:not(:where(.annual-report-hero, .annual-report-featured)),
+body
+	.annual-report-stage.annual-report-stage
+	*:not(:where(.annual-report-hero, .annual-report-featured, .MuiPaper-root)) {
+	box-shadow: none;
+}
+
+body .annual-report-stage.annual-report-stage *,
+body .annual-report-stage.annual-report-stage .MuiPaper-root * {
+	filter: none;
+}
+
+body .annual-report-stage.annual-report-stage *,
+body .annual-report-stage.annual-report-stage .MuiPaper-root * {
+	backdrop-filter: none;
+	-webkit-backdrop-filter: none;
+}
+
+body .annual-report-stage .annual-report-hero,
+body .annual-report-stage .annual-report-featured {
+	box-shadow: var(--annual-card-shadow);
+}
+
+body .annual-report-stage .MuiPaper-root {
+	--skerry-paper-fallback-shadow: var(--annual-card-shadow);
+}
+
+body
+	.annual-report-stage
+	.annual-report-charts
+	> .annual-report-panel.MuiPaper-root,
+body .annual-report-stage .annual-report-ranking.MuiPaper-root {
+	--skerry-paper-fallback-shadow: none;
+	background-image: none;
+	backdrop-filter: none;
+	-webkit-backdrop-filter: none;
+}
+
+.skerry-motion-root-report {
+	display: block;
+
+	min-width: 0;
+
+	position: relative;
+
+	isolation: isolate;
+}
+
+.skerry-report-route-layer {
+	display: block;
+
+	min-width: 0;
+}

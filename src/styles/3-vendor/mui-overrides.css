@@ -1,0 +1,529 @@
+﻿/* Skerry global polish pass: liquid glass, stable controls and richer feedback. */
+
+:root {
+	--skerry-glow-primary:
+		0 0 0 1px
+		color-mix(in srgb, var(--mui-palette-primary-main) 24%, transparent),
+		0 12px 28px
+		color-mix(in srgb, var(--mui-palette-primary-main) 20%, transparent),
+		0 0 36px color-mix(in srgb, var(--skerry-accent) 20%, transparent);
+
+	--skerry-button-min: 104px;
+
+	--skerry-button-compact: 38px;
+}
+
+.MuiButton-root,
+.MuiToggleButton-root,
+.MuiIconButton-root,
+.MuiTab-root,
+.MuiChip-root {
+	flex-shrink: 0;
+}
+
+.MuiButton-root {
+	position: relative;
+
+	isolation: isolate;
+
+	display: inline-flex;
+
+	align-items: center;
+
+	justify-content: center;
+
+	max-width: 100%;
+
+	min-height: var(--skerry-button-compact);
+
+	min-width: var(--skerry-button-min);
+
+	white-space: nowrap;
+
+	overflow: hidden;
+
+	text-overflow: ellipsis;
+}
+
+/* Keep icons and labels in stable slots while labels change or enter loading. */
+
+.MuiButton-root .MuiButton-startIcon,
+.MuiButton-root .MuiButton-endIcon {
+	flex: 0 0 18px;
+
+	width: 18px;
+
+	min-width: 18px;
+}
+
+.MuiButton-root .MuiCircularProgress-root {
+	flex: 0 0 auto;
+}
+
+.MuiButton-root::after {
+	content: "";
+
+	position: absolute;
+
+	inset: 0 auto 0 -42%;
+
+	z-index: 0;
+
+	width: 34%;
+
+	transform: skewX(-18deg);
+
+	background: linear-gradient(
+		90deg,
+		transparent,
+		var(--skerry-button-sheen-color),
+		transparent
+	);
+
+	opacity: 0;
+
+	pointer-events: none;
+}
+
+.MuiButton-root > * {
+	position: relative;
+
+	z-index: 1;
+}
+
+.MuiButton-root:is(
+	.skerry-button-level-a,
+	.skerry-button-level-b,
+	.MuiButton-containedPrimary
+):not(.Mui-disabled):hover::after {
+	opacity: 0.62;
+
+	animation: skerry-button-sheen 560ms cubic-bezier(0.2, 0.7, 0.2, 1);
+}
+
+/* B keeps the shared sweep, with a softer highlight than the primary action. */
+.MuiButton-root.skerry-button-level-b:not(.Mui-disabled):hover::after {
+	opacity: 0.32;
+}
+
+.MuiButton-root:not(.Mui-disabled):active {
+	filter: none;
+	transform: none;
+}
+
+.MuiButton-root.Mui-focusVisible,
+.MuiToggleButton-root.Mui-focusVisible,
+.MuiIconButton-root.Mui-focusVisible {
+	box-shadow: var(
+		--skerry-mui-focus-shadow-output,
+		var(
+			--skerry-button-focus-shadow-output,
+			0 0 0 2px var(--mui-palette-background-default),
+			0 0 0 4px color-mix(in srgb, var(--mui-palette-primary-main) 65%, transparent)
+		)
+	) !important;
+}
+
+/* 复杂卡片与复合交互容器绝对不套外层直角 outline，避免下层文字与边距被方盒套住 */
+
+:is(
+	.game-card-action-root,
+	.skerry-launch-action-button,
+	[role="button"]:has(.game-card-cover),
+	[role="button"]:has(.game-card-meta)
+):focus,
+:is(
+	.game-card-action-root,
+	.skerry-launch-action-button,
+	[role="button"]:has(.game-card-cover),
+	[role="button"]:has(.game-card-meta)
+):focus-visible {
+	box-shadow: var(--skerry-button-focus-shadow-output, none);
+}
+
+/* 保持普通超链接的轻量圆角可访问性聚焦 */
+
+a[href]:focus-visible {
+	outline: 2px dashed
+		color-mix(in srgb, var(--mui-palette-primary-main) 60%, transparent);
+
+	outline-offset: 2px;
+
+	border-radius: 4px;
+}
+
+/* Shared outline reset; owner-specific focus rings remain on their original selectors. */
+.MuiButton-root.Mui-focusVisible,
+.MuiToggleButton-root.Mui-focusVisible,
+.MuiIconButton-root.Mui-focusVisible,
+:is(
+	.game-card-action-root,
+	.skerry-launch-action-button,
+	[role="button"]:has(.game-card-cover),
+	[role="button"]:has(.game-card-meta)
+):focus,
+:is(
+	.game-card-action-root,
+	.skerry-launch-action-button,
+	[role="button"]:has(.game-card-cover),
+	[role="button"]:has(.game-card-meta)
+):focus-visible,
+:is(input, select, textarea):focus,
+:is(input, select, textarea):focus-visible {
+	outline: none;
+}
+
+@keyframes skerry-button-sheen {
+	0% {
+		opacity: 0;
+		transform: translateX(0) skewX(-18deg);
+	}
+	20% {
+		opacity: 1;
+	}
+	80% {
+		opacity: 1;
+	}
+	100% {
+		opacity: 0;
+		transform: translateX(460%) skewX(-18deg);
+	}
+}
+
+.MuiButton-sizeSmall {
+	min-width: 82px;
+}
+
+.MuiAlert-action .MuiButton-root,
+.MuiSnackbarContent-action .MuiButton-root {
+	min-width: 78px;
+}
+
+.MuiButton-startIcon,
+.MuiButton-endIcon {
+	width: 18px;
+
+	min-width: 18px;
+
+	justify-content: center;
+}
+
+/* Neutral glass surfaces for outlined, toggle, and icon buttons. */
+.MuiButton-outlined:not(.Mui-disabled),
+.MuiButton-text:not(.Mui-disabled),
+.MuiToggleButton-root,
+.MuiIconButton-root {
+	backdrop-filter: blur(14px) saturate(132%);
+}
+
+/* Keep neutral surface values above MUI variants and control-level sx. */
+.MuiButton-root.MuiButton-outlined.MuiButton-outlined:not(.Mui-disabled) {
+	background: color-mix(
+		in srgb,
+		var(--mui-palette-background-paper) 84%,
+		var(--skerry-canvas)
+	);
+
+	border-color: color-mix(
+		in srgb,
+		var(--skerry-glass-border) 80%,
+		rgba(255, 255, 255, 0.32)
+	);
+}
+
+.MuiToggleButton-root.MuiToggleButton-root.MuiToggleButton-root:not(
+	.Mui-selected
+) {
+	background: color-mix(
+		in srgb,
+		var(--mui-palette-background-paper) 84%,
+		var(--skerry-canvas)
+	);
+
+	border-color: color-mix(
+		in srgb,
+		var(--skerry-glass-border) 80%,
+		rgba(255, 255, 255, 0.32)
+	);
+}
+
+.MuiIconButton-root.Mui-disabled,
+.MuiToggleButton-root.Mui-disabled {
+	--skerry-button-disabled-opacity-output: 0.54;
+}
+
+.MuiButton-root:has(.MuiCircularProgress-root) {
+	cursor: progress;
+
+	min-width: var(--skerry-button-min);
+
+	filter: saturate(0.96) brightness(0.99);
+}
+
+.MuiButton-root:has(.MuiCircularProgress-root) .MuiCircularProgress-root {
+	flex: 0 0 auto;
+}
+
+.MuiButton-root:has(.MuiCircularProgress-root) .MuiButton-startIcon,
+.MuiButton-root:has(.MuiCircularProgress-root) .MuiButton-endIcon {
+	flex: 0 0 18px;
+
+	width: 18px;
+
+	min-width: 18px;
+}
+
+.MuiButton-root:has(.MuiCircularProgress-root)::after {
+	inset: 0;
+
+	width: 100%;
+
+	transform: none;
+
+	background: linear-gradient(
+		100deg,
+		transparent 0%,
+		rgba(255, 255, 255, 0.2) 38%,
+		rgba(255, 255, 255, 0.34) 50%,
+		rgba(255, 255, 255, 0.2) 62%,
+		transparent 100%
+	);
+
+	background-size: 240% 100%;
+
+	opacity: 0.54;
+
+	animation: skerry-button-loading 1.3s ease-in-out infinite;
+}
+
+@keyframes skerry-button-loading {
+	0% {
+		background-position: 120% 0;
+	}
+
+	100% {
+		background-position: -120% 0;
+	}
+}
+
+.MuiIconButton-root:not(.Mui-disabled):active {
+	transform: scale(0.97);
+}
+
+.MuiSwitch-root.MuiSwitch-sizeSmall,
+.MuiSwitch-root.MuiSwitch-sizeMedium {
+	padding: 7px;
+}
+
+.MuiSwitch-root {
+	flex-shrink: 0;
+}
+
+.MuiSwitch-root .MuiSwitch-switchBase.Mui-checked + .MuiSwitch-track,
+.MuiSwitch-root
+	.MuiSwitch-switchBase.Mui-checked.Mui-disabled
+	+ .MuiSwitch-track {
+	opacity: 0.82;
+
+	box-shadow: 0 0 18px color-mix(in srgb, var(--skerry-accent) 24%, transparent);
+}
+
+.MuiTabs-root .MuiTabs-indicator {
+	height: 3px;
+
+	border-radius: 999px 999px 0 0;
+
+	box-shadow: 0 0 16px color-mix(in srgb, var(--skerry-accent) 34%, transparent);
+}
+
+/* Theme-specific defaults for shared MUI controls and dialogs. */
+
+.MuiDivider-root:is(
+	.MuiDivider-fullWidth,
+	.MuiDivider-middle,
+	.MuiDivider-inset,
+	.MuiDivider-vertical,
+	.MuiDivider-flexItem,
+	.MuiDivider-withChildren,
+	.MuiDivider-withChildrenVertical,
+	.MuiDivider-absolute
+) {
+	border-color: color-mix(in srgb, var(--skerry-glass-border) 76%, transparent);
+}
+
+.MuiAutocomplete-root {
+	min-width: 0;
+}
+
+.MuiAutocomplete-root .MuiOutlinedInput-root {
+	min-width: 0;
+}
+
+.MuiAutocomplete-root .MuiAutocomplete-input {
+	min-width: 0;
+
+	text-overflow: ellipsis;
+}
+
+.MuiFormControlLabel-root {
+	min-width: 0;
+}
+
+.MuiFormControlLabel-root .MuiFormControlLabel-label {
+	min-width: 0;
+
+	overflow: hidden;
+
+	text-overflow: ellipsis;
+
+	white-space: nowrap;
+}
+
+.MuiCheckbox-root.Mui-focusVisible,
+.MuiRadio-root.Mui-focusVisible,
+.MuiSwitch-switchBase.Mui-focusVisible {
+	border-radius: 10px;
+
+	box-shadow:
+		0 0 0 3px
+		color-mix(in srgb, var(--mui-palette-primary-main) 18%, transparent),
+		0 0 18px color-mix(in srgb, var(--skerry-accent) 14%, transparent);
+}
+
+.MuiCheckbox-root.Mui-disabled,
+.MuiRadio-root.Mui-disabled,
+.MuiSwitch-root.Mui-disabled {
+	filter: grayscale(0.35) saturate(0.7);
+
+	opacity: 0.58;
+}
+
+.MuiAutocomplete-popper .MuiAutocomplete-listbox {
+	padding: 6px;
+}
+
+.MuiAutocomplete-option {
+	border-radius: 11px;
+
+	font-weight: 650;
+}
+
+.MuiAutocomplete-popper
+	.MuiAutocomplete-listbox
+	.MuiAutocomplete-option[aria-selected="true"],
+.MuiAutocomplete-popper
+	.MuiAutocomplete-listbox
+	.MuiAutocomplete-option.Mui-focused {
+	background: color-mix(
+		in srgb,
+		var(--mui-palette-primary-main) 11%,
+		transparent
+	);
+}
+
+.MuiChip-root:is(.MuiChip-filled, .MuiChip-outlined) {
+	border-color: var(
+		--skerry-chip-border-color,
+		color-mix(in srgb, var(--skerry-glass-border) 82%, transparent)
+	);
+
+	background: var(
+		--skerry-chip-background,
+		color-mix(
+			in srgb,
+			var(--mui-palette-background-paper) 88%,
+			var(--skerry-canvas)
+		)
+	);
+
+	backdrop-filter: blur(12px) saturate(130%);
+
+	font-weight: var(--skerry-chip-font-weight, 720);
+}
+
+.MuiPaper-root.MuiAlert-root {
+	border: 1px solid
+		color-mix(in srgb, var(--skerry-glass-border) 78%, transparent);
+
+	border-radius: 16px;
+
+	background: color-mix(
+		in srgb,
+		var(--mui-palette-background-paper) 90%,
+		var(--skerry-canvas)
+	);
+}
+
+.MuiAlert-root {
+	backdrop-filter: blur(14px) saturate(126%);
+
+	box-shadow:
+		var(--skerry-glass-rim),
+		0 12px 30px rgba(20, 46, 78, 0.12);
+}
+
+.MuiAlert-icon {
+	filter: drop-shadow(0 0 8px currentColor);
+}
+
+.MuiCircularProgress-root.MuiCircularProgress-indeterminate {
+	animation-duration: 1.05s;
+}
+
+@media (prefers-reduced-transparency: reduce) {
+	.MuiInputBase-root.MuiOutlinedInput-root.MuiOutlinedInput-root,
+	.MuiAlert-root.MuiAlert-root.MuiAlert-root,
+	.MuiChip-root.MuiChip-root.MuiChip-root {
+		background: var(
+			--skerry-chip-background,
+			var(--mui-palette-background-paper)
+		);
+
+		backdrop-filter: none;
+
+		-webkit-backdrop-filter: none;
+	}
+
+	.MuiInputBase-root.MuiOutlinedInput-root.MuiOutlinedInput-root.Mui-disabled {
+		background: var(
+			--skerry-chip-background,
+			var(--mui-palette-background-paper)
+		);
+	}
+}
+
+/* Page owners can replace this generic Paper/Card shadow through its value token. */
+.MuiCard-root.MuiCard-root:not(
+	:where(
+		.MuiMenu-paper,
+		.MuiPopover-paper,
+		.MuiDialog-paper,
+		.MuiAutocomplete-paper,
+		.MuiPickersPopper-paper,
+		.MuiSnackbarContent-root,
+		.skerry-context-menu-paper,
+		.skerry-submenu-paper,
+		.skerry-detail-more-menu-paper
+	)
+),
+.MuiPaper-root.MuiPaper-root:not(:where(.MuiMenu-paper)):not(:where(.MuiPopover-paper)):not(
+	.MuiDialog-paper
+):not(:where(.MuiAutocomplete-paper)):not(
+	:where(
+		.MuiMenu-paper,
+		.MuiPopover-paper,
+		.MuiDialog-paper,
+		.MuiAutocomplete-paper,
+		.MuiPickersPopper-paper,
+		.MuiSnackbarContent-root,
+		.skerry-context-menu-paper,
+		.skerry-submenu-paper,
+		.skerry-detail-more-menu-paper
+	)
+) {
+	box-shadow: var(
+		--skerry-paper-fallback-shadow,
+		var(--skerry-glass-rim),
+		var(--skerry-glow-soft)
+	);
+}

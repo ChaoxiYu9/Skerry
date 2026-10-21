@@ -1,0 +1,90 @@
+/* Popup sizing utilities shared by selects and menus. */
+
+/* SelectInput supplies an inline paper min-width, so popup width classes must
+ * override it to keep compact menus within their intended size. */
+
+.skerry-select-menu-compact {
+	box-sizing: border-box;
+
+	width: 100%;
+
+	min-width: 0;
+
+	max-width: 100%;
+
+	overflow-x: hidden;
+}
+
+.skerry-select-menu-compact-paper {
+	box-sizing: border-box;
+
+	overflow-x: hidden;
+}
+
+.skerry-select-menu-anchor-width {
+	box-sizing: border-box;
+
+	--skerry-select-anchor-clamped-width: min(
+		var(--skerry-select-anchor-width, 100%),
+		calc(100vw - 24px)
+	);
+
+	overflow-x: hidden;
+}
+
+.skerry-select-menu-anchor-width .MuiMenu-list,
+.skerry-select-menu-compact-paper .MuiMenu-list,
+.skerry-theme-menu-paper .MuiMenu-list {
+	box-sizing: border-box;
+
+	width: 100%;
+
+	min-width: 0;
+
+	max-width: 100%;
+}
+
+.skerry-select-menu-anchor-width .MuiMenuItem-root,
+.skerry-select-menu-compact-paper .MuiMenuItem-root,
+.skerry-theme-menu-paper .MuiMenuItem-root {
+	box-sizing: border-box;
+
+	width: 100%;
+
+	overflow: hidden;
+
+	text-overflow: ellipsis;
+
+	white-space: nowrap;
+}
+
+.skerry-select-menu-w-60 {
+	--skerry-select-menu-width: min(15rem, calc(100vw - 24px));
+}
+
+.skerry-select-menu-w-40 {
+	--skerry-select-menu-width: min(10rem, calc(100vw - 24px));
+}
+
+.skerry-select-menu-w-28 {
+	--skerry-select-menu-width: min(7rem, calc(100vw - 24px));
+}
+
+/* Paper root + preset class outranks MUI Paper sx while keeping each width
+ * preset as the single owner of its width and minimum width. */
+.MuiPaper-root.skerry-select-menu-w-60,
+.MuiPaper-root.skerry-select-menu-w-40,
+.MuiPaper-root.skerry-select-menu-w-28 {
+	width: var(--skerry-select-menu-width);
+	min-width: var(--skerry-select-menu-width);
+}
+
+.skerry-theme-menu-paper {
+	box-sizing: border-box;
+
+	width: min(10.5rem, calc(100vw - 24px));
+
+	min-width: min(10.5rem, calc(100vw - 24px));
+
+	overflow-x: hidden;
+}

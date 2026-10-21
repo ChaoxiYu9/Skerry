@@ -1,0 +1,93 @@
+/* Workbench shell: the navigation is a quiet frame, not a second page. */
+
+.skerry-shell {
+	width: 100%;
+
+	height: 100dvh;
+
+	overflow: hidden;
+}
+
+.MuiDrawer-paper {
+	backdrop-filter: blur(22px) saturate(140%);
+}
+
+.MuiDrawer-root .MuiDrawer-paper {
+	background: color-mix(
+		in srgb,
+		var(--mui-palette-background-default) 82%,
+		transparent
+	);
+	border-right: 1px solid var(--mui-palette-divider);
+}
+
+.MuiDrawer-paper .MuiListSubheader-root {
+	font-size: 10px;
+
+	font-weight: 800;
+
+	letter-spacing: 0.14em;
+
+	text-transform: uppercase;
+
+	color: var(--mui-palette-text-secondary);
+}
+
+.MuiDrawer-paper .MuiListItemButton-root {
+	min-height: 42px;
+
+	margin: 3px 10px;
+
+	padding-inline: 12px;
+
+	border: 1px solid transparent;
+
+	border-radius: 12px;
+
+	transition:
+		background-color 180ms ease,
+		border-color 180ms ease,
+		transform 180ms ease;
+}
+
+.MuiDrawer-paper .MuiListItemButton-root:hover {
+	border-color: var(--mui-palette-divider);
+
+	transform: translateX(2px);
+}
+
+.MuiDrawer-paper .MuiListItemButton-root.Mui-selected {
+	background: linear-gradient(
+		100deg,
+		rgba(47, 125, 246, 0.18),
+		rgba(112, 199, 255, 0.1)
+	);
+
+	border-color: rgba(47, 125, 246, 0.26);
+}
+
+.skerry-shell main {
+	background: transparent;
+}
+
+.skerry-dock {
+	width: 64px;
+
+	height: auto;
+
+	border-right: 1px solid var(--skerry-glass-border);
+
+	z-index: 50;
+
+	background: color-mix(in srgb, var(--skerry-canvas) 78%, transparent);
+
+	backdrop-filter: blur(18px) saturate(125%);
+
+	box-shadow: none;
+}
+
+.skerry-dock::after {
+	content: none;
+
+	pointer-events: none;
+}

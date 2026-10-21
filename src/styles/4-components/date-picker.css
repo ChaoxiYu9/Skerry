@@ -1,0 +1,15 @@
+/* SkerryDatePicker calendar day buttons */
+.skerry-calendar-day-btn.MuiButton-root {
+	min-width: 0;
+	width: 32px;
+	height: 32px;
+	min-height: 32px;
+	--skerry-btn-radius: 6px;
+	padding: 0;
+	margin: 0;
+	font-size: 0.82rem;
+}
+
+.skerry-calendar-day-btn.MuiButton-root::after {
+	display: none;
+}

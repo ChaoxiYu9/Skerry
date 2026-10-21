@@ -1,0 +1,16 @@
+/* The shared Level A owner controls color, hover sheen, and pressed state. */
+.atlas-page .atlas-random-launch.MuiButton-containedPrimary {
+	--skerry-btn-font-weight: 800;
+	height: 28px;
+	min-height: 28px;
+	font-size: 12px;
+	flex: 0 0 auto;
+	min-width: 78px;
+	border: 0;
+	padding: 6px 10px;
+}
+
+/* Keep the compact icon timing aligned with the shared primary action. */
+.atlas-page .atlas-random-launch.MuiButton-containedPrimary .MuiButton-endIcon {
+	--skerry-motion-transition-duration: initial;
+}

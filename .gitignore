@@ -1,0 +1,27 @@
+# Folder to ignore
+node_modules
+dist
+target
+.project-cache
+docs-local
+others
+
+# Editor directories
+.vscode
+
+# For Zed
+.prettierignore
+
+*.local
+.env
+.env.*
+!.env.example
+bgm_oauth_secret.txt
+bgm_oauth_secret.json
+
+AGENTS.md
+
+.shim/
+backups/
+archives/
+local-update-test/

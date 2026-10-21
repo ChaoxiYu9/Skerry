@@ -1,0 +1,234 @@
+.MuiDialog-paper.skerry-path-settings-dialog {
+	width: min(760px, calc(100vw - 40px));
+	max-width: none;
+	max-height: min(88vh, 900px);
+	min-height: 0;
+}
+
+.skerry-path-settings-dialog .MuiDialogTitle-root {
+	padding-bottom: 8px;
+}
+
+.MuiDialog-root
+	.MuiDialog-paper.skerry-path-settings-dialog
+	.MuiDialogContent-root {
+	padding-top: 10px;
+}
+
+.skerry-path-settings-layout {
+	display: flex;
+	min-width: 0;
+	flex-direction: column;
+	gap: 14px;
+}
+
+.skerry-path-section {
+	min-width: 0;
+	padding: 16px 18px 8px;
+	border: 1px solid var(--skerry-dialog-divider);
+	border-radius: 16px;
+	background: color-mix(
+		in srgb,
+		var(--skerry-dialog-surface) 84%,
+		var(--skerry-dialog-border)
+	);
+}
+
+.skerry-path-section-heading {
+	display: flex;
+	align-items: center;
+	gap: 12px;
+	padding-bottom: 12px;
+	border-bottom: 1px solid var(--skerry-dialog-divider);
+}
+
+.skerry-path-section-icon {
+	display: grid;
+	width: 40px;
+	height: 40px;
+	flex: 0 0 40px;
+	place-items: center;
+	border: 1px solid color-mix(in srgb, var(--skerry-accent) 22%, transparent);
+	border-radius: 12px;
+	background: color-mix(in srgb, var(--skerry-accent) 10%, transparent);
+	color: var(--skerry-accent);
+}
+
+.skerry-path-section-icon .MuiSvgIcon-root {
+	font-size: 21px;
+}
+
+.skerry-path-section-heading .skerry-path-section-title.MuiTypography-root {
+	font-weight: 780;
+	color: var(--skerry-ink);
+}
+
+.skerry-path-section-heading .skerry-path-section-note.MuiTypography-root {
+	margin-top: 2px;
+	color: var(--skerry-muted);
+	line-height: 1.45;
+}
+
+.skerry-path-setting {
+	display: grid;
+	grid-template-columns: minmax(210px, 0.82fr) minmax(0, 1.35fr);
+	align-items: center;
+	gap: 3px 20px;
+	min-width: 0;
+	padding: 13px 0;
+	border-bottom: 1px solid var(--skerry-dialog-divider);
+}
+
+.skerry-path-section .skerry-path-setting:last-child {
+	border-bottom: 0;
+}
+
+.skerry-path-setting-title,
+.skerry-path-setting-heading {
+	grid-column: 1;
+	grid-row: 1;
+	align-self: end;
+	margin: 0;
+	color: var(--skerry-ink);
+	font-size: 0.9rem;
+	font-weight: 740;
+}
+
+.skerry-path-setting > .MuiTypography-caption {
+	grid-column: 1;
+	grid-row: 2;
+	align-self: start;
+	margin: 3px 0 0;
+	color: var(--skerry-muted);
+	font-size: 0.75rem;
+	line-height: 1.45;
+}
+
+.skerry-path-setting > .MuiTextField-root {
+	grid-column: 2;
+	grid-row: 1 / span 2;
+	width: 100%;
+	min-width: 0;
+	margin: 0;
+}
+
+.skerry-path-setting .MuiOutlinedInput-root {
+	border-radius: 11px;
+	background: color-mix(in srgb, var(--skerry-dialog-surface) 92%, transparent);
+}
+
+.skerry-path-setting .MuiInputBase-input {
+	min-width: 0;
+	text-overflow: ellipsis;
+}
+
+.skerry-path-setting-title.MuiTypography-root {
+	color: var(--skerry-ink);
+	font-weight: 740;
+}
+
+.skerry-path-setting-heading {
+	display: flex;
+	align-items: center;
+	gap: 9px;
+}
+
+.skerry-path-tool-icon {
+	display: grid;
+	width: 34px;
+	height: 34px;
+	flex: 0 0 34px;
+	place-items: center;
+	border-radius: 10px;
+	background: color-mix(in srgb, var(--skerry-accent) 9%, transparent);
+	color: var(--skerry-accent);
+}
+
+.skerry-path-tool-icon .MuiSvgIcon-root {
+	font-size: 19px;
+}
+
+.skerry-path-setting-heading .MuiTypography-root {
+	color: var(--skerry-ink);
+	font-size: 0.9rem;
+	font-weight: 740;
+}
+
+.skerry-path-setting--le > .MuiTextField-root,
+.skerry-path-setting--magpie > .MuiTextField-root {
+	grid-row: 1;
+	align-self: end;
+}
+
+.skerry-path-setting--le > .skerry-path-setting-default,
+.skerry-path-setting--magpie > .skerry-path-setting-default {
+	grid-column: 2;
+	grid-row: 2;
+	min-width: 0;
+	margin: 6px 0 0;
+}
+
+.skerry-path-setting--le .MuiFormControlLabel-root,
+.skerry-path-setting--magpie .MuiFormControlLabel-root {
+	margin-inline: 0;
+}
+
+.skerry-path-setting--le .MuiFormControlLabel-label,
+.skerry-path-setting--magpie .MuiFormControlLabel-label {
+	font-size: 0.78rem;
+	color: var(--skerry-ink);
+}
+
+.skerry-path-setting--le .MuiBox-root > .MuiTypography-caption,
+.skerry-path-setting--magpie .MuiBox-root > .MuiTypography-caption {
+	margin: 2px 0 0 34px;
+	color: var(--skerry-muted);
+	line-height: 1.4;
+}
+
+.skerry-path-requires-path.MuiTypography-root {
+	display: block;
+	margin: 2px 0 0 34px;
+	color: var(--skerry-muted);
+	line-height: 1.4;
+}
+
+.skerry-path-settings-dialog .MuiDialogActions-root {
+	justify-content: flex-end;
+}
+
+@media (max-width: 640px) {
+	.MuiDialog-paper.skerry-path-settings-dialog {
+		width: calc(100vw - 24px);
+		max-height: calc(100vh - 24px);
+	}
+
+	.skerry-path-section {
+		padding: 13px 14px 6px;
+	}
+
+	.skerry-path-setting {
+		grid-template-columns: minmax(0, 1fr);
+		gap: 5px;
+		padding: 11px 0;
+	}
+
+	.skerry-path-setting-title,
+	.skerry-path-setting-heading,
+	.skerry-path-setting > .MuiTypography-caption,
+	.skerry-path-setting > .MuiTextField-root,
+	.skerry-path-setting--le > .skerry-path-setting-default,
+	.skerry-path-setting--magpie > .skerry-path-setting-default {
+		grid-column: 1;
+		grid-row: auto;
+	}
+
+	.skerry-path-setting > .MuiTextField-root {
+		margin-top: 3px;
+	}
+
+	.skerry-path-setting--le > .skerry-path-setting-default,
+	.skerry-path-setting--magpie > .skerry-path-setting-default {
+		margin-top: 2px;
+	}
+}

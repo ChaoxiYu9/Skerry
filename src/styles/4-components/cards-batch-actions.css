@@ -1,0 +1,247 @@
+/* CardsBatchBar layout, sizing, and action states */
+.cards-control-main,
+.cards-control-accessory {
+	overflow: visible;
+}
+
+.cards-batch-actions .MuiButton-root {
+	transition:
+		background-color 170ms ease,
+		border-color 170ms ease,
+		box-shadow 170ms ease,
+		color 170ms ease;
+}
+
+.cards-batch-actions .MuiButton-root:not(.Mui-disabled):active {
+	transform: none;
+}
+
+.cards-control-bar {
+	display: grid;
+	grid-template-columns: minmax(0, 1fr) auto;
+	align-items: center;
+	gap: 14px;
+	min-height: 58px;
+	margin: 0 0 22px;
+	padding: 8px 0 14px;
+	border-bottom: 1px solid
+		color-mix(in srgb, var(--skerry-glass-border) 82%, transparent);
+}
+
+.cards-control-main {
+	display: flex;
+	align-items: center;
+	flex: 1 1 auto;
+	flex-wrap: nowrap;
+	gap: 10px;
+	min-width: 0;
+}
+
+.cards-control-accessory {
+	display: flex;
+	align-items: center;
+	flex: 1 1 auto;
+	min-width: 0;
+}
+
+.cards-batch-actions,
+.cards-batch-switch {
+	display: flex;
+	align-items: center;
+	flex-wrap: nowrap;
+}
+
+.cards-batch-actions {
+	gap: 5px;
+	justify-self: end;
+	width: max-content;
+	max-width: none;
+	overflow: visible;
+	white-space: nowrap;
+	animation: cards-batch-actions-enter 190ms cubic-bezier(0.2, 0.75, 0.3, 1)
+		both;
+}
+
+@keyframes cards-batch-actions-enter {
+	from {
+		opacity: 0;
+		transform: translateY(5px) scale(0.985);
+	}
+
+	to {
+		opacity: 1;
+		transform: translateY(0) scale(1);
+	}
+}
+
+.cards-total-count {
+	justify-self: end;
+}
+
+.cards-batch-selected-count {
+	box-sizing: border-box;
+	padding-inline: 4px;
+	text-align: center;
+	font-variant-numeric: tabular-nums;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+	flex: 0 0 68px;
+}
+
+.cards-batch-switch {
+	gap: 2px;
+	min-height: 36px;
+	padding-left: 8px;
+	border-left: 1px solid
+		color-mix(in srgb, var(--skerry-glass-border) 70%, transparent);
+}
+
+.cards-batch-actions .MuiButton-root {
+	width: 116px;
+	min-width: 0;
+	min-height: 36px;
+	padding-inline: 13px;
+}
+
+.cards-total-count {
+	flex: 0 0 auto;
+	font-weight: 700;
+	white-space: nowrap;
+}
+
+.cards-batch-toggle-selection.MuiButton-root,
+.cards-batch-danger.MuiButton-root {
+	--skerry-btn-radius: 6px;
+
+	min-width: unset;
+}
+
+.cards-batch-actions .cards-batch-toggle-selection.MuiButton-root {
+	background: transparent;
+	width: auto;
+	padding: 4px 6px;
+	color: var(--skerry-text, inherit);
+}
+
+.cards-batch-actions .cards-batch-toggle-selection:hover:not(.is-selected) {
+	background: rgba(125, 125, 125, 0.08);
+}
+
+.cards-batch-toggle-selection .MuiButton-startIcon {
+	color: var(--mui-palette-primary-main, #d97706);
+}
+
+.cards-batch-actions .cards-batch-toggle-selection .MuiButton-startIcon,
+.cards-batch-actions .cards-batch-danger .MuiButton-startIcon {
+	margin-right: 4px;
+}
+
+:dir(ltr)
+	.cards-batch-actions
+	.cards-batch-toggle-selection
+	.MuiButton-startIcon,
+:dir(ltr) .cards-batch-actions .cards-batch-danger .MuiButton-startIcon {
+	--skerry-btn-icon-margin-inline-end: 4px;
+}
+
+@media (max-width: 1120px) {
+	.cards-batch-actions .MuiButton-root {
+		width: auto;
+	}
+}
+
+.cards-batch-actions .cards-batch-danger.MuiButton-root {
+	width: auto;
+	padding: 4px 8px;
+}
+
+.cards-batch-danger.MuiButton-root.Mui-disabled {
+	color: var(--mui-palette-error-main, #ef4444);
+}
+
+.cards-batch-danger .MuiButton-startIcon {
+	color: var(--mui-palette-error-main, #ef4444);
+}
+
+@media (max-width: 1480px) {
+	.cards-control-bar {
+		gap: 10px;
+	}
+
+	.cards-control-main {
+		gap: 7px;
+	}
+
+	.cards-batch-actions,
+	.cards-batch-switch {
+		gap: 4px;
+	}
+
+	.cards-batch-actions .MuiButton-root {
+		min-height: 34px;
+		padding-inline: 10px;
+		font-size: 12px;
+	}
+
+	.cards-batch-switch .MuiTypography-root,
+	.cards-batch-selected-count,
+	.cards-total-count {
+		font-size: 12px;
+	}
+}
+
+@media (max-width: 1280px) {
+	.cards-batch-actions .MuiButton-root .MuiButton-startIcon {
+		margin-right: 4px;
+	}
+
+	.cards-batch-actions .cards-batch-danger.MuiButton-root,
+	.cards-batch-actions .cards-batch-collection.MuiButton-root,
+	.cards-batch-actions .cards-batch-remove-category.MuiButton-root,
+	.cards-batch-actions .cards-batch-toggle-selection.MuiButton-root {
+		font-size: 0;
+	}
+
+	.cards-batch-actions .cards-batch-collection.MuiButton-root,
+	.cards-batch-actions .cards-batch-remove-category.MuiButton-root {
+		padding-inline: 9px;
+	}
+
+	.cards-batch-actions .cards-batch-collection.MuiButton-root,
+	.cards-batch-actions .cards-batch-remove-category.MuiButton-root {
+		min-width: 38px;
+	}
+
+	.cards-batch-danger.MuiButton-root .MuiButton-startIcon,
+	.cards-batch-collection.MuiButton-root .MuiButton-startIcon,
+	.cards-batch-remove-category.MuiButton-root .MuiButton-startIcon,
+	.cards-batch-toggle-selection.MuiButton-root .MuiButton-startIcon {
+		margin: 0;
+	}
+}
+
+@media (max-width: 1120px) {
+	.cards-control-bar {
+		align-items: stretch;
+		grid-template-columns: minmax(0, 1fr);
+	}
+
+	.cards-control-main {
+		flex-wrap: wrap;
+	}
+
+	.cards-control-accessory {
+		width: 100%;
+		max-width: none;
+	}
+
+	.cards-batch-switch {
+		padding-left: 0;
+		border-left: 0;
+	}
+
+	.cards-total-count {
+		align-self: flex-end;
+	}
+}

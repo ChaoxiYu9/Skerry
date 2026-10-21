@@ -1,0 +1,76 @@
+/* Empty hero state owned by the HomePage current-game card. */
+
+html:is([data-toolpad-color-scheme="light"], [data-mui-color-scheme="light"])
+	:where(.atlas-page)
+	.atlas-current.atlas-current-empty {
+	border: 1px solid var(--skerry-glass-border);
+	background: linear-gradient(
+		135deg,
+		#fffdf6 0%,
+		#fff8ee 38%,
+		#fbf3ea 72%,
+		#f7ece3 100%
+	);
+	color: #241a12;
+	box-shadow: var(--skerry-glass-shadow);
+}
+
+html:is([data-toolpad-color-scheme="light"], [data-mui-color-scheme="light"])
+	:where(.atlas-page)
+	.atlas-current-empty
+	.atlas-current-name {
+	color: #241a12;
+}
+
+html:is([data-toolpad-color-scheme="light"], [data-mui-color-scheme="light"])
+	:where(.atlas-page)
+	.atlas-current-empty
+	.atlas-current-meta {
+	color: #6f6257;
+}
+
+html:is([data-toolpad-color-scheme="light"], [data-mui-color-scheme="light"])
+	:where(.atlas-page)
+	.atlas-current-empty
+	.MuiButton-contained {
+	--skerry-contained-primary-image-output: linear-gradient(
+		135deg,
+		#b03b0f,
+		#9a3412
+	);
+	--skerry-contained-primary-background-color-output: transparent;
+	--skerry-btn-primary-text: #fff8f1;
+	--skerry-btn-primary-shadow:
+		0 8px 20px rgba(176, 59, 15, 0.22), inset 0 1px 0 rgba(255, 255, 255, 0.18);
+}
+
+html:is([data-toolpad-color-scheme="dark"], [data-mui-color-scheme="dark"])
+	:where(.atlas-page)
+	.atlas-current-empty
+	.MuiButton-contained {
+	--skerry-contained-primary-image-output: linear-gradient(
+		135deg,
+		#2f7df6 0%,
+		#70c7ff 54%,
+		#7d74ff 82%,
+		var(--skerry-rose) 100%
+	);
+	--skerry-contained-primary-background-color-output: transparent;
+	--skerry-btn-primary-text: #ffffff;
+	--skerry-btn-primary-shadow: var(--skerry-glow-primary);
+}
+
+html:is([data-toolpad-color-scheme="light"], [data-mui-color-scheme="light"])
+	:where(.atlas-page)
+	.atlas-current-empty
+	.atlas-current-art::after {
+	background:
+		linear-gradient(
+			90deg,
+			rgba(255, 248, 238, 0.58) 0%,
+			rgba(255, 248, 238, 0.22) 38%,
+			rgba(176, 59, 15, 0.08) 78%,
+			rgba(176, 59, 15, 0.13) 100%
+		),
+		linear-gradient(0deg, rgba(96, 78, 50, 0.09), transparent 58%);
+}

@@ -1,0 +1,127 @@
+.skerry-add-game-dialog .MuiTabs-root {
+	margin-inline: clamp(20px, 2.2vw, 30px);
+	border-bottom: 1px solid var(--skerry-dialog-divider);
+}
+
+.skerry-add-game-dialog .MuiTab-root {
+	min-height: 48px;
+	font-weight: 700;
+}
+
+.skerry-add-game-content {
+	min-width: 0;
+}
+
+.skerry-add-game-form {
+	max-width: 100%;
+}
+
+.skerry-add-game-dialog
+	.skerry-add-launch-choice-row
+	> .MuiButton-root.MuiButton-root {
+	--skerry-btn-radius: 14px;
+	min-height: 42px;
+	border-radius: var(--skerry-btn-radius);
+}
+
+.skerry-add-game-dialog
+	.skerry-add-launch-choice-row
+	> .MuiButton-root.MuiButton-root:hover,
+.skerry-add-game-dialog
+	.skerry-add-launch-choice-row
+	> .MuiButton-root.MuiButton-root:active,
+.skerry-add-game-dialog
+	.skerry-add-launch-choice-row
+	> .MuiButton-root.MuiButton-root:focus-visible,
+.skerry-add-game-dialog
+	.skerry-add-launch-choice-row
+	> .MuiButton-root.MuiButton-root.Mui-disabled {
+	border-radius: var(--skerry-btn-radius);
+}
+
+.skerry-add-game-mode-section {
+	padding: 14px;
+	border: 1px solid var(--skerry-dialog-divider);
+	border-radius: 16px;
+	background: color-mix(in srgb, var(--skerry-ink) 2.5%, transparent);
+}
+
+.skerry-add-game-dialog
+	.skerry-add-game-mode-section
+	.skerry-source-mode-toggle.MuiToggleButtonGroup-root {
+	padding: 4px;
+	border: 1px solid var(--skerry-dialog-divider);
+	border-radius: 14px;
+	background: color-mix(in srgb, var(--skerry-dialog-surface) 78%, transparent);
+}
+
+.skerry-add-game-dialog
+	.skerry-add-game-mode-section
+	.skerry-source-mode-toggle
+	.MuiToggleButton-root {
+	min-height: 36px;
+	flex-basis: 0;
+	border: 0;
+	border-radius: 10px;
+	background: transparent;
+	box-shadow: none;
+	color: var(--skerry-muted);
+	font-weight: 700;
+	transition:
+		background-color 140ms ease,
+		color 140ms ease;
+}
+
+.skerry-add-game-dialog
+	.skerry-add-game-mode-section
+	.skerry-source-mode-toggle
+	.MuiToggleButton-root:hover {
+	border-radius: 10px;
+	background: color-mix(
+		in srgb,
+		var(--skerry-accent) 7%,
+		var(--skerry-dialog-surface)
+	);
+	color: var(--skerry-ink);
+}
+
+.skerry-add-game-dialog
+	.skerry-add-game-mode-section
+	.skerry-source-mode-toggle
+	.MuiToggleButton-root.MuiToggleButton-root.Mui-selected {
+	background: color-mix(
+		in srgb,
+		var(--skerry-accent) 13%,
+		var(--skerry-dialog-surface)
+	);
+	box-shadow: none;
+	color: var(--skerry-accent);
+}
+
+.skerry-add-game-dialog
+	.skerry-add-game-mode-section
+	.skerry-source-mode-toggle
+	.MuiToggleButton-root.MuiToggleButton-root.Mui-selected:hover,
+.skerry-add-game-dialog
+	.skerry-add-game-mode-section
+	.skerry-source-mode-toggle
+	.MuiToggleButton-root.MuiToggleButton-root.Mui-selected:active {
+	border-radius: 10px;
+	background: color-mix(
+		in srgb,
+		var(--skerry-accent) 17%,
+		var(--skerry-dialog-surface)
+	);
+	box-shadow: none;
+	color: var(--skerry-accent);
+}
+
+@media (max-width: 600px) {
+	.skerry-add-game-dialog .MuiTabs-root {
+		margin-inline: 18px;
+	}
+
+	.skerry-add-game-mode-section {
+		padding: 10px;
+	}
+}

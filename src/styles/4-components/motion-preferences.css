@@ -1,0 +1,27 @@
+/* App-wide reduced motion preferences */
+@media (prefers-reduced-motion: reduce) {
+	*,
+	*::before,
+	*::after {
+		scroll-behavior: auto;
+		transition-duration: var(
+			--skerry-motion-transition-duration,
+			0.01ms
+		) !important;
+		animation-duration: var(--skerry-motion-animation-duration, 0.01ms) !important;
+		animation-iteration-count: 1 !important;
+	}
+
+	.MuiButton-root::after {
+		display: none;
+	}
+
+	.skerry-motion-root,
+	.MuiPopover-paper,
+	.MuiDialog-paper,
+	.MuiAutocomplete-paper,
+	.MuiPickersPopper-paper {
+		transform: none !important;
+		filter: none !important;
+	}
+}

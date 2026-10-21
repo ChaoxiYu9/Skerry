@@ -1,0 +1,312 @@
+/* Bulk import result table scrollbar */
+.bulk-import-virtuoso,
+.bulk-import-virtuoso [data-virtuoso-scroller="true"] {
+	scrollbar-width: none;
+}
+
+.bulk-import-virtuoso::-webkit-scrollbar,
+.bulk-import-virtuoso [data-virtuoso-scroller="true"]::-webkit-scrollbar {
+	display: none;
+}
+
+.bulk-import-result-header {
+	position: sticky;
+	top: 0;
+	z-index: 2;
+	min-height: 38px;
+	border-radius: 10px 10px 0 0;
+	background: color-mix(in srgb, var(--skerry-dialog-surface) 96%, transparent);
+	font-size: 0.78rem;
+}
+
+.bulk-import-result-row {
+	--bulk-import-result-columns: minmax(220px, 1.2fr) minmax(230px, 1.2fr)
+		minmax(100px, 0.55fr) minmax(260px, 1.5fr) 88px;
+	transition: background-color 150ms ease;
+}
+
+.bulk-import-result-row:hover {
+	background: color-mix(in srgb, var(--skerry-accent) 4%, transparent);
+}
+
+.bulk-import-match-image,
+.bulk-import-match-image-placeholder {
+	width: 34px;
+	height: 46px;
+	flex: 0 0 34px;
+	border: 1px solid
+		color-mix(in srgb, var(--skerry-dialog-border) 75%, transparent);
+	border-radius: 7px;
+	object-fit: cover;
+}
+
+.bulk-import-match-image-placeholder {
+	display: grid;
+	place-items: center;
+	background: color-mix(in srgb, var(--skerry-accent) 9%, transparent);
+	color: var(--skerry-accent);
+	font-size: 0.85rem;
+	font-weight: 800;
+}
+
+.bulk-import-status-chip.MuiChip-root.MuiChip-root {
+	min-width: 74px;
+	justify-content: center;
+	border: 1px solid var(--bulk-import-status-border);
+	background: var(--bulk-import-status-background);
+	color: var(--bulk-import-status-text);
+	font-weight: 700;
+}
+
+.bulk-import-status-chip .MuiChip-label {
+	color: inherit;
+}
+
+.bulk-import-status-chip[data-status="pending"] {
+	--bulk-import-status-background: color-mix(
+		in srgb,
+		var(--skerry-muted) 10%,
+		var(--skerry-dialog-surface)
+	);
+	--bulk-import-status-border: color-mix(
+		in srgb,
+		var(--skerry-muted) 24%,
+		transparent
+	);
+	--bulk-import-status-text: var(--skerry-ink);
+}
+
+.bulk-import-status-chip[data-status="matched"] {
+	--bulk-import-status-background: #e4f4e8;
+	--bulk-import-status-border: #9acda7;
+	--bulk-import-status-text: #205b32;
+}
+
+.bulk-import-status-chip[data-status="not found"] {
+	--bulk-import-status-background: #fff1da;
+	--bulk-import-status-border: #e5bd80;
+	--bulk-import-status-text: #754314;
+}
+
+.bulk-import-status-chip[data-status="error"] {
+	--bulk-import-status-background: #fde8e6;
+	--bulk-import-status-border: #e3a29b;
+	--bulk-import-status-text: #8f2921;
+}
+
+.bulk-import-status-chip[data-status="duplicate"] {
+	--bulk-import-status-background: #e9eff7;
+	--bulk-import-status-border: #a9bfd7;
+	--bulk-import-status-text: #344f70;
+}
+
+html:is([data-toolpad-color-scheme="dark"], [data-mui-color-scheme="dark"])
+	.bulk-import-status-chip[data-status="pending"] {
+	--bulk-import-status-background: rgba(148, 163, 184, 0.12);
+	--bulk-import-status-border: rgba(148, 163, 184, 0.3);
+	--bulk-import-status-text: #cbd5e1;
+}
+
+html:is([data-toolpad-color-scheme="dark"], [data-mui-color-scheme="dark"])
+	.bulk-import-status-chip[data-status="matched"] {
+	--bulk-import-status-background: rgba(74, 222, 128, 0.14);
+	--bulk-import-status-border: rgba(74, 222, 128, 0.42);
+	--bulk-import-status-text: #a7f3c0;
+}
+
+html:is([data-toolpad-color-scheme="dark"], [data-mui-color-scheme="dark"])
+	.bulk-import-status-chip[data-status="not found"] {
+	--bulk-import-status-background: rgba(251, 191, 36, 0.13);
+	--bulk-import-status-border: rgba(251, 191, 36, 0.4);
+	--bulk-import-status-text: #fde68a;
+}
+
+html:is([data-toolpad-color-scheme="dark"], [data-mui-color-scheme="dark"])
+	.bulk-import-status-chip[data-status="error"] {
+	--bulk-import-status-background: rgba(248, 113, 113, 0.14);
+	--bulk-import-status-border: rgba(248, 113, 113, 0.42);
+	--bulk-import-status-text: #fecaca;
+}
+
+html:is([data-toolpad-color-scheme="dark"], [data-mui-color-scheme="dark"])
+	.bulk-import-status-chip[data-status="duplicate"] {
+	--bulk-import-status-background: rgba(125, 170, 221, 0.13);
+	--bulk-import-status-border: rgba(125, 170, 221, 0.4);
+	--bulk-import-status-text: #c7dcf5;
+}
+
+@media (max-width: 1120px) {
+	.bulk-import-result-row {
+		--bulk-import-result-columns: minmax(180px, 1fr) minmax(190px, 1fr)
+			minmax(88px, auto) minmax(200px, 1.2fr) 76px;
+	}
+}
+
+@media (max-width: 760px) {
+	.bulk-import-result-header,
+	.bulk-import-result-row {
+		--bulk-import-result-columns: minmax(165px, 1fr) minmax(190px, 1fr) 86px
+			56px;
+	}
+
+	.bulk-import-result-header > :nth-child(4),
+	.bulk-import-result-row > :nth-child(4) {
+		display: none;
+	}
+}
+
+/* Shared layout and loading states for collection import dialogs. */
+
+.skerry-import-source-grid {
+	display: grid;
+
+	grid-template-columns: repeat(2, minmax(0, 1fr));
+
+	gap: 12px;
+
+	min-width: 0;
+}
+
+.skerry-import-source-grid > * {
+	min-width: 0;
+}
+
+.skerry-import-source-grid .MuiFormControlLabel-root,
+.skerry-import-source-grid .MuiTypography-root,
+.skerry-import-source-grid .MuiButton-root {
+	max-width: 100%;
+}
+
+.skerry-source-mode-toggle.MuiToggleButtonGroup-root {
+	display: flex;
+
+	width: 100%;
+
+	min-width: 0;
+
+	flex-wrap: wrap;
+
+	gap: 4px;
+
+	border: 0;
+}
+
+.skerry-source-mode-toggle .MuiToggleButton-root {
+	min-width: 0;
+
+	flex: 1 1 112px;
+
+	white-space: nowrap;
+}
+
+.skerry-dialog-loading-state {
+	display: flex;
+
+	min-height: 124px;
+
+	flex-direction: column;
+
+	gap: 12px;
+
+	border-radius: 14px;
+
+	background: color-mix(
+		in srgb,
+		var(--mui-palette-primary-main) 5%,
+		transparent
+	);
+}
+
+.skerry-dialog-loading-state .MuiCircularProgress-root {
+	filter: drop-shadow(
+		0 0 12px color-mix(in srgb, var(--skerry-accent) 36%, transparent)
+	);
+}
+
+.skerry-import-loading-strip {
+	display: flex;
+
+	flex: 0 0 52px;
+
+	align-items: center;
+
+	gap: 10px;
+
+	min-width: 0;
+
+	margin: 8px 24px 0;
+
+	padding: 8px 12px;
+
+	border: 1px solid
+		color-mix(in srgb, var(--skerry-glass-border) 82%, transparent);
+
+	border-radius: 12px;
+
+	background: color-mix(
+		in srgb,
+		var(--mui-palette-primary-main) 8%,
+		transparent
+	);
+
+	animation: skerry-import-status-enter 220ms cubic-bezier(0.2, 0.75, 0.3, 1)
+		both;
+}
+
+@keyframes skerry-import-status-enter {
+	from {
+		opacity: 0;
+		transform: translateY(-4px) scale(0.99);
+	}
+
+	to {
+		opacity: 1;
+		transform: translateY(0) scale(1);
+	}
+}
+
+.skerry-import-loading-strip > .MuiCircularProgress-root {
+	flex: 0 0 auto;
+
+	filter: drop-shadow(
+		0 0 10px color-mix(in srgb, var(--skerry-accent) 38%, transparent)
+	);
+}
+
+.skerry-import-loading-copy {
+	display: flex;
+
+	min-width: 0;
+
+	flex: 1 1 auto;
+
+	flex-direction: column;
+
+	gap: 1px;
+}
+
+.skerry-import-loading-copy .MuiTypography-root {
+	overflow: hidden;
+
+	text-overflow: ellipsis;
+
+	white-space: nowrap;
+}
+
+.skerry-import-loading-progress {
+	flex: 0 1 180px;
+
+	min-width: 72px;
+
+	border-radius: 999px;
+}
+
+@media (max-width: 620px) {
+	.skerry-import-source-grid {
+		grid-template-columns: minmax(0, 1fr);
+	}
+
+	.skerry-source-mode-toggle .MuiToggleButton-root {
+		flex-basis: calc(50% - 2px);
+	}
+}

@@ -1,0 +1,197 @@
+/* Shared game card container and cover styles. */
+
+.skerry-game-card {
+	user-select: none;
+	position: relative;
+	border-radius: 12px;
+	padding: 8px 8px 10px 8px;
+	box-sizing: border-box;
+	contain: var(--game-card-interaction-contain, var(--game-card-contain, layout style));
+	--game-card-cover-border: var(--mui-palette-divider);
+	--game-card-cover-shadow: none;
+	--game-card-cover-scroll-shadow: 0 8px 18px rgba(8, 18, 22, 0.08);
+	--game-card-cover-drag-border: color-mix(
+		in srgb,
+		var(--mui-palette-primary-main) 34%,
+		var(--skerry-glass-border)
+	);
+	--game-card-cover-drag-shadow:
+		inset 0 1px 0 rgba(255, 255, 255, 0.32),
+		0 18px 42px rgba(8, 18, 22, 0.2),
+		0 0 0 1px
+		color-mix(in srgb, var(--mui-palette-primary-main) 16%, transparent),
+		0 0 26px color-mix(in srgb, var(--skerry-amber) 12%, transparent);
+}
+
+/* Shared card cover baseline, geometry, and clipping. */
+
+.skerry-game-card .game-card-cover {
+	contain: style;
+	position: relative;
+	border-radius: 6px;
+	overflow: hidden;
+	transition: border-color 180ms ease;
+
+	border: 1px solid var(--game-card-cover-border);
+	box-shadow: var(--game-card-cover-shadow);
+}
+
+/* Cover state values have equal specificity; their order defines precedence. */
+:where(.cards-scroll-region.is-scrolling .skerry-game-card) .game-card-cover {
+	--game-card-cover-shadow: var(--game-card-cover-scroll-shadow);
+}
+
+:where(.skerry-game-card.is-drag-overlay) .game-card-cover {
+	--game-card-cover-border: var(--game-card-cover-drag-border);
+	--game-card-cover-shadow: var(--game-card-cover-drag-shadow);
+}
+
+:where(.skerry-game-card:is(.is-active, .is-selected, :hover, :focus-within))
+	.game-card-cover {
+	--game-card-cover-border: transparent;
+	--game-card-cover-shadow: none;
+}
+
+/* The workspace can keep this scroll treatment neutral via inherited values. */
+:where(.cards-scroll-region.is-scrolling .skerry-game-card:hover)
+	.game-card-cover {
+	--game-card-cover-border: var(
+		--game-card-cover-scroll-hover-border,
+		var(--mui-palette-divider)
+	);
+	--game-card-cover-shadow: var(
+		--game-card-cover-scroll-hover-shadow,
+		inset 0 1.5px 0 0 rgba(255, 255, 255, 0.28),
+		inset 0 -2px 0 0 rgba(0, 0, 0, 0.45),
+		inset 0 0 0 1px rgba(255, 255, 255, 0.08)
+	);
+}
+
+html:is([data-mui-color-scheme="dark"], [data-toolpad-color-scheme="dark"])
+	.skerry-game-card:hover
+	.game-card-action-root {
+	border-color: transparent;
+}
+
+/* CardItem owns the frame palette. Themes supply values; states select them. */
+html:is([data-mui-color-scheme="light"], [data-toolpad-color-scheme="light"])
+	.skerry-game-card {
+	--game-card-surface: #fbf9f5;
+	--game-card-cover-background: #f2eee7;
+	--game-card-cover-border: #e5dfd2;
+	--game-card-border: #ded6c8;
+	--game-card-accent-border: #c2410c;
+	--game-card-shadow: none;
+	--game-card-selected-shadow: none;
+	--game-card-hover-shadow:
+		0 12px 26px -4px rgba(120, 105, 85, 0.28),
+		0 4px 10px rgba(120, 105, 85, 0.14);
+}
+
+html:is([data-mui-color-scheme="dark"], [data-toolpad-color-scheme="dark"])
+	.skerry-game-card {
+	--game-card-surface: #182232;
+	--game-card-cover-background: transparent;
+	--game-card-cover-border: rgba(255, 255, 255, 0.12);
+	--game-card-cover-scroll-shadow: none;
+	--game-card-cover-drag-border: rgba(255, 255, 255, 0.12);
+	--game-card-cover-drag-shadow: none;
+	--game-card-border: rgba(148, 163, 184, 0.22);
+	--game-card-accent-border: #38bdf8;
+	--game-card-shadow:
+		0 3px 10px rgba(0, 0, 0, 0.45),
+		0 0 0 rgba(56, 189, 248, 0),
+		inset 0 1px 0 rgba(255, 255, 255, 0.05);
+	--game-card-selected-shadow:
+		0 3px 10px rgba(0, 0, 0, 0.45),
+		0 0 0 rgba(56, 189, 248, 0),
+		inset 0 1px 0 rgba(255, 255, 255, 0);
+	--game-card-hover-shadow:
+		0 8px 18px -2px rgba(0, 0, 0, 0.45),
+		0 4px 16px rgba(56, 189, 248, 0.22),
+		inset 0 1px 0 rgba(255, 255, 255, 0);
+}
+
+html:is(
+		[data-mui-color-scheme="light"],
+		[data-toolpad-color-scheme="light"],
+		[data-mui-color-scheme="dark"],
+		[data-toolpad-color-scheme="dark"]
+	)
+	.skerry-game-card {
+	background: var(--game-card-surface);
+	border: 1.5px solid var(--game-card-border);
+	box-shadow: var(--game-card-shadow);
+}
+
+html:is(
+		[data-mui-color-scheme="light"],
+		[data-toolpad-color-scheme="light"],
+		[data-mui-color-scheme="dark"],
+		[data-toolpad-color-scheme="dark"]
+	)
+	.skerry-game-card:is(.is-active, .is-selected) {
+	--game-card-border: var(--game-card-accent-border);
+	--game-card-shadow: var(--game-card-selected-shadow);
+}
+
+/* Hover and selection share the accent border; only hover lifts the card. */
+html:is(
+		[data-mui-color-scheme="light"],
+		[data-toolpad-color-scheme="light"],
+		[data-mui-color-scheme="dark"],
+		[data-toolpad-color-scheme="dark"]
+	)
+	.skerry-game-card:hover {
+	--game-card-border: var(--game-card-accent-border);
+	--game-card-shadow: var(--game-card-hover-shadow);
+}
+
+html:is(
+		[data-mui-color-scheme="light"],
+		[data-toolpad-color-scheme="light"],
+		[data-mui-color-scheme="dark"],
+		[data-toolpad-color-scheme="dark"]
+	)
+	.skerry-game-card
+	.game-card-cover {
+	background: var(--game-card-cover-background);
+}
+
+/* Card metadata label. */
+.skerry-game-card .game-card-meta {
+	padding: 8px 2px 0 2px;
+	box-sizing: border-box;
+}
+
+.skerry-game-card .game-card-meta .MuiTypography-caption {
+	display: inline-block;
+	max-width: 100%;
+	padding: 1px 7px;
+	margin-top: 4px;
+	border-radius: 4px;
+	font-size: 0.72rem;
+	font-weight: 500;
+	letter-spacing: 0.02em;
+	transition:
+		background-color 180ms ease,
+		color 180ms ease;
+}
+
+html:is([data-mui-color-scheme="light"], [data-toolpad-color-scheme="light"])
+	.skerry-game-card
+	.game-card-meta
+	.MuiTypography-caption {
+	background: #ede6d8;
+	color: #6d6455;
+	border: 1px solid #ded6c6;
+}
+
+html:is([data-mui-color-scheme="dark"], [data-toolpad-color-scheme="dark"])
+	.skerry-game-card
+	.game-card-meta
+	.MuiTypography-caption {
+	background: #222f44;
+	color: #cbd5e1;
+	border: 1px solid rgba(255, 255, 255, 0.12);
+}

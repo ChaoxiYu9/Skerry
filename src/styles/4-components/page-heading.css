@@ -1,0 +1,38 @@
+/* Shared heading treatment for Toolpad's generated page title. */
+.skerry-shell
+	main
+	.MuiContainer-root
+	> .MuiStack-root
+	> .MuiStack-root
+	.MuiTypography-h4 {
+	display: block;
+
+	max-width: 100%;
+
+	overflow: hidden;
+
+	font-size: clamp(30px, 3.2vw, 52px);
+
+	font-weight: 700;
+
+	letter-spacing: -0.04em;
+
+	line-height: 1;
+
+	background: linear-gradient(
+		112deg,
+		var(--mui-palette-primary-main) 0%,
+		var(--skerry-accent) 58%,
+		var(--skerry-iris) 100%
+	);
+
+	-webkit-background-clip: text;
+
+	background-clip: text;
+
+	color: transparent;
+
+	text-overflow: ellipsis;
+
+	white-space: nowrap;
+}

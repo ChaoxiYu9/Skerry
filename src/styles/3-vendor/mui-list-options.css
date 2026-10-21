@@ -1,0 +1,5 @@
+/* MenuItem and Autocomplete options share a consistent selectable-row height. */
+.MuiList-root .MuiMenuItem-root,
+.MuiAutocomplete-popper .MuiAutocomplete-option {
+	min-height: 38px;
+}

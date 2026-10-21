@@ -1,0 +1,86 @@
+/* Recent activity filters share one palette and surface treatment in both themes. */
+
+.atlas-page {
+	--atlas-filter-all-accent: #2563eb;
+	--atlas-filter-all-from: #1d4ed8;
+	--atlas-filter-all-to: #2563eb;
+	--atlas-filter-play-accent: #16a34a;
+	--atlas-filter-play-from: #166534;
+	--atlas-filter-play-to: #15803d;
+	--atlas-filter-add-accent: #a16207;
+	--atlas-filter-add-from: #92400e;
+	--atlas-filter-add-to: #a16207;
+}
+
+:where(.atlas-page) .atlas-timeline-filter-chip.is-all.MuiChip-root {
+	--atlas-filter-chip-accent: var(--atlas-filter-all-accent);
+	--atlas-filter-chip-from: var(--atlas-filter-all-from);
+	--atlas-filter-chip-to: var(--atlas-filter-all-to);
+}
+
+:where(.atlas-page) .atlas-timeline-filter-chip.is-play.MuiChip-root {
+	--atlas-filter-chip-accent: var(--atlas-filter-play-accent);
+	--atlas-filter-chip-from: var(--atlas-filter-play-from);
+	--atlas-filter-chip-to: var(--atlas-filter-play-to);
+}
+
+:where(.atlas-page) .atlas-timeline-filter-chip.is-add.MuiChip-root {
+	--atlas-filter-chip-accent: var(--atlas-filter-add-accent);
+	--atlas-filter-chip-from: var(--atlas-filter-add-from);
+	--atlas-filter-chip-to: var(--atlas-filter-add-to);
+}
+
+.atlas-page .atlas-timeline-filter-chip.MuiChip-root {
+	--skerry-chip-background: color-mix(
+		in srgb,
+		var(--atlas-filter-chip-accent) 8%,
+		var(--skerry-glass-surface)
+	);
+	--skerry-chip-border-color: color-mix(
+		in srgb,
+		var(--atlas-filter-chip-accent) 42%,
+		transparent
+	);
+	backdrop-filter: none;
+	-webkit-backdrop-filter: none;
+	background: var(--skerry-chip-background);
+	color: color-mix(
+		in srgb,
+		var(--atlas-filter-chip-accent) 78%,
+		var(--skerry-ink)
+	);
+	transition:
+		filter var(--skerry-duration-fast) ease,
+		box-shadow var(--skerry-duration-fast) ease;
+}
+
+.atlas-page .atlas-timeline-filter-chip.MuiChip-root.MuiChip-filled {
+	--skerry-chip-background: linear-gradient(
+		135deg,
+		var(--atlas-filter-chip-from) 0%,
+		var(--atlas-filter-chip-to) 100%
+	);
+	--skerry-chip-border-color: color-mix(
+		in srgb,
+		var(--atlas-filter-chip-accent) 56%,
+		transparent
+	);
+	background: var(--skerry-chip-background);
+	color: #ffffff;
+	backdrop-filter: none;
+	-webkit-backdrop-filter: none;
+	box-shadow: 0 5px 12px
+		color-mix(in srgb, var(--atlas-filter-chip-accent) 22%, transparent);
+}
+
+.atlas-page .atlas-timeline-filter-chip.MuiChip-root:hover {
+	filter: brightness(1.06);
+}
+
+.atlas-page .atlas-timeline-filter-chip.MuiChip-root .MuiChip-icon {
+	width: 16px;
+	height: 16px;
+	margin-left: 7px;
+	margin-right: -2px;
+	color: inherit;
+}

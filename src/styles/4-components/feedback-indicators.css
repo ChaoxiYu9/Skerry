@@ -1,0 +1,78 @@
+/* Shared MUI progress, spinner, and skeleton indicators */
+.MuiLinearProgress-root {
+	position: relative;
+	min-height: 7px;
+	overflow: hidden;
+}
+
+.MuiLinearProgress-root.MuiLinearProgress-root {
+	height: 7px;
+	border-radius: 999px;
+	background: color-mix(
+		in srgb,
+		var(--mui-palette-primary-main) 13%,
+		transparent
+	);
+}
+
+.MuiLinearProgress-root {
+	--skerry-linear-progress-bar-background: linear-gradient(
+		90deg,
+		#2f7df6,
+		#70c7ff 58%,
+		#7d74ff
+	);
+}
+
+html:is([data-toolpad-color-scheme="light"], [data-mui-color-scheme="light"])
+	.MuiLinearProgress-root {
+	--skerry-linear-progress-bar-background: linear-gradient(90deg, #9a3412, #c2410c);
+}
+
+.MuiLinearProgress-root .MuiLinearProgress-bar:is(
+	.MuiLinearProgress-bar1,
+	.MuiLinearProgress-bar2
+) {
+	border-radius: inherit;
+	background: var(--skerry-linear-progress-bar-background);
+}
+
+.MuiCircularProgress-root {
+	flex: 0 0 auto;
+	vertical-align: middle;
+	filter: drop-shadow(
+		0 0 10px
+			color-mix(in srgb, var(--mui-palette-primary-main) 28%, transparent)
+	);
+}
+
+.MuiSkeleton-root {
+	--skerry-skeleton-animation: skerry-shimmer 1.45s ease-in-out infinite;
+}
+
+.MuiSkeleton-root.MuiSkeleton-root {
+	background: linear-gradient(
+		100deg,
+		rgba(255, 255, 255, 0.12),
+		rgba(255, 255, 255, 0.42),
+		rgba(255, 255, 255, 0.12)
+	);
+	background-size: 240% 100%;
+	animation: var(--skerry-skeleton-animation);
+}
+
+@keyframes skerry-shimmer {
+	0% {
+		background-position: 120% 0;
+	}
+
+	100% {
+		background-position: -120% 0;
+	}
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.MuiSkeleton-root {
+		--skerry-skeleton-animation: none;
+	}
+}

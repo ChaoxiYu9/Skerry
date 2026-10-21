@@ -1,0 +1,15 @@
+/* Shared container and card-performance defaults for the sortable game grid. */
+.cards-scroll-region .skerry-game-card,
+.sortable-cards-grid .skerry-game-card {
+	content-visibility: auto;
+	contain-intrinsic-size: 180px 320px;
+	--game-card-contain: layout style paint;
+}
+
+.cards-scroll-region .sortable-cards-grid .skerry-game-card {
+	--game-card-contain: layout style;
+}
+.sortable-cards-grid {
+	position: relative;
+	isolation: isolate;
+}

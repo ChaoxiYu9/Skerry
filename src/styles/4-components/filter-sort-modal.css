@@ -1,0 +1,176 @@
+/* Component-specific layout for filter and sort entry points. */
+.library-filter-action .skerry-filter-sort-trigger.MuiButton-root {
+	padding-inline: 10px;
+}
+
+.skerry-filter-sort-control {
+	position: relative;
+	display: inline-flex;
+	align-items: center;
+	overflow: visible;
+}
+
+.skerry-filter-sort-control.has-active-filters
+	.skerry-filter-sort-trigger.MuiButton-root {
+	padding-right: 36px;
+}
+
+.skerry-filter-active-count {
+	position: absolute;
+	right: 6px;
+	top: 50%;
+	min-width: 18px;
+	height: 18px;
+	padding-inline: 5px;
+	border: 1px solid
+		color-mix(
+			in srgb,
+			var(--mui-palette-primary-main) 24%,
+			var(--mui-palette-divider)
+		);
+	border-radius: 999px;
+	background: color-mix(
+		in srgb,
+		var(--mui-palette-primary-main) 12%,
+		var(--mui-palette-background-paper)
+	);
+	color: var(--mui-palette-primary-main);
+	font-size: 11px;
+	font-weight: 700;
+	line-height: 16px;
+	text-align: center;
+	transform: translateY(-50%);
+	transition: opacity 140ms ease, transform 140ms ease;
+	pointer-events: none;
+}
+
+.skerry-filter-clear-button.MuiIconButton-root {
+	position: absolute;
+	right: 3px;
+	top: 50%;
+	width: 26px;
+	height: 26px;
+	padding: 3px;
+	border: 1px solid
+		color-mix(
+			in srgb,
+			var(--mui-palette-error-main) 22%,
+			var(--mui-palette-divider)
+		);
+	border-radius: 8px;
+	background: color-mix(
+		in srgb,
+		var(--mui-palette-error-main) 5%,
+		var(--mui-palette-background-paper)
+	);
+	color: var(--mui-palette-error-main);
+	opacity: 0;
+	transform: translateY(-50%) scale(0.94);
+	transition:
+		opacity 140ms ease,
+		transform 140ms ease,
+		background-color 140ms ease,
+		border-color 140ms ease;
+	pointer-events: none;
+}
+
+.skerry-filter-sort-control.has-active-filters:is(:hover, :focus-within)
+	.skerry-filter-active-count {
+	opacity: 0;
+	transform: translateY(-50%) scale(0.92);
+}
+
+.skerry-filter-sort-control.has-active-filters:is(:hover, :focus-within)
+	.skerry-filter-clear-button {
+	opacity: 1;
+	transform: translateY(-50%) scale(1);
+	pointer-events: auto;
+}
+
+.skerry-filter-clear-button.MuiIconButton-root:hover {
+	border-color: color-mix(
+		in srgb,
+		var(--mui-palette-error-main) 48%,
+		var(--mui-palette-divider)
+	);
+	background: color-mix(
+		in srgb,
+		var(--mui-palette-error-main) 12%,
+		var(--mui-palette-background-paper)
+	);
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.skerry-filter-active-count,
+	.skerry-filter-clear-button.MuiIconButton-root {
+		transition: none;
+	}
+}
+
+.skerry-filter-sort-dialog .MuiDialogActions-root {
+	display: flex;
+	flex-wrap: wrap;
+	justify-content: flex-end;
+}
+
+/* Dialog content must shrink before it creates a hidden horizontal scrollbar. */
+
+.skerry-filter-sort-dialog .MuiDialogContent-root {
+	min-width: 0;
+
+	overflow-x: hidden;
+}
+
+.skerry-filter-sort-dialog fieldset {
+	min-width: 0;
+
+	max-width: 100%;
+
+	overflow: hidden;
+}
+
+.skerry-filter-sort-dialog fieldset .MuiToggleButton-root {
+	box-sizing: border-box;
+
+	min-width: 0;
+
+	max-width: 100%;
+
+	flex: 1 1 86px;
+
+	overflow: hidden;
+
+	text-overflow: ellipsis;
+
+	white-space: nowrap;
+}
+
+.skerry-filter-sort-dialog .MuiToggleButtonGroup-root {
+	min-width: 0;
+
+	max-width: 100%;
+}
+
+.skerry-filter-sort-dialog .MuiToggleButtonGroup-root .MuiToggleButton-root {
+	min-width: 0;
+
+	flex: 1 1 0;
+
+	white-space: nowrap;
+
+	overflow: hidden;
+
+	text-overflow: ellipsis;
+}
+
+.skerry-filter-sort-dialog .MuiAutocomplete-root,
+.skerry-filter-sort-dialog .MuiFormControl-root,
+.skerry-filter-sort-dialog .MuiInputBase-root {
+	min-width: 0;
+
+	max-width: 100%;
+}
+
+.skerry-filter-sort-dialog .MuiChip-root {
+	max-width: 100%;
+}

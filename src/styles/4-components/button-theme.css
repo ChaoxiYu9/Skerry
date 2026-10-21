@@ -1,0 +1,374 @@
+/* Unclassified outlined buttons use ordinary C styling. Explicit A-D classes
+ * select the other shared tiers. Palette values live in theme.css;
+ * local component variables remain available for deliberate exceptions. */
+
+/* Keep theme eligibility while anchoring ordinary properties to the MUI root
+ * and variant classes. Palette values stay in variables, so theme edits do not
+ * need another forced override. */
+html:is(
+	[data-toolpad-color-scheme="light"],
+	[data-mui-color-scheme="light"],
+	[data-toolpad-color-scheme="dark"],
+	[data-mui-color-scheme="dark"]
+) .MuiButton-root.MuiButton-outlined:not(.Mui-disabled) {
+	border: 1px solid var(--skerry-outlined-button-border);
+	color: var(--skerry-outlined-button-text);
+	background: var(--skerry-outlined-button-background-output);
+	box-shadow: var(--skerry-outlined-button-shadow-output);
+}
+
+html:is(
+		[data-toolpad-color-scheme="light"],
+		[data-mui-color-scheme="light"],
+		[data-toolpad-color-scheme="dark"],
+		[data-mui-color-scheme="dark"]
+	)
+	.MuiButton-root.MuiButton-outlined:not(.Mui-disabled):hover {
+	border-color: var(--skerry-outlined-button-hover-border);
+	color: var(--skerry-outlined-button-hover-text);
+	background: var(--skerry-outlined-button-hover-background);
+	box-shadow: var(--skerry-outlined-button-hover-shadow);
+}
+
+/* Explicit levels provide one token owner across MUI variants. */
+.MuiButton-root.skerry-button-level-b {
+	--skerry-outlined-button-border: var(--skerry-btn-secondary-border);
+	--skerry-outlined-button-background: var(--skerry-btn-secondary-bg);
+	--skerry-outlined-button-background-output: var(--skerry-btn-secondary-bg);
+	--skerry-outlined-button-shadow: var(--skerry-btn-secondary-shadow);
+	--skerry-outlined-button-shadow-output: var(--skerry-btn-secondary-shadow);
+	--skerry-outlined-button-text: var(--skerry-btn-secondary-text);
+	--skerry-outlined-button-hover-border: var(
+		--skerry-btn-secondary-hover-border
+	);
+	--skerry-outlined-button-hover-background: var(
+		--skerry-btn-secondary-hover-bg
+	);
+	--skerry-outlined-button-hover-shadow: var(
+		--skerry-btn-secondary-hover-shadow
+	);
+	--skerry-outlined-button-hover-text: var(--skerry-btn-secondary-hover-text);
+}
+
+.MuiButton-root.skerry-button-level-c {
+	--skerry-outlined-button-border: var(--skerry-btn-level-c-border);
+	--skerry-outlined-button-background: var(--skerry-btn-level-c-background);
+	--skerry-outlined-button-background-output: var(
+		--skerry-btn-level-c-background
+	);
+	--skerry-outlined-button-shadow: var(--skerry-btn-level-c-shadow);
+	--skerry-outlined-button-shadow-output: var(--skerry-btn-level-c-shadow);
+	--skerry-outlined-button-text: var(--skerry-btn-level-c-text);
+	--skerry-outlined-button-hover-border: var(--skerry-btn-level-c-hover-border);
+	--skerry-outlined-button-hover-background: var(
+		--skerry-btn-level-c-hover-background
+	);
+	--skerry-outlined-button-hover-shadow: var(--skerry-btn-level-c-hover-shadow);
+	--skerry-outlined-button-hover-text: var(--skerry-btn-level-c-hover-text);
+}
+
+.MuiButton-root.skerry-button-level-d {
+	--skerry-outlined-button-border: var(--skerry-btn-ghost-border);
+	--skerry-outlined-button-background: var(--skerry-btn-ghost-bg);
+	--skerry-outlined-button-background-output: var(--skerry-btn-ghost-bg);
+	--skerry-outlined-button-shadow: var(--skerry-btn-ghost-shadow);
+	--skerry-outlined-button-shadow-output: var(--skerry-btn-ghost-shadow);
+	--skerry-outlined-button-text: var(--skerry-btn-ghost-text);
+	--skerry-outlined-button-hover-border: var(--skerry-btn-ghost-hover-border);
+	--skerry-outlined-button-hover-background: var(--skerry-btn-ghost-hover-bg);
+	--skerry-outlined-button-hover-shadow: var(--skerry-btn-ghost-hover-shadow);
+	--skerry-outlined-button-hover-text: var(--skerry-btn-ghost-hover-text);
+}
+
+/* C is the ordinary surfaced action: flat, readable and without a sweep. */
+html:is(
+	[data-toolpad-color-scheme="light"],
+	[data-mui-color-scheme="light"],
+	[data-toolpad-color-scheme="dark"],
+	[data-mui-color-scheme="dark"]
+) .MuiButton-root.MuiButton-root.skerry-button-level-c:not(.Mui-disabled) {
+	border: 1px solid var(--skerry-btn-level-c-border);
+	color: var(--skerry-btn-level-c-text);
+	background: var(--skerry-btn-level-c-background);
+	box-shadow: var(--skerry-btn-level-c-shadow);
+}
+
+html:is(
+		[data-toolpad-color-scheme="light"],
+		[data-mui-color-scheme="light"],
+		[data-toolpad-color-scheme="dark"],
+		[data-mui-color-scheme="dark"]
+	)
+	.MuiButton-root.MuiButton-root.skerry-button-level-c:not(
+		.Mui-disabled
+	):hover {
+	border-color: var(--skerry-btn-level-c-hover-border);
+	color: var(--skerry-btn-level-c-hover-text);
+	background: var(--skerry-btn-level-c-hover-background);
+	box-shadow: var(--skerry-btn-level-c-hover-shadow);
+}
+
+.MuiButton-root.MuiButton-root.skerry-button-level-c:not(
+	.Mui-disabled
+):hover::after {
+	display: none;
+}
+
+/* D level: quiet text actions for cancel, close and light utility actions. */
+html:is(
+	[data-toolpad-color-scheme="light"],
+	[data-mui-color-scheme="light"],
+	[data-toolpad-color-scheme="dark"],
+	[data-mui-color-scheme="dark"]
+)
+.MuiButton-root.MuiButton-text:not(.Mui-disabled):not(
+	.MuiButton-colorError
+):not(.skerry-button-level-a):not(.skerry-button-level-b):not(
+	.skerry-button-level-c
+):not(.skerry-button-level-danger):not(.detail-action-btn) {
+	border-color: var(--skerry-btn-ghost-border);
+	color: var(--skerry-btn-ghost-text);
+	background: var(--skerry-btn-ghost-bg);
+	box-shadow: var(--skerry-btn-ghost-shadow);
+}
+
+html:is(
+		[data-toolpad-color-scheme="light"],
+		[data-mui-color-scheme="light"],
+		[data-toolpad-color-scheme="dark"],
+		[data-mui-color-scheme="dark"]
+	)
+	.MuiButton-root.MuiButton-text:not(.Mui-disabled):not(
+		.MuiButton-colorError
+	):not(.skerry-button-level-a):not(.skerry-button-level-b):not(
+		.skerry-button-level-c
+	):not(.skerry-button-level-danger):not(.detail-action-btn):hover {
+	border-color: var(--skerry-btn-ghost-hover-border);
+	color: var(--skerry-btn-ghost-hover-text);
+	background: var(--skerry-btn-ghost-hover-bg);
+	box-shadow: var(--skerry-btn-ghost-hover-shadow);
+}
+
+.MuiButton-root.MuiButton-text:not(.skerry-button-level-a):not(
+	.skerry-button-level-b
+):not(.skerry-button-level-danger):not(.detail-action-btn)::after {
+	display: none;
+}
+
+/* Non-contained error actions take precedence over the neutral outline. */
+html:is(
+	[data-toolpad-color-scheme="light"],
+	[data-mui-color-scheme="light"],
+	[data-toolpad-color-scheme="dark"],
+	[data-mui-color-scheme="dark"]
+)
+.MuiButton-root.MuiButton-colorError:not(.MuiButton-contained):not(
+	.Mui-disabled
+) {
+	border: 1px solid var(--skerry-error-button-border);
+	color: var(--skerry-error-button-text-output);
+	background: var(--skerry-error-button-background-output);
+	box-shadow: var(--skerry-error-button-shadow-output);
+}
+
+html:is(
+		[data-toolpad-color-scheme="light"],
+		[data-mui-color-scheme="light"],
+		[data-toolpad-color-scheme="dark"],
+		[data-mui-color-scheme="dark"]
+	)
+	.MuiButton-root.MuiButton-colorError:not(.MuiButton-contained):not(
+		.Mui-disabled
+	):hover {
+	border-color: var(--skerry-error-button-hover-border);
+	--skerry-error-button-text-output: var(--skerry-error-button-hover-text);
+	--skerry-error-button-background-output: var(
+		--skerry-error-button-hover-background
+	);
+	--skerry-error-button-shadow-output: var(--skerry-error-button-hover-shadow);
+}
+
+html:is(
+		[data-toolpad-color-scheme="light"],
+		[data-mui-color-scheme="light"],
+		[data-toolpad-color-scheme="dark"],
+		[data-mui-color-scheme="dark"]
+	)
+	.MuiButton-root.MuiButton-colorError:not(.MuiButton-contained):not(
+		.Mui-disabled
+	),
+html:is(
+		[data-toolpad-color-scheme="light"],
+		[data-mui-color-scheme="light"],
+		[data-toolpad-color-scheme="dark"],
+		[data-mui-color-scheme="dark"]
+	)
+	.MuiButton-root.MuiButton-colorError:not(.MuiButton-contained):not(
+		.Mui-disabled
+	):hover {
+	color: var(--skerry-error-button-text-output);
+	background: var(--skerry-error-button-background-output);
+	box-shadow: var(--skerry-error-button-shadow-output);
+}
+
+/* Filled primary buttons already share semantic tokens. Light mode retains
+ * its disabled palette; dark mode only adapts enabled buttons. */
+html:is([data-toolpad-color-scheme="light"], [data-mui-color-scheme="light"])
+.MuiButton-root.MuiButton-containedPrimary.MuiButton-containedPrimary,
+html:is([data-toolpad-color-scheme="dark"], [data-mui-color-scheme="dark"])
+	.MuiButton-root.MuiButton-containedPrimary.MuiButton-containedPrimary:not(
+		.Mui-disabled
+	) {
+	--skerry-contained-primary-image-output: var(--skerry-btn-primary-bg);
+	color: var(--skerry-btn-primary-text);
+}
+
+html:is([data-toolpad-color-scheme="light"], [data-mui-color-scheme="light"])
+	.MuiButton-root.MuiButton-containedPrimary.MuiButton-containedPrimary {
+	--skerry-contained-primary-background-color-output: var(--skerry-accent);
+	border-color: var(
+		--skerry-contained-primary-border-color-output,
+		var(--skerry-btn-primary-border)
+	);
+}
+
+html:is([data-toolpad-color-scheme="dark"], [data-mui-color-scheme="dark"])
+	.MuiButton-root.MuiButton-containedPrimary.MuiButton-containedPrimary:not(
+		.Mui-disabled
+	) {
+	border: var(--skerry-contained-primary-border-output, 0);
+	--skerry-contained-primary-background-color-output: transparent;
+}
+
+html:is([data-toolpad-color-scheme="light"], [data-mui-color-scheme="light"])
+	.MuiButton-containedPrimary:hover,
+html:is([data-toolpad-color-scheme="dark"], [data-mui-color-scheme="dark"])
+	.MuiButton-containedPrimary:hover:not(.Mui-disabled) {
+	--skerry-contained-primary-image-output: var(
+		--skerry-mui-primary-hover-image,
+		var(--skerry-btn-primary-hover-bg)
+	);
+}
+
+html:is([data-toolpad-color-scheme="dark"], [data-mui-color-scheme="dark"])
+	.MuiButton-containedPrimary:hover:not(.Mui-disabled) {
+	--skerry-mui-primary-hover-image: linear-gradient(
+		135deg,
+		#2f7df6 0%,
+		#55baff 58%,
+		#7d74ff 82%,
+		var(--skerry-rose) 100%
+	);
+	filter: saturate(1.08) brightness(1.02);
+}
+
+html:is([data-toolpad-color-scheme="light"], [data-mui-color-scheme="light"])
+	.MuiButton-containedPrimary,
+html:is([data-toolpad-color-scheme="dark"], [data-mui-color-scheme="dark"])
+	.MuiButton-containedPrimary:not(.Mui-disabled),
+html:is([data-toolpad-color-scheme="light"], [data-mui-color-scheme="light"])
+	.MuiButton-containedPrimary:hover,
+html:is([data-toolpad-color-scheme="dark"], [data-mui-color-scheme="dark"])
+	.MuiButton-containedPrimary:hover:not(.Mui-disabled) {
+	background-color: var(--skerry-contained-primary-background-color-output);
+	background-image: var(--skerry-contained-primary-image-output);
+}
+
+/* Level A uses the same primary gradient at rest and hover; the shared MUI
+ * sheen is its only hover treatment. */
+html:is([data-toolpad-color-scheme], [data-mui-color-scheme])
+	.MuiButton-root.MuiButton-containedPrimary.skerry-button-level-a-gradient:is(
+		:enabled,
+		:disabled
+	),
+html:is([data-toolpad-color-scheme], [data-mui-color-scheme])
+	.MuiButton-root.MuiButton-containedPrimary.skerry-button-level-a-gradient:hover:not(
+		.Mui-disabled
+	),
+html:is([data-toolpad-color-scheme], [data-mui-color-scheme])
+	.MuiButton-root.MuiButton-containedPrimary.skerry-button-level-a-gradient:active:not(
+		.Mui-disabled
+	) {
+	--skerry-contained-primary-image-output: var(--skerry-btn-primary-bg);
+	color: var(--skerry-btn-primary-text);
+}
+
+html:is([data-toolpad-color-scheme], [data-mui-color-scheme])
+	.MuiButton-root.MuiButton-containedPrimary.skerry-button-level-a-gradient:hover:not(
+		.Mui-disabled
+	) {
+	filter: none;
+}
+
+html:is([data-toolpad-color-scheme="dark"], [data-mui-color-scheme="dark"])
+	.MuiButton-root.skerry-button-level-a:hover:not(.Mui-disabled) {
+	filter: none;
+}
+
+/* Destructive filled actions use the same danger tokens in both color schemes.
+ * Page-specific launch actions can still provide their own contextual palette. */
+html:is(
+	[data-toolpad-color-scheme="light"],
+	[data-mui-color-scheme="light"],
+	[data-toolpad-color-scheme="dark"],
+	[data-mui-color-scheme="dark"]
+)
+	.MuiButton-root.MuiButton-containedError:not(.Mui-disabled):not(
+		.skerry-button-level-a
+	) {
+	background: var(--skerry-btn-danger-bg);
+	border: 1px solid var(--skerry-btn-danger-border);
+	color: var(--skerry-btn-danger-text);
+	box-shadow: var(--skerry-btn-danger-shadow);
+}
+
+html:is(
+		[data-toolpad-color-scheme="light"],
+		[data-mui-color-scheme="light"],
+		[data-toolpad-color-scheme="dark"],
+		[data-mui-color-scheme="dark"]
+	)
+	.MuiButton-root.MuiButton-containedError:not(.Mui-disabled):not(
+		.skerry-button-level-a
+	):hover {
+	background: var(--skerry-btn-danger-hover-bg);
+	border-color: var(--skerry-btn-danger-border);
+	color: var(--skerry-btn-danger-text);
+	box-shadow: var(--skerry-btn-danger-hover-shadow);
+}
+
+/* Button presses do not change scale, filters or tier colors. */
+.MuiButton-root.MuiButton-root:not(.Mui-disabled):active {
+	filter: none;
+	transform: none;
+}
+
+html:is(
+		[data-toolpad-color-scheme="light"],
+		[data-mui-color-scheme="light"],
+		[data-toolpad-color-scheme="dark"],
+		[data-mui-color-scheme="dark"]
+	)
+	.MuiButton-root.MuiButton-outlined:not(.Mui-disabled):active {
+	border-color: var(--skerry-outlined-button-border);
+	color: var(--skerry-outlined-button-text);
+	background: var(--skerry-outlined-button-background-output);
+	box-shadow: var(--skerry-outlined-button-shadow-output);
+}
+
+html:is(
+		[data-toolpad-color-scheme="light"],
+		[data-mui-color-scheme="light"],
+		[data-toolpad-color-scheme="dark"],
+		[data-mui-color-scheme="dark"]
+	)
+	.MuiButton-root.MuiButton-text:not(.Mui-disabled):not(
+		.MuiButton-colorError
+	):not(.skerry-button-level-a):not(.skerry-button-level-b):not(
+		.skerry-button-level-c
+	):not(.skerry-button-level-danger):not(.detail-action-btn):active {
+	border-color: var(--skerry-btn-ghost-border);
+	color: var(--skerry-btn-ghost-text);
+	background: var(--skerry-btn-ghost-bg);
+	box-shadow: var(--skerry-btn-ghost-shadow);
+}

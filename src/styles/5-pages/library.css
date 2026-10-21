@@ -1,0 +1,312 @@
+@import "./library-buttons.css";
+/* Game library: controls live with the list, while the page title stays calm. */
+
+.skerry-main.library-page-scroll {
+	display: flex;
+	flex-direction: column;
+	height: calc(100dvh - 64px);
+	overflow: hidden;
+	scrollbar-gutter: auto;
+	scrollbar-width: none;
+	-ms-overflow-style: none;
+}
+
+.skerry-main.library-page-scroll > .skerry-motion-root {
+	height: 100%;
+	max-height: 100%;
+	min-height: 0;
+	display: flex;
+	flex-direction: column;
+	flex: 1 1 auto;
+	overflow: hidden;
+}
+
+.skerry-library-route-frame {
+	display: grid;
+
+	min-width: 0;
+}
+
+.skerry-motion-root-contained .skerry-library-route-frame.is-active {
+	height: 100%;
+
+	min-height: 0;
+}
+
+.skerry-library-route-base {
+	min-width: 0;
+
+	grid-area: 1 / 1;
+}
+
+.skerry-library-route-base.is-detail-active {
+	position: absolute;
+
+	inset: 0;
+
+	z-index: -1;
+
+	visibility: hidden;
+
+	pointer-events: none;
+
+	overflow: hidden;
+
+	contain: layout paint;
+}
+
+.skerry-main.library-page-scroll .skerry-library-route-frame.is-active,
+.skerry-main.library-page-scroll .skerry-library-route-base,
+.skerry-main.library-page-scroll
+	> .skerry-motion-root
+	> [data-skerry-route-layer="collection"].is-active {
+	height: 100%;
+	max-height: 100%;
+	min-height: 0;
+	display: flex;
+	flex-direction: column;
+	flex: 1 1 auto;
+	overflow: hidden;
+}
+
+.library-page-shell {
+	width: 100%;
+	max-width: none;
+	margin: 0;
+	padding-inline: 0;
+	color: var(--skerry-ink);
+	height: 100%;
+	max-height: 100%;
+	display: flex;
+	flex: 1 1 auto;
+	flex-direction: column;
+	min-height: 0;
+	overflow: hidden;
+}
+
+.library-card-stage {
+	display: flex;
+	flex: 1 1 auto;
+	flex-direction: column;
+	min-width: 0;
+	min-height: 0;
+	height: 100%;
+	max-height: 100%;
+	overflow: hidden;
+}
+
+.library-card-stage .cards-control-bar {
+	flex: 0 0 auto;
+	position: sticky;
+	top: 0;
+	z-index: 10;
+	background: var(--skerry-canvas);
+	margin-bottom: 0;
+}
+
+.library-page-shell .cards-scroll-region {
+	box-sizing: border-box;
+	flex: 1 1 0;
+	min-height: 0;
+	height: auto;
+	max-height: none;
+	overflow-x: hidden;
+	overflow-y: auto;
+	overscroll-behavior-y: contain;
+	padding: 16px 0 32px;
+	margin-right: 0;
+	scrollbar-gutter: stable;
+	scrollbar-width: none;
+	-ms-overflow-style: none;
+	background: transparent;
+	box-shadow: none;
+	contain: layout paint;
+	transform: translateZ(0);
+	will-change: scroll-position;
+	pointer-events: auto;
+}
+
+.library-page-shell .cards-scroll-region.is-scrolling {
+	pointer-events: auto;
+}
+
+.library-page-shell .cards-scroll-region::-webkit-scrollbar {
+	display: none;
+
+	width: 0;
+
+	height: 0;
+}
+
+.skerry-main.library-page-scroll::-webkit-scrollbar {
+	width: 0;
+
+	height: 0;
+}
+
+.library-page-scroll .skerry-game-card {
+	content-visibility: auto;
+
+	contain-intrinsic-size: 180px 320px;
+}
+
+.skerry-main.library-page-scroll .cards-scroll-region .skerry-game-card {
+	--game-card-contain: layout style;
+
+	content-visibility: auto;
+
+	contain-intrinsic-size: 180px 320px;
+}
+
+.skerry-main.library-page-scroll
+	.cards-scroll-region
+	.skerry-game-card:nth-child(-n + 48) {
+	content-visibility: visible;
+
+	contain-intrinsic-size: auto;
+
+	--game-card-contain: none;
+}
+
+/* CardItem renders image effects; this page supplies its hover values. */
+.skerry-main.library-page-scroll {
+	--game-card-image-hover-filter: saturate(1.16) contrast(1.07) brightness(1.06);
+}
+
+.library-page-scroll {
+	--game-card-image-hover-transform: none;
+}
+
+.library-controls-pack {
+	display: flex;
+	overflow: visible;
+
+	align-items: center;
+
+	flex: 1 1 auto;
+
+	flex-wrap: nowrap;
+
+	gap: 10px;
+
+	min-width: 0;
+}
+
+.library-workbench-search {
+	flex: 0 0 320px;
+}
+
+.library-workbench-search > .MuiBox-root {
+	width: 100%;
+}
+
+.library-workbench-search .MuiOutlinedInput-root {
+	min-height: 38px;
+
+	background: color-mix(
+		in srgb,
+		var(--mui-palette-background-paper) 72%,
+		transparent
+	);
+
+	backdrop-filter: blur(16px) saturate(132%);
+}
+
+.library-workbench-actions {
+	display: inline-flex;
+	align-items: center;
+	align-self: center;
+	height: var(--skerry-btn-h-md, 36px);
+	min-height: var(--skerry-btn-h-md, 36px);
+	gap: 6px;
+	overflow: visible;
+	flex-wrap: nowrap;
+	flex: 0 0 auto;
+	min-width: max-content;
+}
+
+.library-workbench-actions--with-manage {
+	flex: 1 1 auto;
+	min-width: 0;
+}
+
+.library-workbench-actions--with-manage .collection-manage-games-button {
+	margin-left: auto;
+}
+
+@media (max-width: 1480px) {
+	.library-controls-pack {
+		gap: 7px;
+	}
+
+	.library-workbench-search {
+		flex: 0 0 280px;
+	}
+}
+
+@media (max-width: 1280px) {
+	.library-workbench-search {
+		flex: 0 0 240px;
+	}
+}
+
+@media (max-width: 1120px) {
+	.library-page-shell {
+		padding-inline: 52px;
+	}
+
+	.library-controls-pack {
+		flex-wrap: wrap;
+	}
+
+	.library-controls-pack,
+	.library-workbench-search {
+		width: 100%;
+
+		max-width: none;
+	}
+}
+
+/* The shared library/collection workspace keeps hovered covers neutral. */
+html:is(
+		[data-mui-color-scheme="light"],
+		[data-toolpad-color-scheme="light"],
+		[data-mui-color-scheme="dark"],
+		[data-toolpad-color-scheme="dark"]
+	)
+	:is(.library-page-shell, .library-page-scroll) {
+	--game-card-cover-scroll-hover-border: transparent;
+	--game-card-cover-scroll-hover-shadow: none;
+}
+
+/* Keep reduced-motion duration tokens local to scroll-reset targets. */
+.skerry-main.library-page-scroll.is-page-scrolling .skerry-game-card *,
+.skerry-main.library-page-scroll.is-page-scrolling .skerry-game-card *::before,
+.skerry-main.library-page-scroll.is-page-scrolling .skerry-game-card *::after,
+.skerry-main.library-page-scroll.is-page-scrolling .skerry-game-card::before,
+.skerry-main.library-page-scroll.is-page-scrolling .skerry-game-card::after {
+	--skerry-motion-animation-duration: initial;
+	--skerry-motion-transition-duration: initial;
+}
+
+/* Suspend card effects while the library list is scrolling. */
+.skerry-main.library-page-scroll.is-page-scrolling .skerry-game-card,
+.skerry-main.library-page-scroll.is-page-scrolling .game-card-cover,
+.skerry-main.library-page-scroll.is-page-scrolling .game-card-image,
+.skerry-main.library-page-scroll.is-page-scrolling
+	.skerry-game-card:hover
+	:is(.game-card-cover, .game-card-image) {
+	--skerry-motion-animation-duration: 0ms;
+	--skerry-motion-transition-duration: 0ms;
+	animation: none;
+	transition: none;
+	filter: none;
+	box-shadow: none;
+  transform: none;
+	pointer-events: none;
+}
+
+.skerry-main.library-page-scroll.is-page-scrolling .skerry-game-card {
+	--game-card-contain: layout style;
+}
+

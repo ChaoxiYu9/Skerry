@@ -1,0 +1,389 @@
+/* ==========================================================================
+   Skerry Design Tokens Contract (主题设计语义令牌)
+   单点真理：所有颜色、边框、投影与状态在此统一定义，深浅模式只在此切换变量
+   ========================================================================== */
+
+:root {
+	/* 1. 物理动效与尺寸律令（全软件统一物理法则） */
+	--skerry-radius-sm: 6px;
+	--skerry-radius-md: 8px;
+	--skerry-radius-lg: 12px;
+	--skerry-radius-xl: 16px;
+	--skerry-radius-pill: 999px;
+
+	--skerry-duration-fast: 120ms;
+	--skerry-duration-normal: 180ms;
+	--skerry-duration-smooth: 260ms;
+	--skerry-ease-standard: cubic-bezier(0.16, 1, 0.3, 1);
+
+	--skerry-btn-h-sm: 28px;
+	--skerry-btn-h-md: 36px;
+	--skerry-btn-h-lg: 40px;
+
+	/* Compatibility variables are adapters only; palette values stay in tier tokens. */
+	--skerry-outlined-button-border: var(--skerry-btn-level-c-border);
+	--skerry-outlined-button-background: var(--skerry-btn-level-c-background);
+	--skerry-outlined-button-shadow: var(--skerry-btn-level-c-shadow);
+	--skerry-outlined-button-text: var(--skerry-btn-level-c-text);
+	--skerry-outlined-button-hover-border: var(--skerry-btn-level-c-hover-border);
+	--skerry-outlined-button-hover-background: var(
+		--skerry-btn-level-c-hover-background
+	);
+	--skerry-outlined-button-hover-shadow: var(--skerry-btn-level-c-hover-shadow);
+	--skerry-outlined-button-hover-text: var(--skerry-btn-level-c-hover-text);
+	--skerry-outlined-button-background-output: var(
+		--skerry-outlined-button-background
+	);
+	--skerry-outlined-button-shadow-output: var(--skerry-outlined-button-shadow);
+
+	--skerry-error-button-border: var(--skerry-btn-danger-soft-border);
+	--skerry-error-button-background: var(--skerry-btn-danger-soft-bg);
+	--skerry-error-button-shadow: var(--skerry-btn-danger-soft-shadow);
+	--skerry-error-button-text: var(--skerry-btn-danger-soft-text);
+	--skerry-error-button-hover-border: var(--skerry-btn-danger-soft-hover-border);
+	--skerry-error-button-hover-background: var(
+		--skerry-btn-danger-soft-hover-bg
+	);
+	--skerry-error-button-hover-shadow: var(
+		--skerry-btn-danger-soft-hover-shadow
+	);
+	--skerry-error-button-hover-text: var(--skerry-btn-danger-soft-hover-text);
+	--skerry-error-button-text-output: var(--skerry-error-button-text);
+	--skerry-error-button-background-output: var(
+		--skerry-error-button-background
+	);
+	--skerry-error-button-shadow-output: var(--skerry-error-button-shadow);
+}
+
+/* ==========================================================================
+   ☀️ 浅色模式语义色卡（温润纸质微拟物）
+   ========================================================================== */
+html[data-mui-color-scheme="light"],
+html[data-toolpad-color-scheme="light"],
+:root:not([data-mui-color-scheme="dark"]):not(
+	[data-toolpad-color-scheme="dark"]
+) {
+	/* 画布与表面容器 */
+	--skerry-canvas: #f3efe7;
+	--skerry-glass-surface: rgba(253, 251, 246, 0.94);
+	--skerry-glass-border: rgba(96, 78, 50, 0.18);
+	--skerry-glass-shadow:
+		0 24px 64px rgba(76, 64, 47, 0.14), 0 6px 18px rgba(76, 64, 47, 0.07);
+	--skerry-ink: #1f2937;
+	--skerry-muted: #64748b;
+	--skerry-accent: #9a3412;
+	--skerry-glint: #f7ecd5;
+	--skerry-iris: #8b5e34;
+	--skerry-rose: #c2410c;
+	--skerry-amber: #c2410c;
+	--skerry-panel: rgba(253, 251, 246, 0.94);
+	--skerry-panel-dark: rgba(255, 255, 255, 0.96);
+	--skerry-surface-panel: #faf6ed;
+	--skerry-surface-card: #ffffff;
+	--skerry-surface-dialog: #ffffff;
+	--skerry-surface-popover: #ffffff;
+	--skerry-dialog-surface: rgba(255, 251, 243, 0.94);
+	--skerry-dialog-surface-image: linear-gradient(
+		145deg,
+		rgba(255, 253, 248, 0.99),
+		rgba(250, 245, 235, 0.97) 56%,
+		rgba(244, 236, 222, 0.96)
+	);
+	--skerry-dialog-border: rgba(119, 79, 46, 0.24);
+	--skerry-dialog-shadow:
+		0 34px 88px rgba(50, 37, 23, 0.25),
+		0 8px 24px rgba(102, 61, 30, 0.1),
+		inset 0 1px 0 rgba(255, 255, 255, 0.86);
+	--skerry-dialog-backdrop: rgba(28, 22, 18, 0.5);
+	--skerry-dialog-divider: rgba(133, 94, 54, 0.18);
+	--skerry-dialog-ornament: rgba(184, 93, 44, 0.58);
+	--skerry-dialog-ornament-glow: rgba(220, 137, 78, 0.16);
+	--skerry-dialog-action-wash: rgba(150, 92, 48, 0.035);
+
+	/* 边框与微描边 */
+	--skerry-border-subtle: rgba(120, 100, 80, 0.12);
+	--skerry-border-default: rgba(120, 100, 80, 0.22);
+	--skerry-border-active: #c2410c;
+
+	/* 文字排印系统 */
+	--skerry-text-main: #1a202c;
+	--skerry-text-sub: #4a5568;
+	--skerry-text-muted: #718096;
+	--skerry-text-inverse: #ffffff;
+
+	/* --- 按钮系统：主行动 (Primary) 温暖活力橙红渐变 --- */
+	--skerry-button-sheen-color: rgba(255, 255, 255, 0.42);
+	--skerry-btn-primary-bg: linear-gradient(
+		135deg,
+		#9a3412 0%,
+		#c2410c 58%,
+		#7c2d12 100%
+	);
+	--skerry-btn-primary-hover-bg: var(--skerry-btn-primary-bg);
+	--skerry-btn-primary-active-bg: var(--skerry-btn-primary-bg);
+	--skerry-btn-primary-text: #fffbeb;
+	--skerry-btn-primary-border: rgba(161, 98, 7, 0.34);
+	--skerry-btn-primary-hover-border: var(--skerry-btn-primary-border);
+	--skerry-btn-primary-shadow: 0 12px 24px rgba(161, 98, 7, 0.22);
+
+	/* --- B 级：中强调工具按钮，静态采用原筛选/同步按钮的悬停外观 --- */
+	--skerry-btn-secondary-bg: linear-gradient(
+		135deg,
+		rgba(255, 251, 240, 0.96) 0%,
+		rgba(253, 235, 207, 0.94) 100%
+	);
+	--skerry-btn-secondary-hover-bg: var(--skerry-btn-secondary-bg);
+	--skerry-btn-secondary-active-bg: var(--skerry-btn-secondary-bg);
+	--skerry-btn-secondary-text: #9a3412;
+	--skerry-btn-secondary-hover-text: #7c2d12;
+	--skerry-btn-secondary-border: rgba(194, 65, 12, 0.38);
+	--skerry-btn-secondary-hover-border: var(--skerry-btn-secondary-border);
+	--skerry-btn-secondary-shadow:
+		inset 0 1px 0 rgba(255, 255, 255, 0.78),
+		0 8px 18px rgba(154, 52, 18, 0.1);
+	--skerry-btn-secondary-hover-shadow: var(--skerry-btn-secondary-shadow);
+
+	/* --- C 级：普通操作按钮；使用平面表面，不加阴影或流光 --- */
+	--skerry-btn-level-c-background: var(--skerry-surface-panel);
+	--skerry-btn-level-c-hover-background: var(--skerry-surface-panel);
+	--skerry-btn-level-c-text: var(--skerry-text-sub);
+	--skerry-btn-level-c-hover-text: var(--skerry-accent);
+	--skerry-btn-level-c-border: var(--skerry-glass-border);
+	--skerry-btn-level-c-hover-border: color-mix(
+		in srgb,
+		var(--skerry-accent) 72%,
+		var(--skerry-glass-border)
+	);
+	--skerry-btn-level-c-shadow: none;
+	--skerry-btn-level-c-hover-shadow: none;
+
+	/* --- D 级：低强调文字按钮，悬停出现轻柔的中性色表面 --- */
+	--skerry-btn-ghost-bg: transparent;
+	--skerry-btn-ghost-hover-bg: rgba(154, 52, 18, 0.07);
+	--skerry-btn-ghost-text: var(--skerry-text-sub);
+	--skerry-btn-ghost-hover-text: var(--skerry-accent);
+	--skerry-btn-ghost-border: transparent;
+	--skerry-btn-ghost-hover-border: transparent;
+	--skerry-btn-ghost-shadow: none;
+	--skerry-btn-ghost-hover-shadow: none;
+	--skerry-btn-ghost-active-bg: var(--skerry-btn-ghost-hover-bg);
+
+	/* --- 按钮系统：图标按钮 (Icon) --- */
+	--skerry-btn-icon-bg: var(--skerry-btn-secondary-bg);
+	--skerry-btn-icon-hover-bg: var(--skerry-btn-secondary-hover-bg);
+	--skerry-btn-icon-text: var(--skerry-btn-secondary-text);
+	--skerry-btn-icon-hover-text: var(--skerry-btn-secondary-hover-text);
+	--skerry-btn-icon-border: var(--skerry-btn-secondary-border);
+	--skerry-btn-icon-hover-border: var(--skerry-btn-secondary-hover-border);
+
+	/* --- 按钮系统：危险操作 (Danger) --- */
+	--skerry-btn-danger-bg: linear-gradient(
+		135deg,
+		#dc2626 0%,
+		#ef4444 58%,
+		#b91c1c 100%
+	);
+	--skerry-btn-danger-hover-bg: linear-gradient(
+		135deg,
+		#b91c1c 0%,
+		#dc2626 58%,
+		#991b1b 100%
+	);
+	--skerry-btn-danger-text: #ffffff;
+	--skerry-btn-danger-border: rgba(185, 28, 28, 0.35);
+	--skerry-btn-danger-soft-bg: rgba(220, 38, 38, 0.07);
+	--skerry-btn-danger-soft-hover-bg: rgba(220, 38, 38, 0.14);
+	--skerry-btn-danger-soft-text: #dc2626;
+	--skerry-btn-danger-soft-hover-text: #b91c1c;
+	--skerry-btn-danger-soft-border: rgba(220, 38, 38, 0.32);
+	--skerry-btn-danger-soft-hover-border: rgba(220, 38, 38, 0.5);
+	--skerry-btn-danger-soft-shadow: 0 1px 3px rgba(220, 38, 38, 0.08);
+	--skerry-btn-danger-soft-hover-shadow: 0 2px 6px rgba(220, 38, 38, 0.16);
+	--skerry-btn-danger-shadow: 0 1px 3px rgba(185, 28, 28, 0.14);
+	--skerry-btn-danger-hover-shadow: var(--skerry-btn-danger-shadow);
+
+	/* 阴影系统 */
+	--skerry-shadow-card: 0 2px 6px rgba(120, 100, 80, 0.06);
+	--skerry-shadow-card-hover:
+		0 12px 26px -4px rgba(120, 105, 85, 0.28),
+		0 4px 10px rgba(120, 105, 85, 0.14);
+}
+
+/* ==========================================================================
+   🌙 深色模式语义色卡（曜石深晶 + 极光霓虹）
+   ========================================================================== */
+html[data-mui-color-scheme="dark"],
+html[data-toolpad-color-scheme="dark"] {
+	/* 画布与表面容器 */
+	--skerry-canvas: #071321;
+	--skerry-glass-surface: rgba(13, 25, 40, 0.94);
+	--skerry-glass-border: rgba(117, 201, 255, 0.16);
+	--skerry-glass-shadow:
+		0 24px 68px rgba(0, 0, 0, 0.42), 0 7px 22px rgba(0, 0, 0, 0.26);
+	--skerry-ink: #eff7ff;
+	--skerry-muted: #9db5cc;
+	--skerry-accent: #70c7ff;
+	--skerry-glint: #d9ecff;
+	--skerry-iris: #8b5e34;
+	--skerry-rose: #ff9abc;
+	--skerry-amber: #ffd089;
+	--skerry-panel: rgba(13, 25, 40, 0.95);
+	--skerry-panel-dark: rgba(5, 12, 22, 0.98);
+	--skerry-surface-panel: #0f172a;
+	--skerry-surface-card: #182232;
+	--skerry-surface-dialog: #131c2e;
+	--skerry-surface-popover: #151f33;
+	--skerry-dialog-surface: rgba(13, 23, 37, 0.96);
+	--skerry-dialog-surface-image: linear-gradient(
+		145deg,
+		rgba(25, 39, 58, 0.99),
+		rgba(13, 25, 40, 0.98) 56%,
+		rgba(8, 18, 31, 0.99)
+	);
+	--skerry-dialog-border: rgba(126, 185, 224, 0.24);
+	--skerry-dialog-shadow:
+		0 38px 100px rgba(0, 0, 0, 0.58),
+		0 10px 32px rgba(0, 0, 0, 0.3),
+		inset 0 1px 0 rgba(213, 235, 255, 0.12);
+	--skerry-dialog-backdrop: rgba(1, 7, 16, 0.68);
+	--skerry-dialog-divider: rgba(121, 164, 198, 0.18);
+	--skerry-dialog-ornament: rgba(230, 163, 106, 0.62);
+	--skerry-dialog-ornament-glow: rgba(104, 191, 237, 0.12);
+	--skerry-dialog-action-wash: rgba(126, 185, 224, 0.035);
+
+	/* 边框与微描边 */
+	--skerry-border-subtle: rgba(255, 255, 255, 0.08);
+	--skerry-border-default: rgba(255, 255, 255, 0.16);
+	--skerry-border-active: #38bdf8;
+
+	/* 文字排印系统 */
+	--skerry-text-main: #f8fafc;
+	--skerry-text-sub: #94a3b8;
+	--skerry-text-muted: #64748b;
+	--skerry-text-inverse: #090e17;
+
+	/* --- 按钮系统：主行动 (Primary, 图3标准) 湛蓝霓虹紫极光渐变 --- */
+	--skerry-button-sheen-color: rgba(255, 255, 255, 0.52);
+	--skerry-btn-primary-bg: linear-gradient(
+		135deg,
+		#2f7df6 0%,
+		#70c7ff 54%,
+		#7d74ff 82%,
+		var(--skerry-rose) 100%
+	);
+	--skerry-btn-primary-hover-bg: var(--skerry-btn-primary-bg);
+	--skerry-btn-primary-active-bg: var(--skerry-btn-primary-bg);
+	--skerry-btn-primary-text: #ffffff;
+	--skerry-btn-primary-border: transparent;
+	--skerry-btn-primary-hover-border: transparent;
+	--skerry-btn-primary-shadow:
+		0 12px 24px rgba(47, 125, 246, 0.32), 0 0 16px rgba(112, 199, 255, 0.22);
+
+	/* --- B 级：中强调工具按钮，保留暗色模式下的冷色层次 --- */
+	--skerry-btn-secondary-bg: linear-gradient(
+		135deg,
+		rgba(56, 189, 248, 0.28) 0%,
+		rgba(14, 165, 233, 0.2) 100%
+	);
+	--skerry-btn-secondary-hover-bg: var(--skerry-btn-secondary-bg);
+	--skerry-btn-secondary-active-bg: var(--skerry-btn-secondary-bg);
+	--skerry-btn-secondary-text: #38bdf8;
+	--skerry-btn-secondary-hover-text: #7dd3fc;
+	--skerry-btn-secondary-border: rgba(56, 189, 248, 0.8);
+	--skerry-btn-secondary-hover-border: var(--skerry-btn-secondary-border);
+	--skerry-btn-secondary-shadow:
+		inset 0 1px 0 rgba(255, 255, 255, 0.22),
+		0 6px 18px rgba(56, 189, 248, 0.25);
+	--skerry-btn-secondary-hover-shadow: var(--skerry-btn-secondary-shadow);
+
+	/* --- C 级：普通操作按钮；使用平面表面，不加阴影或流光 --- */
+	--skerry-btn-level-c-background: var(--skerry-surface-panel);
+	--skerry-btn-level-c-hover-background: var(--skerry-surface-panel);
+	--skerry-btn-level-c-text: var(--skerry-text-sub);
+	--skerry-btn-level-c-hover-text: var(--skerry-accent);
+	--skerry-btn-level-c-border: var(--skerry-glass-border);
+	--skerry-btn-level-c-hover-border: color-mix(
+		in srgb,
+		var(--skerry-accent) 72%,
+		var(--skerry-glass-border)
+	);
+	--skerry-btn-level-c-shadow: none;
+	--skerry-btn-level-c-hover-shadow: none;
+
+	/* --- D 级：低强调文字按钮 --- */
+	--skerry-btn-ghost-bg: transparent;
+	--skerry-btn-ghost-hover-bg: rgba(255, 255, 255, 0.07);
+	--skerry-btn-ghost-text: var(--skerry-text-sub);
+	--skerry-btn-ghost-hover-text: var(--skerry-accent);
+	--skerry-btn-ghost-border: transparent;
+	--skerry-btn-ghost-hover-border: transparent;
+	--skerry-btn-ghost-shadow: none;
+	--skerry-btn-ghost-hover-shadow: none;
+	--skerry-btn-ghost-active-bg: var(--skerry-btn-ghost-hover-bg);
+
+	/* --- 按钮系统：图标按钮 (Icon) --- */
+	--skerry-btn-icon-bg: var(--skerry-btn-secondary-bg);
+	--skerry-btn-icon-hover-bg: var(--skerry-btn-secondary-hover-bg);
+	--skerry-btn-icon-text: var(--skerry-btn-secondary-text);
+	--skerry-btn-icon-hover-text: var(--skerry-btn-secondary-hover-text);
+	--skerry-btn-icon-border: var(--skerry-btn-secondary-border);
+	--skerry-btn-icon-hover-border: var(--skerry-btn-secondary-hover-border);
+
+	/* --- 按钮系统：危险操作 (Danger) --- */
+	--skerry-btn-danger-bg: linear-gradient(135deg, #e11d48 0%, #be123c 100%);
+	--skerry-btn-danger-hover-bg: linear-gradient(
+		135deg,
+		#f43f5e 0%,
+		#e11d48 100%
+	);
+	--skerry-btn-danger-text: #ffffff;
+	--skerry-btn-danger-border: rgba(255, 255, 255, 0.25);
+	--skerry-btn-danger-soft-bg: rgba(239, 68, 68, 0.14);
+	--skerry-btn-danger-soft-hover-bg: rgba(239, 68, 68, 0.24);
+	--skerry-btn-danger-soft-text: #f87171;
+	--skerry-btn-danger-soft-hover-text: #fca5a5;
+	--skerry-btn-danger-soft-border: rgba(239, 68, 68, 0.4);
+	--skerry-btn-danger-soft-hover-border: rgba(239, 68, 68, 0.6);
+	--skerry-btn-danger-soft-shadow: 0 1px 4px rgba(0, 0, 0, 0.25);
+	--skerry-btn-danger-soft-hover-shadow: 0 2px 8px rgba(239, 68, 68, 0.2);
+	--skerry-btn-danger-shadow: 0 1px 4px rgba(0, 0, 0, 0.25);
+	--skerry-btn-danger-hover-shadow: var(--skerry-btn-danger-shadow);
+
+	/* 阴影系统 */
+	--skerry-shadow-card: 0 3px 10px rgba(0, 0, 0, 0.45);
+	--skerry-shadow-card-hover:
+		0 8px 18px -2px rgba(0, 0, 0, 0.45), 0 4px 16px rgba(56, 189, 248, 0.22);
+}
+/* Shared surface materials used by popups, page panels and list states. */
+:root {
+	--skerry-glass-liquid: linear-gradient(
+		145deg,
+		rgba(255, 255, 255, 0.99),
+		rgba(251, 247, 239, 0.97) 42%,
+		rgba(243, 239, 231, 0.94)
+	);
+
+	--skerry-glass-liquid-dark: linear-gradient(
+		145deg,
+		rgba(24, 37, 56, 0.992),
+		rgba(13, 25, 40, 0.975) 48%,
+		rgba(8, 18, 31, 0.988)
+	);
+
+	--skerry-glass-rim:
+		inset 0 1px 0 rgba(255, 255, 255, 0.68),
+		inset 0 -1px 0 rgba(96, 78, 50, 0.08), 0 0 0 1px rgba(255, 255, 255, 0.24);
+
+	--skerry-glow-soft:
+		0 20px 54px rgba(76, 64, 47, 0.14), 0 7px 20px rgba(96, 78, 50, 0.08);
+}
+/* Dark shared surface materials. */
+
+html:is([data-toolpad-color-scheme="dark"], [data-mui-color-scheme="dark"]) {
+	--skerry-glass-rim:
+		inset 0 1px 0 rgba(255, 255, 255, 0.16), inset 0 -1px 0 rgba(0, 0, 0, 0.24),
+		0 0 0 1px rgba(117, 201, 255, 0.14);
+
+	--skerry-glow-soft:
+		0 22px 58px rgba(0, 0, 0, 0.38), 0 8px 24px rgba(0, 0, 0, 0.24);
+}

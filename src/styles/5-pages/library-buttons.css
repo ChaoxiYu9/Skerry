@@ -1,0 +1,347 @@
+/* ==========================================================================
+   Skerry Library Toolbar Buttons (游戏库顶栏独立按钮体系)
+   严格限定在 .library-workbench-actions 内，物理隔离，不扩散
+   100% 消费 Design Tokens 单点真理变量
+   ========================================================================== */
+
+/* Primary toolbar buttons keep the shared sheen without amplifying the outer edge on hover. */
+.library-workbench-actions .library-action-primary:hover:not(.Mui-disabled),
+.library-workbench-actions
+	.library-launch-action
+	.skerry-launch-action-button:hover:not(.Mui-disabled) {
+	filter: none;
+}
+
+.library-workbench-actions .library-launch-action,
+.library-workbench-actions .library-filter-action {
+	display: inline-flex;
+	align-items: center;
+	height: var(--skerry-btn-h-md, 36px);
+}
+
+/* Fixed slots keep library controls aligned when labels or counts change. */
+.library-workbench-actions .library-launch-action,
+.library-workbench-actions .library-action-primary.MuiButton-root,
+.library-workbench-actions .library-filter-action,
+.library-workbench-actions .library-sync-source-button.MuiButton-root,
+.library-workbench-actions > .library-action-button {
+	box-sizing: border-box;
+	flex: 0 0 auto;
+	width: 130px;
+	min-width: 0;
+}
+
+.library-workbench-actions .library-launch-action .MuiButton-root,
+.library-workbench-actions .library-filter-action .MuiButton-root {
+	width: 100%;
+	min-width: 0;
+}
+
+.library-workbench-actions .library-filter-action > .group {
+	display: flex;
+	width: 100%;
+}
+
+/* 基础尺寸与内容裁切；胶囊外形继承通用按钮基线 */
+.library-workbench-actions .MuiButton-root {
+	height: var(--skerry-btn-h-md, 36px);
+	min-height: var(--skerry-btn-h-md, 36px);
+	font-size: 13px;
+	--skerry-btn-line-height: var(--skerry-btn-h-md, 36px);
+	padding: 0 16px;
+}
+
+.library-workbench-actions .MuiButton-root:active {
+	transform: none;
+}
+
+/* 高光扫光伪元素继承胶囊圆角并严格受限 */
+.library-workbench-actions .MuiButton-root::after {
+	border-radius: inherit;
+}
+
+/* 图标微调 */
+.library-workbench-actions .MuiButton-startIcon {
+	margin-left: -2px;
+	margin-right: 5px;
+}
+.library-workbench-actions .MuiButton-startIcon .MuiSvgIcon-root {
+	font-size: 17px;
+}
+
+/* --------------------------------------------------------------------------
+   2. 主按钮群：[启动游戏/同步本地] 与 [+ 添加游戏] - 高权重绝对一致
+   -------------------------------------------------------------------------- */
+html:is([data-toolpad-color-scheme], [data-mui-color-scheme])
+	.library-workbench-actions
+	.library-action-primary:not(.Mui-disabled),
+html:is([data-toolpad-color-scheme], [data-mui-color-scheme])
+	.library-workbench-actions
+	.library-launch-action
+	.skerry-launch-action-button:not(.Mui-disabled),
+.library-workbench-actions .library-action-primary:not(.Mui-disabled),
+.library-workbench-actions
+	.library-launch-action
+	.skerry-launch-action-button.skerry-launch-start:not(.Mui-disabled),
+.library-workbench-actions
+	.library-launch-action
+	.skerry-launch-action-button.skerry-launch-sync:not(.Mui-disabled) {
+	--library-action-background: var(--skerry-btn-primary-bg);
+	--library-action-border: 1px solid var(--skerry-btn-primary-border);
+	--library-action-text: var(--skerry-btn-primary-text);
+	--library-action-shadow: none;
+	--skerry-btn-shadow: var(--library-action-shadow);
+	--skerry-mui-focus-shadow-output:
+		0 0 0 2px var(--mui-palette-background-default),
+		0 0 0 4px color-mix(in srgb, var(--mui-palette-primary-main) 65%, transparent);
+	--skerry-button-focus-shadow-output:
+		0 0 0 2px var(--mui-palette-background-default),
+		0 0 0 4px color-mix(in srgb, var(--mui-palette-primary-main) 65%, transparent);
+}
+
+html:is([data-toolpad-color-scheme], [data-mui-color-scheme])
+	.library-workbench-actions
+	.library-action-primary:hover:not(.skerry-button-level-a),
+html:is([data-toolpad-color-scheme], [data-mui-color-scheme])
+	.library-workbench-actions
+	.library-launch-action
+	.skerry-launch-action-button:hover:not(.Mui-disabled):not(.skerry-button-level-a),
+.library-workbench-actions .library-action-primary:hover:not(.skerry-button-level-a),
+.library-workbench-actions
+	.library-launch-action
+	.skerry-launch-action-button.skerry-launch-start:not(.Mui-disabled):not(.skerry-button-level-a):hover,
+.library-workbench-actions
+	.library-launch-action
+	.skerry-launch-action-button.skerry-launch-sync:not(.Mui-disabled):not(.skerry-button-level-a):hover {
+	--library-action-background: var(--skerry-btn-primary-hover-bg);
+	--library-action-border: 1px solid var(--skerry-btn-primary-hover-border);
+}
+
+html:is([data-toolpad-color-scheme], [data-mui-color-scheme])
+	.library-workbench-actions
+	.library-action-primary:active:not(.skerry-button-level-a),
+html:is([data-toolpad-color-scheme], [data-mui-color-scheme])
+	.library-workbench-actions
+	.library-launch-action
+	.skerry-launch-action-button:active:not(.Mui-disabled):not(.skerry-button-level-a),
+.library-workbench-actions .library-action-primary:active:not(.skerry-button-level-a),
+.library-workbench-actions
+	.library-launch-action
+	.skerry-launch-action-button.skerry-launch-start:not(.Mui-disabled):not(.skerry-button-level-a):active,
+.library-workbench-actions
+	.library-launch-action
+	.skerry-launch-action-button.skerry-launch-sync:not(.Mui-disabled):not(.skerry-button-level-a):active {
+	--library-action-background: var(--skerry-btn-primary-active-bg);
+	transform: scale(0.988);
+}
+
+/* 运行中状态 */
+.library-workbench-actions
+	.library-launch-action
+	.skerry-launch-action-button.skerry-launch-running {
+	--library-action-background: var(--skerry-btn-danger-bg);
+	--library-action-border: 1px solid var(--skerry-btn-danger-border);
+	--library-action-text: var(--skerry-btn-danger-text);
+}
+
+/* Primary action backgrounds share an output across base, hover, and active. */
+html:is([data-toolpad-color-scheme], [data-mui-color-scheme])
+	.library-workbench-actions
+	.library-action-primary:is(:enabled, :disabled),
+html:is([data-toolpad-color-scheme], [data-mui-color-scheme])
+	.library-workbench-actions
+	.library-launch-action
+	.skerry-launch-action-button:not(.Mui-disabled):is(:enabled, :disabled),
+.library-workbench-actions .library-action-primary:is(:enabled, :disabled),
+.library-workbench-actions
+	.library-launch-action
+	.skerry-launch-action-button.skerry-launch-start:not(.Mui-disabled):is(:enabled, :disabled),
+.library-workbench-actions
+	.library-launch-action
+	.skerry-launch-action-button.skerry-launch-sync:not(.Mui-disabled):is(:enabled, :disabled),
+.library-workbench-actions
+	.library-launch-action
+	.skerry-launch-action-button.skerry-launch-running:is(:enabled, :disabled),
+html:is([data-toolpad-color-scheme], [data-mui-color-scheme])
+	.library-workbench-actions
+	.library-action-primary:hover:is(:enabled, :disabled),
+html:is([data-toolpad-color-scheme], [data-mui-color-scheme])
+	.library-workbench-actions
+	.library-launch-action
+	.skerry-launch-action-button:hover:not(.Mui-disabled):is(:enabled, :disabled),
+.library-workbench-actions .library-action-primary:hover:is(:enabled, :disabled),
+.library-workbench-actions
+	.library-launch-action
+	.skerry-launch-action-button.skerry-launch-start:not(.Mui-disabled):hover:is(:enabled, :disabled),
+.library-workbench-actions
+	.library-launch-action
+	.skerry-launch-action-button.skerry-launch-sync:not(.Mui-disabled):hover:is(:enabled, :disabled),
+html:is([data-toolpad-color-scheme], [data-mui-color-scheme])
+	.library-workbench-actions
+	.library-action-primary:active:is(:enabled, :disabled),
+html:is([data-toolpad-color-scheme], [data-mui-color-scheme])
+	.library-workbench-actions
+	.library-launch-action
+	.skerry-launch-action-button:active:not(.Mui-disabled):is(:enabled, :disabled),
+.library-workbench-actions .library-action-primary:active:is(:enabled, :disabled),
+.library-workbench-actions
+	.library-launch-action
+	.skerry-launch-action-button.skerry-launch-start:not(.Mui-disabled):active:is(:enabled, :disabled),
+.library-workbench-actions
+	.library-launch-action
+	.skerry-launch-action-button.skerry-launch-sync:not(.Mui-disabled):active:is(:enabled, :disabled) {
+	background: var(--library-action-background);
+}
+
+/* Library primary and running actions share their base property boundary. */
+html:is([data-toolpad-color-scheme], [data-mui-color-scheme])
+	.library-workbench-actions
+	.library-action-primary,
+html:is([data-toolpad-color-scheme], [data-mui-color-scheme])
+	.library-workbench-actions
+	.library-launch-action
+	.skerry-launch-action-button:not(.Mui-disabled),
+.library-workbench-actions .library-action-primary,
+.library-workbench-actions
+	.library-launch-action
+	.skerry-launch-action-button.skerry-launch-start:not(.Mui-disabled),
+.library-workbench-actions
+	.library-launch-action
+	.skerry-launch-action-button.skerry-launch-sync:not(.Mui-disabled),
+.library-workbench-actions
+	.library-launch-action
+	.skerry-launch-action-button.skerry-launch-running {
+	color: var(--library-action-text);
+}
+/* Library primary and running actions share their base property boundary. */
+html:is([data-toolpad-color-scheme], [data-mui-color-scheme])
+	.library-workbench-actions
+	.MuiButton-root.MuiButton-root.library-action-primary:not(.Mui-disabled),
+.library-workbench-actions
+	.MuiButton-root.MuiButton-root.library-action-primary:not(.Mui-disabled) {
+	border: var(--library-action-border);
+	background-clip: padding-box;
+}
+html:is([data-toolpad-color-scheme], [data-mui-color-scheme])
+	.library-workbench-actions
+	.library-launch-action
+	.MuiButton-root.MuiButton-root.skerry-launch-action-button:not(.Mui-disabled),
+.library-workbench-actions
+	.library-launch-action
+	.MuiButton-root.MuiButton-root.skerry-launch-action-button:not(.Mui-disabled) {
+	border: var(--library-action-border);
+	background-clip: padding-box;
+}
+html:is([data-toolpad-color-scheme], [data-mui-color-scheme])
+	.library-workbench-actions
+	.library-launch-action
+	.MuiButton-root.MuiButton-root.skerry-launch-action-button.skerry-launch-running.Mui-disabled,
+.library-workbench-actions
+	.library-launch-action
+	.MuiButton-root.MuiButton-root.skerry-launch-action-button.skerry-launch-running.Mui-disabled {
+	border: var(--library-action-border);
+}
+
+/* Normal color owners outrank MUI variant and state colors without forcing priority. */
+.library-workbench-actions .MuiButton-root.library-action-primary,
+.library-workbench-actions .MuiButton-root.library-action-primary:hover,
+.library-workbench-actions .MuiButton-root.library-action-primary:active,
+.library-workbench-actions
+	.MuiButton-root.library-action-primary.Mui-focusVisible {
+	color: var(--library-action-text);
+}
+
+/* --------------------------------------------------------------------------
+   3. 副按钮群：[筛选排序] 与 [同步数据源] 优雅微吸附 (scale 0.99)
+   -------------------------------------------------------------------------- */
+/* --------------------------------------------------------------------------
+   4. 未选中/禁用状态 (Disabled)
+   -------------------------------------------------------------------------- */
+/* 普通副按钮禁用状态（筛选排序等）：半透暗晶底 */
+.library-workbench-actions
+.MuiButton-root.Mui-disabled:not(.skerry-launch-action-button) {
+	--library-disabled-background: rgba(255, 255, 255, 0.06);
+	--library-disabled-border: 1px solid rgba(255, 255, 255, 0.1);
+	--library-disabled-color: rgba(255, 255, 255, 0.38);
+	--library-disabled-filter: none;
+	--library-disabled-opacity: 1;
+}
+
+/* 主行动按钮禁用状态：保持原选中渐变底色，打上一层高级灰质感 */
+.library-workbench-actions .skerry-launch-action-button.Mui-disabled {
+	--library-disabled-background: var(--skerry-btn-primary-bg);
+	--library-disabled-border: 1px solid var(--skerry-btn-primary-border);
+	--library-disabled-color: rgba(255, 255, 255, 0.6);
+	--library-disabled-filter: grayscale(80%) brightness(0.55) contrast(0.9);
+	--library-disabled-opacity: 0.85;
+}
+
+/* 浅色模式：普通副按钮禁用状态 */
+html:is([data-mui-color-scheme="light"], [data-toolpad-color-scheme="light"])
+	.library-workbench-actions
+	.MuiButton-root.Mui-disabled:not(.skerry-launch-action-button) {
+	--library-disabled-background: #eeeae1;
+	--library-disabled-border: 1px solid #dcd6c8;
+	--library-disabled-color: #948c7c;
+}
+
+/* 浅色模式：主行动按钮未选中/禁用状态：保持原渐变底色打上柔和灰色 */
+html:is([data-mui-color-scheme="light"], [data-toolpad-color-scheme="light"])
+	.library-workbench-actions
+	.skerry-launch-action-button.Mui-disabled {
+	--library-disabled-color: rgba(255, 255, 255, 0.75);
+	--library-disabled-filter: grayscale(70%) opacity(0.55);
+	--library-disabled-opacity: 1;
+}
+
+/* Disabled sync keeps its B-level palette under the existing disabled state. */
+html:is([data-toolpad-color-scheme="dark"], [data-mui-color-scheme="dark"]):not(
+		:is([data-toolpad-color-scheme="light"], [data-mui-color-scheme="light"])
+	)
+	.library-workbench-actions
+	.library-action-button.library-action-secondary.MuiButton-root.Mui-disabled {
+	--library-disabled-border: 1px solid var(--skerry-btn-secondary-border);
+	--library-disabled-background: var(--skerry-btn-secondary-bg);
+	--library-disabled-color: var(--skerry-btn-secondary-text);
+}
+
+.library-workbench-actions
+	.skerry-launch-action-button.skerry-launch-running.Mui-disabled {
+	--library-disabled-color: var(--library-action-text);
+}
+
+.library-workbench-actions
+	.MuiButton-root.Mui-disabled:not(.skerry-launch-action-button) {
+	--skerry-btn-shadow: none;
+}
+
+.library-workbench-actions
+	.MuiButton-root.MuiButton-root.Mui-disabled:not(.skerry-launch-action-button),
+.library-workbench-actions
+	.skerry-launch-action-button.skerry-launch-action-button.Mui-disabled,
+html:is([data-mui-color-scheme="light"], [data-toolpad-color-scheme="light"])
+	.library-workbench-actions
+	.MuiButton-root.MuiButton-root.Mui-disabled:not(.skerry-launch-action-button),
+html:is([data-mui-color-scheme="light"], [data-toolpad-color-scheme="light"])
+	.library-workbench-actions
+	.skerry-launch-action-button.skerry-launch-action-button.Mui-disabled {
+	background: var(--library-disabled-background);
+	border: var(--library-disabled-border);
+	color: var(--library-disabled-color);
+	filter: var(--library-disabled-filter);
+	opacity: var(--library-disabled-opacity);
+}
+
+.library-workbench-actions .library-action-primary.MuiButton-root.MuiButton-root.Mui-disabled:not(.skerry-launch-action-button) {
+	border: var(--library-disabled-border);
+}
+
+@media (max-width: 1120px) {
+	.library-workbench-actions .library-launch-action,
+	.library-workbench-actions .library-action-primary.MuiButton-root,
+	.library-workbench-actions .library-filter-action,
+	.library-workbench-actions .library-sync-source-button.MuiButton-root,
+	.library-workbench-actions > .library-action-button {
+		width: auto;
+	}
+}

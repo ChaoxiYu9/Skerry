@@ -1,0 +1,1 @@
+export { NextUpDetail } from "./NextUpDetailPage";

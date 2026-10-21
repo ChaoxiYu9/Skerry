@@ -1,0 +1,96 @@
+/* CardItem owns rendered motion; DnD supplies transform through a custom property. */
+.skerry-game-card {
+	--game-card-interaction-layer: 1000;
+	transform: var(--game-card-transform, translateZ(0));
+	z-index: var(--sortable-card-z-index, auto);
+	transition: var(
+		--game-card-transition,
+		transform 360ms cubic-bezier(0.22, 0.61, 0.36, 1),
+		box-shadow 360ms cubic-bezier(0.22, 0.61, 0.36, 1),
+		border-color 200ms ease
+	);
+}
+
+/* Idle layers still come from the overlay, DnD or detail-launch runtime.
+ * While interacting, one boundary selects the existing shared/grid/theme layer. */
+.skerry-game-card:is(:hover, :focus-within) {
+	z-index: var(--game-card-interaction-layer);
+}
+
+:where(.sortable-cards-grid) .skerry-game-card:where(:hover, :focus-within) {
+	--game-card-interaction-layer: 1700;
+	--game-card-interaction-contain: none;
+}
+
+:where(.sortable-cards-grid) > .skerry-game-card:where(:hover, :focus-within) {
+	--game-card-interaction-layer: 9999;
+}
+
+/* Preserve the themed hover layer and lift, including hover plus keyboard focus. */
+:where(
+	html:is(
+		[data-mui-color-scheme="light"],
+		[data-toolpad-color-scheme="light"],
+		[data-mui-color-scheme="dark"],
+		[data-toolpad-color-scheme="dark"]
+	)
+) .skerry-game-card:where(:hover) {
+	--game-card-interaction-layer: 40;
+	--game-card-transform: translateY(-5px) translateZ(0);
+}
+
+.cards-scroll-region.is-dragging {
+	cursor: grabbing;
+}
+
+.cards-scroll-region.is-dragging .skerry-game-card {
+	will-change: transform;
+}
+
+/* Drag movement takes precedence over the hover lift. */
+:where(.cards-scroll-region.is-dragging .sortable-cards-grid)
+.skerry-game-card {
+	--game-card-transform: var(--sortable-card-transform, none);
+	--game-card-transition: transform 180ms cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.skerry-game-card.is-drag-overlay {
+	z-index: 1700;
+	cursor: grabbing;
+}
+
+.cards-scroll-region.is-scrolling .game-card-cover {
+	--skerry-motion-transition-duration: 0ms;
+	transition-duration: var(--skerry-motion-transition-duration);
+}
+
+.skerry-game-card.is-detail-launching .game-card-cover {
+	contain: none;
+}
+
+/* Component image states supply values; the page may provide a hover treatment. */
+:where(.skerry-game-card) .game-card-image {
+	display: block;
+	filter: var(--game-card-image-filter, none);
+}
+
+:where(.skerry-game-card:hover) .game-card-image {
+	filter: var(
+		--game-card-image-hover-filter,
+		var(--game-card-image-filter, none)
+	);
+	transform: var(--game-card-image-hover-transform, translateZ(0));
+}
+
+:where(.cards-scroll-region.is-scrolling) .game-card-image {
+	--game-card-image-filter: none;
+}
+
+:where(.skerry-game-card.is-drag-overlay) .game-card-image {
+	--game-card-image-filter: saturate(1.06) contrast(1.03);
+}
+
+:where(.cards-scroll-region.is-scrolling .skerry-game-card:hover)
+	.game-card-image {
+	--game-card-image-filter: saturate(1.01) contrast(1.01);
+}

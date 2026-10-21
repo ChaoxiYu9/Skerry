@@ -1,0 +1,56 @@
+/* MUI ToggleButton selected palette. Neutral glass is shared with other
+ * button surfaces and remains in mui-overrides.css. */
+
+.MuiToggleButton-root.Mui-selected {
+	--skerry-toggle-button-selected-text: #ffffff;
+	--skerry-toggle-button-selected-border: color-mix(
+		in srgb,
+		var(--mui-palette-primary-main) 72%,
+		var(--skerry-accent)
+	);
+	--skerry-toggle-button-selected-background: linear-gradient(
+		135deg,
+		color-mix(in srgb, var(--mui-palette-primary-main) 82%, #173d73),
+		color-mix(
+			in srgb,
+			var(--skerry-accent) 58%,
+			var(--mui-palette-primary-main)
+		)
+	);
+	--skerry-toggle-button-selected-shadow:
+		inset 0 1px 0 rgba(255, 255, 255, 0.28),
+		0 0 0 1px
+		color-mix(in srgb, var(--mui-palette-primary-main) 22%, transparent),
+		0 8px 18px
+		color-mix(in srgb, var(--mui-palette-primary-main) 18%, transparent);
+}
+
+html:is([data-toolpad-color-scheme="dark"], [data-mui-color-scheme="dark"])
+	.MuiToggleButton-root.Mui-selected {
+	--skerry-toggle-button-selected-background: linear-gradient(
+		135deg,
+		rgba(47, 125, 246, 0.72),
+		rgba(112, 199, 255, 0.42) 58%,
+		rgba(125, 116, 255, 0.5)
+	);
+	--skerry-toggle-button-selected-border: rgba(174, 232, 246, 0.82);
+	--skerry-toggle-button-selected-shadow:
+		inset 0 1px 0 rgba(255, 255, 255, 0.3),
+		inset 3px 0 0 rgba(174, 232, 246, 0.95),
+		0 0 0 1px rgba(112, 199, 255, 0.22),
+		0 8px 22px rgba(20, 83, 151, 0.32);
+	--skerry-btn-shadow: var(--skerry-toggle-button-selected-shadow);
+	--skerry-mui-focus-shadow-output: var(--skerry-toggle-button-selected-shadow);
+}
+
+.MuiToggleButton-root.MuiToggleButton-root.Mui-selected {
+	box-shadow: var(--skerry-toggle-button-selected-shadow);
+}
+
+.MuiToggleButton-root.MuiToggleButton-root.Mui-selected,
+.MuiToggleButton-root.MuiToggleButton-root.Mui-selected:hover,
+.MuiToggleButton-root.MuiToggleButton-root.Mui-selected:active {
+	color: var(--skerry-toggle-button-selected-text);
+	border-color: var(--skerry-toggle-button-selected-border);
+	background: var(--skerry-toggle-button-selected-background);
+}

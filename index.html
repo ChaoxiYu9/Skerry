@@ -1,0 +1,99 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="icon" href="/images/skerry.png" />
+  <title>Skerry</title>
+  <style>
+    html, body {
+      margin: 0;
+      padding: 0;
+      height: 100%;
+      overflow: hidden;
+    }
+    html, body,
+    html[data-toolpad-color-scheme="dark"],
+    html[data-mui-color-scheme="dark"] {
+      background-color: #0b111e;
+      color: #eff7ff;
+    }
+    html[data-toolpad-color-scheme="light"],
+    html[data-mui-color-scheme="light"] {
+      background-color: #f7f9fc;
+      color: #1a1a1a;
+    }
+  </style>
+  <script>
+    (() => {
+      try {
+        const storageKey = "toolpad-mode";
+        const savedMode = localStorage.getItem(storageKey);
+        const mode = savedMode === "light" || savedMode === "system" ? savedMode : "dark";
+        if (!savedMode) localStorage.setItem(storageKey, mode);
+        const colorScheme = mode === "system"
+          ? (window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light")
+          : mode;
+        document.documentElement.setAttribute("data-toolpad-color-scheme", colorScheme);
+        document.documentElement.setAttribute("data-mui-color-scheme", colorScheme);
+        document.documentElement.style.colorScheme = colorScheme;
+        const initBg = colorScheme === "light" ? "#f7f9fc" : "#0b111e";
+        document.documentElement.style.backgroundColor = initBg;
+      } catch {
+        document.documentElement.setAttribute("data-toolpad-color-scheme", "dark");
+        document.documentElement.setAttribute("data-mui-color-scheme", "dark");
+        document.documentElement.style.colorScheme = "dark";
+      }
+
+      try {
+        let isSyncing = false;
+        const syncAttributes = (val) => {
+          if (!val || isSyncing) return;
+          isSyncing = true;
+          try {
+            if (document.documentElement.getAttribute("data-toolpad-color-scheme") !== val) {
+              document.documentElement.setAttribute("data-toolpad-color-scheme", val);
+            }
+            if (document.documentElement.getAttribute("data-mui-color-scheme") !== val) {
+              document.documentElement.setAttribute("data-mui-color-scheme", val);
+            }
+            if (document.documentElement.style.colorScheme !== val) {
+              document.documentElement.style.colorScheme = val;
+            }
+          } finally {
+            isSyncing = false;
+          }
+        };
+
+        const themeObserver = new MutationObserver((mutations) => {
+          if (isSyncing) return;
+          for (const m of mutations) {
+            if (m.attributeName === "data-toolpad-color-scheme") {
+              const val = document.documentElement.getAttribute("data-toolpad-color-scheme");
+              if (val) syncAttributes(val);
+              break;
+            } else if (m.attributeName === "data-mui-color-scheme") {
+              const val = document.documentElement.getAttribute("data-mui-color-scheme");
+              if (val) syncAttributes(val);
+              break;
+            }
+          }
+        });
+        themeObserver.observe(document.documentElement, {
+          attributes: true,
+          attributeFilter: ["data-toolpad-color-scheme", "data-mui-color-scheme"],
+        });
+      } catch (e) {
+        console.error("Theme observer init failed", e);
+      }
+    })();
+  </script>
+</head>
+
+<body>
+  <div id="root"></div>
+  <script type="module" src="/src/main.tsx"></script>
+</body>
+
+</html>

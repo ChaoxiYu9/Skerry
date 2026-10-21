@@ -1,0 +1,35 @@
+/* Month and year selectors in the HomePage activity inspector. */
+
+html:is([data-toolpad-color-scheme="light"], [data-mui-color-scheme="light"])
+	:where(.atlas-page)
+	.atlas-month-picker
+	.MuiOutlinedInput-root {
+	background: rgba(246, 239, 230, 0.88);
+	border: 1px solid rgba(176, 59, 15, 0.14);
+	color: #241a12;
+}
+
+.MuiPopover-paper.atlas-month-select-paper {
+	--skerry-popup-background-color: var(--skerry-panel-card);
+	--skerry-popup-background-image: none;
+	--skerry-popup-border: 1px solid var(--skerry-popup-border-color);
+	--skerry-popup-border-color: var(--skerry-glass-border);
+	--skerry-popup-backdrop-filter: blur(16px);
+}
+
+html:is([data-toolpad-color-scheme="light"], [data-mui-color-scheme="light"])
+	.MuiPopover-paper.atlas-month-select-paper {
+	--skerry-popup-background-color: rgba(255, 253, 249, 0.96);
+	--skerry-popup-background-image: none;
+	--skerry-popup-border: 1px solid var(--skerry-popup-border-color);
+	--skerry-popup-border-color: rgba(176, 59, 15, 0.14);
+	--skerry-popup-shadow: 0 10px 24px rgba(96, 78, 50, 0.12);
+}
+
+html:not(
+		:is([data-toolpad-color-scheme="light"], [data-mui-color-scheme="light"])
+	):is([data-toolpad-color-scheme="dark"], [data-mui-color-scheme="dark"])
+	.MuiPopover-paper.atlas-month-select-paper {
+	--skerry-popup-background-color: var(--skerry-panel-card);
+	--skerry-popup-background-image: none;
+}

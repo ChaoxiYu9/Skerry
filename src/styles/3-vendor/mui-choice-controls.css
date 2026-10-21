@@ -1,0 +1,8 @@
+/* Shared motion baseline for MUI checkbox, radio, and switch roots. */
+.MuiCheckbox-root.MuiCheckbox-root,
+.MuiRadio-root.MuiRadio-root,
+.MuiSwitch-root.MuiSwitch-root {
+	transition:
+		filter 170ms ease,
+		opacity 170ms ease;
+}

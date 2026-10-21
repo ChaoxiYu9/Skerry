@@ -1,0 +1,277 @@
+name: Release
+
+permissions:
+  contents: read
+
+on:
+  workflow_dispatch:
+    inputs:
+      tag_name:
+        description: 'Release tag name (e.g.: v1.0.0)'
+        required: true
+        type: string
+      prerelease:
+        description: 'Mark as pre-release'
+        required: false
+        default: false
+        type: boolean
+
+jobs:
+  prepare:
+    name: Prepare Release
+    runs-on: ubuntu-latest
+    outputs:
+      release_tag: ${{ steps.resolve_tag.outputs.TAG }}
+      pure_changelog: ${{ steps.changelog_entry.outputs.content }}
+      release_body: ${{ steps.combine.outputs.content }}
+    steps:
+      - name: Resolve release tag
+        id: resolve_tag
+        shell: bash
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            TAG="${{ github.event.inputs.tag_name }}"
+          else
+            TAG="${{ github.ref_name }}"
+          fi
+          TAG="${TAG#refs/tags/}"
+          echo "TAG=$TAG" >> "$GITHUB_OUTPUT"
+          echo "Release tag is $TAG"
+
+      - name: Checkout repository
+        uses: actions/checkout@v7
+        with:
+          ref: ${{ steps.resolve_tag.outputs.TAG }}
+          fetch-depth: 0
+
+      - name: Extract changelog entry from CHANGELOG.md
+        id: changelog_entry
+        shell: bash
+        env:
+          VERSION: ${{ steps.resolve_tag.outputs.TAG }}
+        run: |
+          VERSION="${VERSION#v}"
+          VERSION_REGEX="${VERSION//./\\.}"
+          echo "Looking for version: $VERSION"
+
+          CHANGELOG_FILE=$(mktemp)
+          awk "/^## \\[?v?${VERSION_REGEX}\\]?/ {flag=1} flag {if (started && \$0 ~ /^## /) exit; print; started=1}" CHANGELOG.md > "$CHANGELOG_FILE"
+
+          if [ -s "$CHANGELOG_FILE" ]; then
+            DELIMITER="CHANGELOG_$(openssl rand -hex 8)"
+            {
+              echo "content<<$DELIMITER"
+              cat "$CHANGELOG_FILE"
+              echo "$DELIMITER"
+            } >> "$GITHUB_OUTPUT"
+            echo "Found changelog content for $VERSION"
+          else
+            echo "content=See the assets to download and install this version." >> "$GITHUB_OUTPUT"
+            echo "No matching changelog found for version $VERSION"
+          fi
+
+          rm -f "$CHANGELOG_FILE"
+
+      - name: Generate download links
+        uses: orhun/git-cliff-action@v4
+        id: cliff_links
+        env:
+          INCLUDE_DOWNLOAD_LINKS: "only"
+        with:
+          config: cliff.toml
+          args: --current --strip header
+
+      - name: Combine full release body
+        id: combine
+        shell: bash
+        run: |
+          # 生成一个随机定界符，避免内容中含有 EOF 导致截断
+          EOF=$(openssl rand -hex 8)
+          {
+            echo "content<<$EOF"
+            cat << INNER_EOF
+          ${{ steps.changelog_entry.outputs.content }}
+
+          ${{ steps.cliff_links.outputs.content }}
+          INNER_EOF
+            echo "$EOF"
+          } >> "$GITHUB_OUTPUT"
+
+  build-windows:
+    name: Build Windows
+    runs-on: windows-latest
+    needs: prepare
+    permissions:
+      contents: write
+    strategy:
+      matrix:
+        rust_target: [ x86_64-pc-windows-msvc, aarch64-pc-windows-msvc ]
+    environment: TAURI_KEY
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v7
+        with:
+          ref: ${{ needs.prepare.outputs.release_tag }}
+      - name: Install Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: 24
+      - name: Install pnpm
+        uses: pnpm/action-setup@v6
+        with:
+          run_install: false
+      - name: Install Rust
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: ${{ matrix.rust_target }}
+      - name: Rust cache
+        uses: swatinem/rust-cache@v2
+        with:
+          workspaces: "./src-tauri -> target"
+          shared-key: ${{ matrix.rust_target }}
+          save-if: false
+      - name: 7-Zip cache
+        uses: actions/cache@v6
+        with:
+          path: src-tauri/target/7zip
+          key: 7zip-${{ runner.os }}-${{ matrix.rust_target }}-${{ hashFiles('src-tauri/build.rs') }}
+      - name: Configure Rust linker (Windows lld)
+        shell: bash
+        run: |
+          mkdir -p .cargo
+          echo "Configuring lld for Windows..."
+          cat >> .cargo/config.toml <<EOF
+          [target.x86_64-pc-windows-msvc]
+          linker = "rust-lld.exe"
+
+          [target.aarch64-pc-windows-msvc]
+          linker = "rust-lld.exe"
+          EOF
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+      - name: Get version
+        id: get_version
+        shell: bash
+        run: |
+          VERSION=$(node -p "require('./package.json').version")
+          echo "VERSION=$VERSION" >> $GITHUB_OUTPUT
+          echo "Version is $VERSION"
+      - name: Compute short target name
+        id: short
+        shell: bash
+        run: |
+          case "${{ matrix.rust_target }}" in
+            *x86_64-pc-windows*) SHORT=win_x64 ;;
+            *aarch64-pc-windows*) SHORT=win_arm64 ;;
+            *) SHORT=unknown ;;
+          esac
+          echo "SHORT=$SHORT" >> $GITHUB_OUTPUT
+      - name: Build and Upload to Draft Release
+        uses: tauri-apps/tauri-action@v0
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_PRIVATE_KEY }}
+          TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ secrets.TAURI_KEY_PASSWORD }}
+          BGM_APP_SECRET: ${{ secrets.BGM_APP_SECRET }}
+          KUNGAL_CLIENT_SECRET: ${{ secrets.KUNGAL_CLIENT_SECRET }}
+          TAURI_UPDATER_ACTIVE: true
+          CARGO_INCREMENTAL: 0
+        with:
+          tagName: ${{ needs.prepare.outputs.release_tag }}
+          releaseName: ${{ needs.prepare.outputs.release_tag }}
+          releaseBody: ${{ needs.prepare.outputs.pure_changelog }}
+          releaseDraft: true
+          prerelease: false
+          includeUpdaterJson: true
+          includeRelease: true
+          tauriScript: pnpm tauri
+          args: --target ${{ matrix.rust_target }}
+      - name: Prepare portable package (Windows)
+        shell: pwsh
+        run: |
+          $version = "${{ steps.get_version.outputs.VERSION }}"
+          $short = "${{ steps.short.outputs.SHORT }}"
+          $target = "${{ matrix.rust_target }}"
+          $portableRoot = "src-tauri/target/$target/release/portable/Skerry_${version}_${short}"
+          $bundledRoot = "src-tauri/target/$target/release"
+          $bundledSevenZip = Join-Path $bundledRoot "tools/7zip"
+          $portableResources = Join-Path $portableRoot "resources"
+          $portableSevenZip = Join-Path $portableRoot "tools/7zip"
+          $resourcesDataDir = Join-Path $portableResources "data"
+          $zipPath = "src-tauri/target/$target/release/Skerry_${version}_${short}-portable.zip"
+
+          if (Test-Path $portableRoot) {
+            Remove-Item $portableRoot -Recurse -Force
+          }
+          if (Test-Path $zipPath) {
+            Remove-Item $zipPath -Force
+          }
+
+          if (-not (Test-Path $bundledRoot)) {
+            throw "Tauri 构建目录不存在: $bundledRoot"
+          }
+          if (-not (Test-Path $bundledSevenZip)) {
+            throw "Tauri 构建资源中缺少 7-Zip: $bundledSevenZip"
+          }
+
+          New-Item -ItemType Directory -Path $portableSevenZip -Force | Out-Null
+          Get-ChildItem -LiteralPath $bundledSevenZip -Force |
+            Copy-Item -Destination $portableSevenZip -Recurse -Force
+          if (-not (Test-Path $portableSevenZip)) {
+            throw "便携版资源中缺少 7-Zip: $portableSevenZip"
+          }
+          New-Item -ItemType Directory -Path $resourcesDataDir -Force | Out-Null
+          @"
+          该文件夹为数据库文件夹，删除该文件夹则退出便携模式，反之则保持便携模式。
+          This folder stores the database. Deleting this folder exits portable mode; keeping it preserves portable mode.
+          "@ | Set-Content -Path (Join-Path $resourcesDataDir "readme.txt") -Encoding UTF8
+          Copy-Item "src-tauri/target/$target/release/Skerry.exe" "$portableRoot/Skerry.exe"
+          Compress-Archive -Path "$portableRoot/*" -DestinationPath $zipPath
+      - name: Upload portable package to Draft Release
+        shell: bash
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh release upload "${{ needs.prepare.outputs.release_tag }}" \
+            "src-tauri/target/${{ matrix.rust_target }}/release/Skerry_${{ steps.get_version.outputs.VERSION }}_${{ steps.short.outputs.SHORT }}-portable.zip" \
+            --clobber
+
+  finalize-release:
+    name: Finalize Release
+    runs-on: ubuntu-latest
+    needs: [prepare, build-windows]
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v7
+
+      - name: Determine release type
+        id: release-type
+        shell: bash
+        run: |
+          if [[ "${{ needs.prepare.outputs.release_tag }}" == *"alpha"* ]] || [[ "${{ needs.prepare.outputs.release_tag }}" == *"beta"* ]] || [[ "${{ needs.prepare.outputs.release_tag }}" == *"rc"* ]] || [[ "${{ needs.prepare.outputs.release_tag }}" == *"pre"* ]] || [[ "${{ github.event.inputs.prerelease }}" == "true" ]]; then
+            echo "IS_PRERELEASE=true" >> $GITHUB_OUTPUT
+          else
+            echo "IS_PRERELEASE=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Publish Final Release
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          FULL_RELEASE_BODY: ${{ needs.prepare.outputs.release_body }}
+        run: |
+          # 1. 将包含下载链接的完整内容写入临时文件
+          echo "$FULL_RELEASE_BODY" > full_release_notes.md
+
+          # 2. 判断是否添加 prerelease 标签
+          PRERELEASE_FLAG=""
+          if [ "${{ steps.release-type.outputs.IS_PRERELEASE }}" == "true" ]; then
+            PRERELEASE_FLAG="--prerelease"
+          fi
+
+          # 3. 强制覆写 Release 正文，并解除草稿状态
+          gh release edit "${{ needs.prepare.outputs.release_tag }}" \
+            --draft=false \
+            --notes-file full_release_notes.md \
+            $PRERELEASE_FLAG

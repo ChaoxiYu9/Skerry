@@ -1,0 +1,240 @@
+/* MUI popup defaults, geometry and theme values.
+ * popup-surfaces.css renders forced surface properties; component owners
+ * may provide their own ordinary --skerry-popup-* values. */
+
+.MuiMenu-paper,
+.MuiPopover-paper,
+.MuiDialog-paper,
+.MuiAutocomplete-paper,
+.MuiPickersPopper-paper,
+.MuiSnackbarContent-root {
+	position: relative;
+
+	isolation: isolate;
+
+	--skerry-popup-background-color: transparent;
+
+	--skerry-popup-background-image: var(--skerry-glass-liquid);
+
+	--skerry-popup-background-clip: padding-box;
+
+	--skerry-popup-backdrop-filter: blur(22px) saturate(138%);
+
+	--skerry-popup-border: 1px solid
+		var(--skerry-popup-border-color);
+
+	--skerry-popup-border-color: color-mix(
+		in srgb,
+		var(--skerry-glass-border) 92%,
+		rgba(255, 255, 255, 0.38)
+	);
+
+	--skerry-popup-shadow:
+		var(--skerry-glass-rim), inset 0 1px 0 rgba(255, 255, 255, 0.5),
+		0 24px 70px rgba(17, 37, 39, 0.2);
+}
+
+.MuiMenu-paper:not(.skerry-context-menu-paper):not(.skerry-submenu-paper),
+.MuiPopover-paper:not(.skerry-context-menu-paper):not(.skerry-submenu-paper),
+.MuiAutocomplete-popper .MuiAutocomplete-paper,
+.MuiPickersPopper-root .MuiPickersPopper-paper {
+	max-width: min(420px, calc(100vw - 24px));
+}
+
+.MuiMenu-paper:not(.skerry-context-menu-paper):not(.skerry-submenu-paper),
+.MuiPopover-paper:not(.skerry-context-menu-paper):not(.skerry-submenu-paper),
+.MuiAutocomplete-paper,
+.MuiPickersPopper-paper {
+	overflow: hidden;
+}
+
+.MuiMenu-paper:not(.skerry-context-menu-paper):not(.skerry-submenu-paper),
+.MuiPopover-paper:not(.skerry-context-menu-paper):not(.skerry-submenu-paper),
+.MuiAutocomplete-paper,
+.MuiPickersPopper-paper {
+	transform-origin: top center;
+}
+
+html:is([data-toolpad-color-scheme="dark"], [data-mui-color-scheme="dark"])
+	.MuiMenu-paper,
+html:is([data-toolpad-color-scheme="dark"], [data-mui-color-scheme="dark"])
+	.MuiPopover-paper,
+html:is([data-toolpad-color-scheme="dark"], [data-mui-color-scheme="dark"])
+	.MuiDialog-paper,
+html:is([data-toolpad-color-scheme="dark"], [data-mui-color-scheme="dark"])
+	.MuiAutocomplete-paper,
+html:is([data-toolpad-color-scheme="dark"], [data-mui-color-scheme="dark"])
+	.MuiPickersPopper-paper,
+html:is([data-toolpad-color-scheme="dark"], [data-mui-color-scheme="dark"])
+	.MuiSnackbarContent-root {
+	--skerry-popup-background-color: transparent;
+	--skerry-popup-background-image: var(--skerry-glass-liquid-dark);
+	--skerry-popup-background-clip: border-box;
+
+	--skerry-popup-shadow:
+		var(--skerry-glass-rim), 0 28px 76px rgba(0, 0, 0, 0.52);
+}
+
+html:is([data-toolpad-color-scheme="light"], [data-mui-color-scheme="light"])
+	.MuiDialog-paper {
+	color: var(--skerry-ink);
+}
+
+html:is([data-toolpad-color-scheme="light"], [data-mui-color-scheme="light"])
+	.MuiDialog-paper
+	.MuiTypography-root {
+	color: var(--skerry-ink);
+}
+
+html:is([data-toolpad-color-scheme="light"], [data-mui-color-scheme="light"])
+	.MuiDialogTitle-root
+	.MuiIconButton-root:hover {
+	color: #000000;
+
+	background-color: rgba(0, 0, 0, 0.08);
+}
+
+html:is([data-toolpad-color-scheme="light"], [data-mui-color-scheme="light"])
+	.MuiDialogTitle-root
+	.MuiIconButton-root {
+	color: var(--skerry-ink);
+}
+
+html:is([data-toolpad-color-scheme="light"], [data-mui-color-scheme="light"])
+	.MuiDialog-paper.MuiDialog-paper
+	.MuiButton-root.MuiButton-root:not(.MuiButton-contained):not(
+		.MuiDialogActions-root
+			.MuiButton-root:not(.MuiButton-colorError):not(.MuiButton-contained):not(
+				.Mui-disabled
+			)
+	) {
+	color: var(--skerry-ink);
+}
+
+html:is([data-toolpad-color-scheme="light"], [data-mui-color-scheme="light"])
+	.MuiDialog-paper
+	.MuiDialogContent-dividers {
+	border-color: var(--skerry-glass-border);
+}
+
+.MuiPaper-root.MuiDialog-paper {
+	border-radius: 24px;
+}
+
+.MuiDialog-paper {
+
+
+	overflow: hidden;
+}
+
+.MuiDialog-paper .MuiDialogTitle-root {
+	font-weight: 900;
+	background: transparent;
+}
+
+.MuiDialogTitle-root {
+
+
+	letter-spacing: -0.02em;
+
+}
+
+.MuiTooltip-popper .MuiTooltip-tooltip {
+	max-width: 280px;
+
+	padding: 8px 11px;
+
+	border: 1px solid
+		color-mix(in srgb, var(--skerry-glass-border) 88%, transparent);
+
+	border-radius: 6px;
+
+	--skerry-popup-background-color: transparent;
+
+	--skerry-popup-background-image: var(--skerry-glass-liquid);
+
+	--skerry-popup-background-clip: border-box;
+
+	--skerry-popup-text: var(--mui-palette-text-primary);
+
+	backdrop-filter: blur(12px) saturate(118%);
+
+	box-shadow:
+		var(--skerry-glass-rim),
+		0 14px 34px rgba(18, 42, 72, 0.22);
+
+	font-size: 12px;
+
+	font-weight: 820;
+
+	line-height: 1.35;
+}
+
+html:is([data-toolpad-color-scheme="dark"], [data-mui-color-scheme="dark"])
+	.MuiTooltip-tooltip {
+	--skerry-popup-background-color: transparent;
+	--skerry-popup-background-image: var(--skerry-glass-liquid-dark);
+	--skerry-popup-background-clip: border-box;
+}
+
+.MuiSnackbar-root {
+	max-width: min(480px, calc(100vw - 32px));
+}
+
+.MuiPaper-root.MuiSnackbarContent-root {
+	border-radius: 15px;
+}
+
+.MuiSnackbarContent-root {
+	min-height: 48px;
+
+
+	font-weight: 680;
+}
+
+@media (prefers-reduced-transparency: reduce) {
+	.MuiMenu-paper,
+	.MuiPopover-paper,
+	.MuiDialog-paper,
+	.MuiAutocomplete-paper,
+	.MuiTooltip-tooltip,
+	.MuiSnackbarContent-root {
+		--skerry-popup-backdrop-filter: none;
+
+		--skerry-popup-background-color: var(--mui-palette-background-paper);
+
+		--skerry-popup-background-image: none;
+
+		--skerry-popup-background-clip: border-box;
+	}
+}
+
+/* Preserve the ordinary Paper/Card fallback as popup data.
+ * Non-popup Paper/Card nodes retain their original forced shadow rule. */
+
+.MuiCard-root:where(
+	.MuiMenu-paper,
+	.MuiPopover-paper,
+	.MuiDialog-paper,
+	.MuiAutocomplete-paper,
+	.MuiPickersPopper-paper,
+	.MuiSnackbarContent-root,
+	.skerry-context-menu-paper,
+	.skerry-submenu-paper,
+	.skerry-detail-more-menu-paper
+),
+.MuiPaper-root:not(:where(.MuiMenu-paper)):not(:where(.MuiPopover-paper)):not(
+	.MuiDialog-paper
+):not(:where(.MuiAutocomplete-paper)):where(
+	.MuiMenu-paper,
+	.MuiPopover-paper,
+	.MuiDialog-paper,
+	.MuiAutocomplete-paper,
+	.MuiPickersPopper-paper,
+	.MuiSnackbarContent-root,
+	.skerry-context-menu-paper,
+	.skerry-submenu-paper,
+	.skerry-detail-more-menu-paper
+) {
+	--skerry-popup-shadow: var(--skerry-glass-rim), var(--skerry-glow-soft);
+}

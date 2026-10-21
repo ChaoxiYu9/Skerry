@@ -1,0 +1,9 @@
+[package]
+name = "skerry-path"
+version = "0.1.0"
+edition = "2021"
+publish = false
+description = "Skerry application data and portable-mode path contract"
+
+[dependencies]
+directories = "6.0.0"

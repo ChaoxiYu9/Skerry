@@ -1,0 +1,99 @@
+/* Shared MUI MenuItem property boundaries. Theme/state rules in the MUI
+ * adapter and context-menu.css supply ordinary --skerry-menu-item-* values.
+ * Background keeps its shorthand boundary; text and border use ordinary owners. */
+
+/* A background shorthand resets color, image, size and positioning. Keep that
+ * reset only where it existed and consume both selected palette fields. */
+:is(
+	.MuiMenuItem-root:is(:hover, .Mui-focusVisible),
+	:is(.MuiMenu-paper, .MuiPopover-paper, .MuiAutocomplete-paper)
+		.MuiMenuItem-root.Mui-selected,
+	html:is([data-toolpad-color-scheme="dark"], [data-mui-color-scheme="dark"])
+		:is(.MuiMenu-paper, .MuiPopover-paper, .MuiAutocomplete-paper)
+		.MuiMenuItem-root:not(.Mui-selected),
+	:is(
+			.skerry-detail-more-menu-paper,
+			.skerry-context-menu-paper,
+			.skerry-submenu-paper
+		)
+		.MuiMenuItem-root
+) {
+	background: var(--skerry-menu-item-background-image, none)
+		var(--skerry-menu-item-background-color, transparent);
+}
+
+/* Native light menus have image-only states outside the shorthand's original
+ * range. Keep those limited to the image longhand and let sx retain geometry. */
+html:is([data-toolpad-color-scheme="light"], [data-mui-color-scheme="light"])
+	:is(
+		.MuiMenu-paper,
+		.MuiPopover-paper,
+		.skerry-context-menu-paper,
+		.skerry-submenu-paper
+	)
+	.MuiMenuItem-root.MuiMenuItem-root {
+	background-image: var(--skerry-menu-item-background-image, none);
+}
+
+:is(.MuiMenu-paper, .MuiPopover-paper, .MuiAutocomplete-paper)
+	.MuiMenuItem-root.MuiMenuItem-root.Mui-selected,
+html:is([data-toolpad-color-scheme="dark"], [data-mui-color-scheme="dark"])
+	:is(
+		.MuiMenu-paper,
+		.MuiPopover-paper,
+		.MuiAutocomplete-paper,
+		.skerry-detail-more-menu-paper,
+		.skerry-context-menu-paper,
+		.skerry-submenu-paper
+	)
+	.MuiMenuItem-root.MuiMenuItem-root:not(.Mui-selected),
+.skerry-context-menu-paper
+	.MuiMenuItem-root.MuiMenuItem-root:is(
+		[color="error"],
+		.skerry-context-menu-danger-item,
+		:has(.MuiSvgIcon-root[data-testid="DeleteIcon"]),
+		:has(.MuiSvgIcon-root[data-testid="DeleteOutlineRoundedIcon"])
+	),
+:is(.skerry-context-menu-paper, .skerry-submenu-paper)
+	.MuiMenuItem-root.MuiMenuItem-root.Mui-selected,
+html:is([data-toolpad-color-scheme="light"], [data-mui-color-scheme="light"])
+	:is(
+		.MuiMenu-paper,
+		.MuiPopover-paper,
+		.skerry-context-menu-paper,
+		.skerry-submenu-paper
+	)
+	.MuiMenuItem-root.MuiMenuItem-root {
+	color: var(--skerry-menu-item-text);
+}
+
+:is(.MuiMenu-paper, .MuiPopover-paper, .MuiAutocomplete-paper)
+	.MuiMenuItem-root.MuiMenuItem-root.Mui-selected,
+html:is([data-toolpad-color-scheme="dark"], [data-mui-color-scheme="dark"])
+	:is(
+		.MuiMenu-paper,
+		.MuiPopover-paper,
+		.MuiAutocomplete-paper,
+		.skerry-detail-more-menu-paper,
+		.skerry-context-menu-paper,
+		.skerry-submenu-paper
+	)
+	.MuiMenuItem-root.MuiMenuItem-root:not(.Mui-selected),
+:is(.skerry-context-menu-paper, .skerry-submenu-paper)
+	.MuiMenuItem-root.MuiMenuItem-root.Mui-selected,
+:is(
+		.skerry-detail-more-menu-paper,
+		.skerry-context-menu-paper,
+		.skerry-submenu-paper
+	)
+	.MuiMenuItem-root.MuiMenuItem-root:is(:hover, .Mui-focusVisible),
+html:is([data-toolpad-color-scheme="light"], [data-mui-color-scheme="light"])
+	:is(
+		.MuiMenu-paper,
+		.MuiPopover-paper,
+		.skerry-context-menu-paper,
+		.skerry-submenu-paper
+	)
+	.MuiMenuItem-root.MuiMenuItem-root {
+	border-color: var(--skerry-menu-item-border);
+}

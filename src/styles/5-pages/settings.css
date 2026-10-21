@@ -1,0 +1,469 @@
+/* Settings sits directly on the page base and scrolls with the main surface. */
+
+@media (min-width: 1024px) {
+	.settings-workspace-grid {
+		display: grid;
+
+		grid-template-columns: 220px minmax(0, 1fr);
+
+		gap: 32px;
+
+		align-items: start;
+	}
+
+	.settings-section-nav {
+		position: sticky;
+
+		top: 12px;
+
+		align-self: start;
+
+		width: 100%;
+
+		min-width: 0;
+
+		padding: 0;
+
+		border-radius: 0;
+
+		border: none;
+
+		background: transparent;
+
+		backdrop-filter: none;
+
+		-webkit-backdrop-filter: none;
+
+		box-shadow: none;
+
+		overflow-x: visible;
+
+		overflow-y: visible;
+	}
+
+	.settings-nav-header {
+		padding: 0 4px 12px 4px;
+
+		margin-bottom: 12px;
+
+		border-bottom: 1px solid
+			color-mix(in srgb, var(--mui-palette-divider) 70%, transparent);
+	}
+
+	.settings-nav-header .settings-nav-kicker.MuiTypography-root {
+		font-size: 10px;
+
+		font-weight: 850;
+
+		letter-spacing: 0.14em;
+
+		color: var(--mui-palette-primary-main);
+
+		text-transform: uppercase;
+	}
+
+	.settings-nav-header .settings-nav-title.MuiTypography-root {
+		margin-top: 3px;
+
+		font-size: 15px;
+
+		font-weight: 850;
+
+		color: var(--mui-palette-text-primary);
+
+		letter-spacing: -0.02em;
+	}
+
+	.settings-section-nav-list {
+		flex-direction: column;
+
+		gap: 6px;
+	}
+
+	.settings-section-nav-list > button {
+		width: 100%;
+	}
+
+	.settings-section-nav-button {
+		position: relative;
+
+		display: flex;
+
+		align-items: center;
+
+		gap: 12px;
+
+		border: 1px solid transparent;
+
+		border-radius: 12px;
+
+		padding: 9px 12px;
+
+		background: transparent;
+
+		color: var(--mui-palette-text-secondary);
+
+		text-align: left;
+
+		cursor: pointer;
+
+		transition:
+			transform 180ms cubic-bezier(0.2, 0, 0, 1),
+			background-color 180ms ease,
+			border-color 180ms ease,
+			color 180ms ease,
+			box-shadow 180ms ease;
+	}
+
+	.settings-nav-item-icon {
+		display: flex;
+
+		align-items: center;
+
+		justify-content: center;
+
+		width: 32px;
+
+		height: 32px;
+
+		flex-shrink: 0;
+
+		border-radius: 9px;
+
+		border: 1px solid
+			color-mix(in srgb, var(--skerry-glass-border) 60%, transparent);
+
+		background: color-mix(in srgb, var(--skerry-panel-dark) 48%, transparent);
+
+		color: var(--mui-palette-text-secondary);
+
+		transition: all 180ms ease;
+	}
+
+	.settings-nav-item-icon svg {
+		font-size: 18px;
+	}
+
+	.settings-nav-item-text {
+		display: flex;
+
+		flex-direction: column;
+
+		min-width: 0;
+
+		flex: 1;
+	}
+
+	.settings-nav-item-label {
+		font-size: 13px;
+
+		font-weight: 700;
+
+		line-height: 1.25;
+
+		color: var(--mui-palette-text-primary);
+
+		white-space: nowrap;
+
+		overflow: hidden;
+
+		text-overflow: ellipsis;
+	}
+
+	.settings-nav-item-sub {
+		margin-top: 2px;
+
+		font-size: 9.5px;
+
+		font-weight: 800;
+
+		letter-spacing: 0.08em;
+
+		color: var(--mui-palette-text-secondary);
+
+		opacity: 0.72;
+
+		text-transform: uppercase;
+	}
+
+	.settings-section-nav-button:hover {
+		background: color-mix(
+			in srgb,
+			var(--mui-palette-primary-main) 10%,
+			transparent
+		);
+
+		transform: translateX(4px);
+	}
+
+	.settings-section-nav-button:hover .settings-nav-item-icon {
+		color: var(--mui-palette-primary-main);
+
+		border-color: color-mix(
+			in srgb,
+			var(--mui-palette-primary-main) 30%,
+			transparent
+		);
+
+		background: color-mix(
+			in srgb,
+			var(--mui-palette-primary-main) 12%,
+			transparent
+		);
+	}
+
+	.settings-section-nav-button.is-active {
+		background: color-mix(
+			in srgb,
+			var(--mui-palette-primary-main) 16%,
+			transparent
+		);
+
+		border-color: color-mix(
+			in srgb,
+			var(--mui-palette-primary-main) 32%,
+			transparent
+		);
+
+		box-shadow:
+			0 4px 16px
+			color-mix(in srgb, var(--mui-palette-primary-main) 16%, transparent),
+			inset 0 1px 0 rgba(255, 255, 255, 0.2);
+	}
+
+	.settings-section-nav-button.is-active .settings-nav-item-icon {
+		background: linear-gradient(
+			135deg,
+			var(--mui-palette-primary-main),
+			color-mix(in srgb, var(--mui-palette-primary-main) 70%, #000)
+		);
+
+		color: #ffffff;
+
+		border-color: transparent;
+
+		box-shadow: 0 4px 12px
+			color-mix(in srgb, var(--mui-palette-primary-main) 36%, transparent);
+	}
+
+	.settings-section-nav-button.is-active .settings-nav-item-label {
+		color: var(--mui-palette-primary-main);
+
+		font-weight: 850;
+	}
+
+	.settings-section-nav-button.is-active .settings-nav-item-sub {
+		color: var(--mui-palette-primary-main);
+
+		opacity: 0.95;
+	}
+
+	.settings-section-nav-button.is-active::before {
+		content: "";
+
+		position: absolute;
+
+		left: -1px;
+
+		top: 50%;
+
+		transform: translateY(-50%);
+
+		width: 4px;
+
+		height: 22px;
+
+		border-radius: 0 4px 4px 0;
+
+		background: var(--mui-palette-primary-main);
+
+		box-shadow: 0 0 10px var(--mui-palette-primary-main);
+	}
+
+	.settings-content-scroll {
+		min-width: 0;
+
+		padding: 0 0 32px 0;
+
+		scroll-padding-top: 12px;
+
+		backface-visibility: hidden;
+	}
+}
+
+@media (max-width: 1023px) {
+	.settings-workspace {
+		overflow: visible;
+	}
+
+	.settings-workspace-grid {
+		display: flex;
+
+		flex-direction: column;
+	}
+
+	.settings-section-nav {
+		position: relative;
+
+		flex: 0 0 auto;
+
+		z-index: 10;
+
+		padding: 12px 0;
+
+		border: 0;
+
+		border-bottom: 1px solid var(--mui-palette-divider);
+
+		background: var(--mui-palette-background-default);
+
+		overflow-x: auto;
+	}
+
+	.settings-section-nav-list {
+		min-width: max-content;
+
+		gap: 8px;
+	}
+
+	.settings-content-scroll {
+		flex: 1 1 auto;
+
+		min-height: 0;
+
+		padding: 20px 0 28px;
+	}
+}
+
+.settings-section-block {
+	scroll-margin-top: 76px;
+
+	padding-bottom: 30px;
+
+	content-visibility: auto;
+
+	contain: layout paint style;
+
+	contain-intrinsic-size: auto 560px;
+
+	overflow-anchor: none;
+}
+
+.settings-section-block:last-child {
+	padding-bottom: 0;
+}
+
+.settings-section-heading {
+	margin-bottom: 16px;
+
+	padding-inline: 4px;
+}
+
+.skerry-settings-page-scroll {
+	overflow-y: auto;
+
+	overflow-x: hidden;
+
+	scrollbar-width: none;
+
+	-ms-overflow-style: none;
+
+	will-change: scroll-position;
+
+	overscroll-behavior-y: contain;
+
+	overflow-anchor: none;
+}
+
+.skerry-settings-page-scroll::-webkit-scrollbar {
+	display: none;
+
+	width: 0;
+
+	height: 0;
+}
+
+.settings-workspace {
+	height: auto;
+
+	min-height: 0;
+
+	min-width: 0;
+
+	position: relative;
+
+	isolation: isolate;
+}
+
+.settings-workspace-grid {
+	height: auto;
+
+	min-height: 0;
+
+	min-width: 0;
+}
+
+.settings-section-nav-list {
+	display: flex;
+}
+
+.settings-content-scroll {
+	overflow-anchor: none;
+}
+
+/* Hide the scrollbar while keeping the settings content scrollable. */
+.settings-content-scroll {
+	scrollbar-width: none;
+	-ms-overflow-style: none;
+}
+
+.settings-content-scroll::-webkit-scrollbar {
+	display: none;
+	width: 0;
+	height: 0;
+}
+
+.settings-feature-card {
+	margin-bottom: 18px;
+
+	padding: 18px;
+
+	border: 1px solid var(--mui-palette-divider);
+
+	border-radius: 14px;
+
+	background: color-mix(
+		in srgb,
+		var(--mui-palette-background-paper) 94%,
+		var(--mui-palette-background-default) 6%
+	);
+}
+
+.settings-feature-card:last-child {
+	margin-bottom: 0;
+}
+
+.skerry-settings-page-scroll .MuiPaper-root {
+	/* The shared Paper adapter owns the shadow property and priority. */
+	--skerry-paper-fallback-shadow: none;
+
+	backdrop-filter: none;
+
+	-webkit-backdrop-filter: none;
+}
+
+.auto-backup-number-setting {
+	width: 100%;
+	max-width: 260px;
+	display: flex;
+	flex-direction: column;
+	gap: 4px;
+}
+
+.auto-backup-number-setting__label {
+	padding-inline: 14px;
+	color: var(--mui-palette-text-secondary);
+	font-size: 0.75rem;
+	line-height: 1.4;
+}
+

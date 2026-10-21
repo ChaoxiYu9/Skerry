@@ -1,0 +1,354 @@
+/* ==========================================================================
+   Skerry Detail Page Buttons (详细页专属独立按钮体系)
+   详情页操作区与图库管理按钮的局部样式
+   共享按钮基线由全局组件样式提供，这里只保留详情页差异
+   ========================================================================== */
+
+#skerry-detail-page .detail-action-group {
+	--detail-action-secondary-bg: #f7f4ee;
+	--detail-action-secondary-hover-bg: #ede6db;
+	--detail-action-secondary-active-bg: #e4dccc;
+	--detail-action-secondary-text: #1a202c;
+	--detail-action-secondary-hover-text: #9a3412;
+	--detail-action-secondary-border: rgba(0, 0, 0, 0.16);
+	--detail-action-secondary-hover-border: #c4b7a2;
+	--detail-action-secondary-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+	--detail-action-secondary-hover-shadow:
+		0 0 6px rgba(154, 52, 18, 0.1), 0 1px 3px rgba(0, 0, 0, 0.04);
+	display: inline-flex;
+	height: var(--skerry-btn-h-lg, 40px);
+}
+
+html:is([data-mui-color-scheme="dark"], [data-toolpad-color-scheme="dark"])
+	#skerry-detail-page
+	.detail-action-group {
+	--detail-action-secondary-bg: linear-gradient(
+		180deg,
+		rgba(255, 255, 255, 0.08) 0%,
+		rgba(255, 255, 255, 0.03) 100%
+	);
+	--detail-action-secondary-hover-bg: linear-gradient(
+		180deg,
+		rgba(255, 255, 255, 0.14) 0%,
+		rgba(255, 255, 255, 0.06) 100%
+	);
+	--detail-action-secondary-active-bg: rgba(255, 255, 255, 0.06);
+	--detail-action-secondary-text: #cbd5e1;
+	--detail-action-secondary-hover-text: #7dd3fc;
+	--detail-action-secondary-border: rgba(255, 255, 255, 0.24);
+	--detail-action-secondary-hover-border: rgba(125, 211, 252, 0.35);
+	--detail-action-secondary-shadow: none;
+	--detail-action-secondary-hover-shadow: 0 0 8px rgba(56, 189, 248, 0.18);
+}
+
+/* 1. 基础尺寸与外形：强制统一 40px 高度，8px 方形微圆角，严格封闭 overflow: hidden */
+#skerry-detail-page .detail-action-group .MuiButton-root,
+#skerry-detail-page .detail-action-group .MuiIconButton-root,
+#skerry-detail-page .detail-action-group .skerry-launch-action-button,
+#skerry-detail-page .detail-action-group .detail-action-btn {
+	--skerry-btn-radius: var(--skerry-radius-md, 8px);
+	--skerry-btn-letter-spacing: 0.02em;
+	height: var(--skerry-btn-h-lg, 40px);
+	min-height: var(--skerry-btn-h-lg, 40px);
+	box-sizing: border-box;
+	font-size: 13.5px;
+	font-weight: 600;
+	line-height: 1;
+	padding: 0 16px;
+	text-transform: none;
+	transform: none; /* 稳固原位，彻底删除任何缩放与位移 */
+	position: relative;
+	overflow: hidden; /* 彻底封闭高亮流光，绝不出界 */
+	transition:
+		background var(--skerry-duration-normal, 180ms) ease,
+		border-color var(--skerry-duration-normal, 180ms) ease,
+		color var(--skerry-duration-normal, 180ms) ease,
+		box-shadow var(--skerry-duration-normal, 180ms) ease;
+}
+
+
+#skerry-detail-page .detail-action-group .MuiIconButton-root {
+	box-shadow: none;
+}
+#skerry-detail-page .detail-action-group .MuiIconButton-root {
+	border-radius: var(--skerry-btn-radius);
+	letter-spacing: 0.02em;
+}
+
+#skerry-detail-page .detail-action-group .detail-action-btn:not(.Mui-disabled),
+#skerry-detail-page .detail-action-group .detail-secondary-button:not(.Mui-disabled),
+#skerry-detail-page .detail-action-group .detail-more-button:not(.Mui-disabled),
+#skerry-detail-page .detail-action-group .detail-backdrop-button:not(.Mui-disabled) {
+	cursor: pointer;
+	user-select: none;
+}
+
+/* Disabled Backdrop selects the clickable cursor through the shared disabled owner. */
+#skerry-detail-page
+	.detail-action-group
+	.detail-backdrop-button.Mui-disabled {
+	--skerry-button-disabled-cursor: pointer;
+}
+
+#skerry-detail-page
+	.detail-action-group
+	.skerry-launch-action-button.MuiButton-root {
+	width: 130px;
+	min-width: 130px;
+	padding: 0;
+	justify-content: center;
+}
+
+#skerry-detail-page
+	.detail-action-group
+	.detail-action-btn
+	.MuiTouchRipple-root {
+	border-radius: 8px;
+	overflow: hidden;
+}
+
+/* 纯图标按钮：40px x 40px 方形微圆角 */
+#skerry-detail-page .detail-action-group .detail-action-btn-icon,
+#skerry-detail-page .detail-action-group .MuiIconButton-root {
+	width: var(--skerry-btn-h-lg, 40px);
+	min-width: var(--skerry-btn-h-lg, 40px);
+}
+
+/* 按钮子元素（文字、图标）置于 z-index: 1，浮于流光伪元素之上 */
+#skerry-detail-page .detail-action-group .detail-action-btn > *,
+#skerry-detail-page .detail-action-group .detail-secondary-button > *,
+#skerry-detail-page .detail-action-group .detail-more-button > *,
+#skerry-detail-page .detail-action-group .detail-backdrop-button > * {
+	position: relative;
+	z-index: 1;
+	transition:
+		color var(--skerry-duration-normal, 180ms) ease,
+		fill var(--skerry-duration-normal, 180ms) ease;
+}
+
+/* --------------------------------------------------------------------------
+   2. 主行动按钮（启动游戏 / 同步本地 / 加入游戏库）：实色极光渐变，自然继承全局高光
+   -------------------------------------------------------------------------- */
+#skerry-detail-page
+	.detail-action-group
+	.skerry-launch-action-button.skerry-launch-start:not(.skerry-button-level-a-gradient),
+#skerry-detail-page
+	.detail-action-group
+	.skerry-launch-action-button.skerry-launch-sync:not(.skerry-button-level-a-gradient),
+#skerry-detail-page .detail-action-group .detail-primary-button {
+	background: var(--skerry-btn-primary-bg);
+	background-clip: padding-box;
+	border: 0;
+	color: var(--skerry-btn-primary-text);
+	transform: none;
+}
+
+#skerry-detail-page
+	.detail-action-group
+	.skerry-launch-action-button.skerry-launch-start:not(.skerry-button-level-a-gradient),
+#skerry-detail-page
+	.detail-action-group
+	.skerry-launch-action-button.skerry-launch-sync:not(.skerry-button-level-a-gradient),
+#skerry-detail-page .detail-action-group .detail-primary-button,
+#skerry-detail-page
+	.detail-action-group
+	.skerry-launch-action-button.skerry-launch-running {
+	--skerry-btn-shadow: var(--skerry-btn-primary-shadow);
+	--skerry-mui-focus-shadow-output: var(--skerry-btn-primary-shadow);
+	--skerry-button-focus-shadow-output: var(--skerry-btn-primary-shadow);
+}
+
+#skerry-detail-page
+	.detail-action-group
+	.skerry-launch-action-button.skerry-button-level-a-gradient {
+	--skerry-mui-focus-shadow-output: var(--skerry-btn-primary-shadow);
+	--skerry-button-focus-shadow-output: var(--skerry-btn-primary-shadow);
+}
+
+#skerry-detail-page
+	.detail-action-group
+	.skerry-launch-action-button.skerry-launch-start:hover:not(.skerry-button-level-a-gradient),
+#skerry-detail-page
+	.detail-action-group
+	.skerry-launch-action-button.skerry-launch-sync:hover:not(.skerry-button-level-a-gradient),
+#skerry-detail-page .detail-action-group .detail-primary-button:hover {
+	background: var(--skerry-btn-primary-hover-bg);
+}
+
+html:is([data-mui-color-scheme="light"], [data-toolpad-color-scheme="light"])
+	#skerry-detail-page
+	.detail-action-group
+	.skerry-launch-action-button.MuiButton-root:hover:not(.Mui-disabled):not(.skerry-button-level-a),
+html:is([data-mui-color-scheme="light"], [data-toolpad-color-scheme="light"])
+	#skerry-detail-page
+	.detail-action-group
+	.detail-primary-button.MuiButton-root:hover:not(.Mui-disabled) {
+	filter: none;
+}
+
+html:is([data-mui-color-scheme="dark"], [data-toolpad-color-scheme="dark"])
+	#skerry-detail-page
+	.detail-action-group
+	.skerry-launch-action-button.MuiButton-root:hover:not(.Mui-disabled):not(.skerry-button-level-a),
+html:is([data-mui-color-scheme="dark"], [data-toolpad-color-scheme="dark"])
+	#skerry-detail-page
+	.detail-action-group
+	.detail-primary-button.MuiButton-root:hover:not(.Mui-disabled) {
+	filter: saturate(1.06) brightness(1.02);
+}
+
+#skerry-detail-page
+	.detail-action-group
+	.skerry-launch-action-button.skerry-launch-start:active:not(.skerry-button-level-a-gradient),
+#skerry-detail-page
+	.detail-action-group
+	.skerry-launch-action-button.skerry-launch-sync:active:not(.skerry-button-level-a-gradient),
+#skerry-detail-page .detail-action-group .detail-primary-button:active {
+	background: var(--skerry-btn-primary-active-bg);
+}
+
+/* 主行动按钮禁用/未就绪状态：保留极光渐变底，打上高级灰 */
+#skerry-detail-page
+	.detail-action-group
+	.skerry-launch-action-button.Mui-disabled {
+	background: var(--skerry-btn-primary-bg);
+	border: 0;
+	color: rgba(255, 255, 255, 0.6);
+	--skerry-button-disabled-filter-output: grayscale(80%) brightness(0.55)
+		contrast(0.9);
+	--skerry-button-disabled-opacity-output: 0.85;
+}
+
+html:is([data-mui-color-scheme="light"], [data-toolpad-color-scheme="light"])
+	#skerry-detail-page
+	.detail-action-group
+	.skerry-launch-action-button.Mui-disabled {
+	background: var(--skerry-btn-primary-bg);
+	color: rgba(255, 255, 255, 0.75);
+	--skerry-button-disabled-filter-output: grayscale(70%) opacity(0.55);
+	--skerry-button-disabled-opacity-output: 1;
+}
+
+/* 游戏运行中计时按钮：遵循各自模式的静态主按钮样式（实色圆角无边框），悬停平滑柔和 */
+#skerry-detail-page
+	.detail-action-group
+	.skerry-launch-action-button.skerry-launch-running {
+	background: var(--skerry-btn-primary-bg);
+	background-clip: padding-box;
+	border: 0;
+	color: var(--skerry-btn-primary-text, #ffffff);
+	transform: none;
+}
+
+#skerry-detail-page
+	.detail-action-group
+	.skerry-launch-running
+	.skerry-launch-timer-value {
+	color: var(--skerry-btn-primary-text, #ffffff);
+	text-shadow: none;
+}
+
+#skerry-detail-page
+	.detail-action-group
+	.skerry-launch-running
+	.MuiButton-startIcon {
+	color: var(--skerry-btn-primary-text, #ffffff);
+	text-shadow: none;
+}
+
+/* --------------------------------------------------------------------------
+   3. 右侧 4 个副按钮基础外框材质与稳固定位（打开——、更新资料、更多 ≡、壁纸聚焦 🖼）
+   -------------------------------------------------------------------------- */
+#skerry-detail-page .detail-action-group .detail-action-btn {
+	--detail-action-secondary-shadow-output: var(
+		--detail-action-secondary-shadow
+	);
+	--skerry-mui-focus-shadow-output: var(
+		--detail-action-secondary-shadow-output
+	);
+	background: var(--detail-action-secondary-bg);
+	border: 1px solid var(--detail-action-secondary-border);
+	color: var(--detail-action-secondary-text);
+	transform: none;
+}
+
+#skerry-detail-page .detail-action-group .detail-action-btn:not(.Mui-disabled) {
+	box-shadow: var(--detail-action-secondary-shadow-output);
+}
+
+/* --------------------------------------------------------------------------
+   4. 悬停状态：发光框不动 + 柔和变色（降低饱和反差，更高级耐看）
+   -------------------------------------------------------------------------- */
+#skerry-detail-page .detail-action-group .detail-action-btn:hover {
+	--detail-action-secondary-shadow-output: var(
+		--detail-action-secondary-hover-shadow
+	);
+	--skerry-mui-focus-shadow-output: var(
+		--detail-action-secondary-shadow-output
+	);
+	background: var(--detail-action-secondary-hover-bg);
+	border-color: var(--detail-action-secondary-hover-border);
+	color: var(--detail-action-secondary-hover-text);
+	transform: none; /* 稳固原位，严禁缩放抖动 */
+}
+
+/* Disabled IconButtons use the shared disabled shadow output, with the page
+ * retaining its existing disabled shadow value. */
+#skerry-detail-page .detail-action-group .detail-more-button.Mui-disabled,
+#skerry-detail-page .detail-action-group .detail-backdrop-button.Mui-disabled {
+	--skerry-btn-shadow: var(--detail-action-secondary-shadow-output);
+	--skerry-mui-focus-shadow-output: var(--detail-action-secondary-shadow-output);
+}
+
+/* --------------------------------------------------------------------------
+   5. 四颗副按钮共用图标按钮的悬停流光，不改变各自的按钮尺寸与形状。
+   -------------------------------------------------------------------------- */
+#skerry-detail-page .detail-action-group .detail-action-btn::after {
+	content: "";
+	position: absolute;
+	inset: 0 auto 0 -42%;
+	z-index: 0;
+	width: 34%;
+	transform: skewX(-18deg);
+	background: linear-gradient(
+		90deg,
+		transparent,
+		rgba(255, 255, 255, 0.34),
+		transparent
+	);
+	opacity: 0;
+	pointer-events: none;
+	border-radius: inherit;
+}
+
+#skerry-detail-page
+	.detail-action-group
+	.detail-action-btn:not(.Mui-disabled):hover::after {
+	opacity: 0.46;
+	animation: skerry-button-sheen 520ms cubic-bezier(0.2, 0.7, 0.2, 1);
+}
+
+/* 按下时稳固原位，不发生任何位移与形变 */
+#skerry-detail-page .detail-action-group .detail-action-btn:active,
+#skerry-detail-page .detail-action-group .detail-secondary-button:active,
+#skerry-detail-page .detail-action-group .detail-more-button:active,
+#skerry-detail-page .detail-action-group .detail-backdrop-button:active {
+	background: var(--detail-action-secondary-active-bg);
+	transform: none;
+}
+
+#skerry-detail-page .detail-action-group .detail-action-btn:hover,
+#skerry-detail-page .detail-action-group .detail-action-btn:active {
+	transform: none;
+}
+
+/* Gallery management is a compact C-level action; theme and hover colors come
+ * from the shared button tokens, while this page owns only its dimensions. */
+.skerry-detail-page .detail-gallery-manage-btn.MuiButton-root {
+	--skerry-btn-radius: var(--skerry-radius-pill);
+	height: 28px;
+	min-height: 28px;
+	padding: 0 12px;
+	font-size: 11px;
+	transform: none;
+}
