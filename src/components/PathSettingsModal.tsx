@@ -106,6 +106,7 @@ export const PathSettingsModal: React.FC<PathSettingsModalProps> = ({
 	const initialDraftRef = useRef<PathSettingsDraft>(EMPTY_DRAFT);
 	const [isSubmitting, setIsSubmitting] = useState(false);
 	const isSubmittingRef = useRef(false);
+	const pendingDraftRef = useRef<PathSettingsDraft | null>(null);
 	const { data: settingsData, isPending } = useAllSettings({ enabled: open });
 	const updateSettingsMutation = useUpdateSettings();
 	const relocateSavedataBackupRootMutation =
@@ -133,7 +134,7 @@ export const PathSettingsModal: React.FC<PathSettingsModalProps> = ({
 	);
 
 	useEffect(() => {
-		if (!open || !settingsData) {
+		if (!open || !settingsData || isSubmittingRef.current) {
 			return;
 		}
 		initDraft(settingsData);
@@ -151,7 +152,14 @@ export const PathSettingsModal: React.FC<PathSettingsModalProps> = ({
 	/**
 	 * 自动保存路径设置
 	 */
-	const saveDraft = async (nextDraft: PathSettingsDraft) => {
+	const saveDraft = async (
+		nextDraft: PathSettingsDraft,
+	): Promise<boolean> => {
+		if (isSubmittingRef.current) {
+			pendingDraftRef.current = nextDraft;
+			return true;
+		}
+
 		const previousDraft = initialDraftRef.current;
 		const isDirty =
 			nextDraft.savePath !== previousDraft.savePath ||
@@ -162,7 +170,7 @@ export const PathSettingsModal: React.FC<PathSettingsModalProps> = ({
 			nextDraft.defaultLeLaunch !== previousDraft.defaultLeLaunch ||
 			nextDraft.defaultMagpie !== previousDraft.defaultMagpie;
 
-		if (!isDirty || isSubmittingRef.current) return !isSubmittingRef.current;
+		if (!isDirty) return true;
 
 		try {
 			isSubmittingRef.current = true;
@@ -193,7 +201,7 @@ export const PathSettingsModal: React.FC<PathSettingsModalProps> = ({
 				await updateSettingsMutation.mutateAsync(updates);
 			}
 
-			setDraft(nextDraft);
+			if (!pendingDraftRef.current) setDraft(nextDraft);
 			setInitialDraft(nextDraft);
 			initialDraftRef.current = nextDraft;
 
@@ -250,6 +258,9 @@ export const PathSettingsModal: React.FC<PathSettingsModalProps> = ({
 		} finally {
 			isSubmittingRef.current = false;
 			setIsSubmitting(false);
+			const pendingDraft = pendingDraftRef.current;
+			pendingDraftRef.current = null;
+			if (pendingDraft) void saveDraft(pendingDraft);
 		}
 	};
 
@@ -653,7 +664,6 @@ export const PathSettingsModal: React.FC<PathSettingsModalProps> = ({
 											}}
 											disabled={
 												isLoading ||
-												isSubmitting ||
 												(!draft.lePath.trim() && !draft.defaultLeLaunch)
 											}
 											size="small"
@@ -758,7 +768,6 @@ export const PathSettingsModal: React.FC<PathSettingsModalProps> = ({
 											}}
 											disabled={
 												isLoading ||
-												isSubmitting ||
 												(!draft.magpiePath.trim() && !draft.defaultMagpie)
 											}
 											size="small"

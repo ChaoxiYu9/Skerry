@@ -2,7 +2,7 @@ import Alert from "@mui/material/Alert";
 import Box from "@mui/material/Box";
 import CircularProgress from "@mui/material/CircularProgress";
 import Typography from "@mui/material/Typography";
-import { useEffect, useState, type FC, type ReactNode } from "react";
+import { type FC, type ReactNode, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { getUserErrorMessage } from "@/utils/errors";
 
@@ -64,16 +64,34 @@ export const GameListStateView: FC<GameListStateViewProps> = ({
 		</Box>
 	) : null;
 
-	if (loading) {
-		if (keepChildrenWhenEmpty) {
-			return (
-				<Box className="game-list-state-with-children is-loading">
-					{children}
-					{loadingHint}
-				</Box>
-			);
-		}
+	// The search controls are children of the list. Keep their DOM ancestry stable
+	// when a typo changes a populated result into an empty result (and back).
+	if (keepChildrenWhenEmpty) {
+		return (
+			<Box
+				className={`game-list-state-with-children${loading ? " is-loading" : ""}`}
+			>
+				{children}
+				{error ? (
+					<Box className="p-4">
+						<Alert severity="error">{getUserErrorMessage(error, t)}</Alert>
+					</Box>
+				) : loading ? (
+					loadingHint
+				) : empty ? (
+					<Box className="game-list-empty-overlay">
+						{customEmptyView ?? (
+							<Alert severity="info">
+								{emptyMessage ?? fallbackEmptyMessage}
+							</Alert>
+						)}
+					</Box>
+				) : null}
+			</Box>
+		);
+	}
 
+	if (loading) {
 		if (!showLoadingHint) return null;
 
 		return (
@@ -102,25 +120,8 @@ export const GameListStateView: FC<GameListStateViewProps> = ({
 	}
 
 	if (empty) {
-		if (keepChildrenWhenEmpty) {
-			return (
-				<Box className="game-list-state-with-children">
-					{children}
-					<Box className="game-list-empty-overlay">
-						{customEmptyView ? (
-							customEmptyView
-						) : (
-							<Alert severity="info">
-								{emptyMessage ?? fallbackEmptyMessage}
-							</Alert>
-						)}
-					</Box>
-				</Box>
-			);
-		}
-
 		return customEmptyView ? (
-			<>{customEmptyView}</>
+			customEmptyView
 		) : (
 			<Box className="flex justify-center mt-12">
 				<Alert severity="info">{emptyMessage ?? fallbackEmptyMessage}</Alert>

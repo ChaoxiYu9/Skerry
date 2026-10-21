@@ -87,7 +87,7 @@ export function animateDetailLaunch(options: DetailLaunchOptions) {
 
 	gsap.killTweensOf([cardRoot, target].filter(Boolean));
 	gsap.to(target, {
-		duration: 0.13,
+		duration: 0.22,
 		scale: 1.025,
 		y: -3,
 		ease: "power2.out",
@@ -95,7 +95,7 @@ export function animateDetailLaunch(options: DetailLaunchOptions) {
 		onComplete: finish,
 	});
 
-	window.setTimeout(finish, 170);
+	window.setTimeout(finish, 260);
 }
 
 export function animateDetailClose(options: DetailCloseOptions) {
@@ -122,7 +122,7 @@ export function animateDetailClose(options: DetailCloseOptions) {
 	gsap.killTweensOf([root, ...detailNodes]);
 
 	gsap.to(root, {
-		duration: 0.14,
+		duration: 0.28,
 		y: 4,
 		autoAlpha: 0,
 		scale: 0.996,
@@ -131,5 +131,5 @@ export function animateDetailClose(options: DetailCloseOptions) {
 		onComplete: finish,
 	});
 
-	fallbackTimer = window.setTimeout(finish, 180);
+	fallbackTimer = window.setTimeout(finish, 340);
 }

@@ -23,7 +23,6 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useShallow } from "zustand/react/shallow";
 import { RevealImage } from "@/components/motion/RevealImage";
-import gsap from "gsap";
 import { useGameLaunchFlow } from "@/hooks/features/games/useGameLaunchFlow";
 import { useGameIndex } from "@/hooks/features/games/useGameListFacade";
 import {
@@ -213,22 +212,6 @@ export const Home: React.FC = () => {
 		enabled: visibleGames.length > 0,
 	});
 	const lastPlayedMap = lastPlayedQuery.data ?? EMPTY_LAST_PLAYED;
-	useEffect(() => {
-		const hero = document.querySelector(".atlas-current");
-		if (hero) {
-			gsap.fromTo(
-				hero,
-				{ autoAlpha: 0.88, y: 5 },
-				{
-					autoAlpha: 1,
-					y: 0,
-					duration: 0.26,
-					ease: "power2.out",
-					clearProps: "transform,opacity,visibility",
-				},
-			);
-		}
-	}, []);
 
 	const [cachedFocusId, setCachedFocusId] = useState<number | null>(() => {
 		if (typeof window === "undefined") return null;
@@ -404,7 +387,7 @@ export const Home: React.FC = () => {
 								<Stack direction="row" spacing={1} sx={{ mt: 3 }}>
 									{runningGameIds.has(focusGame.id) ? (
 										<Button
-										className="skerry-launch-action-button skerry-launch-running skerry-button-level-a atlas-launch-main-button atlas-launch-recording-button atlas-hero-launch-btn"
+											className="skerry-launch-action-button skerry-launch-running skerry-button-level-a atlas-launch-main-button atlas-launch-recording-button atlas-hero-launch-btn"
 											variant="contained"
 											color="error"
 											startIcon={<StopRoundedIcon />}

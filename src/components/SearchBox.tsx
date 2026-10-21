@@ -145,6 +145,7 @@ function GameSearchBox({ scopeGameIds, applyNsfwFilter }: GameSearchBoxProps) {
 	});
 
 	const [isOpen, setIsOpen] = useState(false);
+	const [isComposing, setIsComposing] = useState(false);
 
 	const searchBoxWidth = getSearchBoxWidth(i18n.language);
 
@@ -155,8 +156,10 @@ function GameSearchBox({ scopeGameIds, applyNsfwFilter }: GameSearchBoxProps) {
 	const debouncedKeyword = useDebouncedValue(searchInput, DEBOUNCE_SEARCH);
 
 	useEffect(() => {
-		setSearchKeyword(debouncedKeyword.trim());
-	}, [debouncedKeyword, setSearchKeyword]);
+		if (!isComposing && debouncedKeyword === searchInput) {
+			setSearchKeyword(debouncedKeyword.trim());
+		}
+	}, [debouncedKeyword, isComposing, searchInput, setSearchKeyword]);
 
 	const suggestionEntries = useMemo(() => {
 		if (!isOpen) return [];
@@ -229,6 +232,8 @@ function GameSearchBox({ scopeGameIds, applyNsfwFilter }: GameSearchBoxProps) {
 	// 处理键盘事件
 	const handleKeyDown = useCallback(
 		(event: React.KeyboardEvent) => {
+			if (event.nativeEvent.isComposing || event.nativeEvent.keyCode === 229)
+				return;
 			if (event.ctrlKey) return; // 允许 Ctrl 组合键
 
 			if (event.key === "Escape") {
@@ -248,6 +253,7 @@ function GameSearchBox({ scopeGameIds, applyNsfwFilter }: GameSearchBoxProps) {
 			<Autocomplete
 				freeSolo
 				value={null}
+				open={isOpen && !isComposing && suggestions.length > 0}
 				onOpen={() => setIsOpen(true)}
 				onClose={() => setIsOpen(false)}
 				options={suggestions}
@@ -267,6 +273,16 @@ function GameSearchBox({ scopeGameIds, applyNsfwFilter }: GameSearchBoxProps) {
 						placeholder={t("components.SearchBox.search", "搜索")}
 						onKeyDown={handleKeyDown}
 						slotProps={{
+							htmlInput: {
+								...params.inputProps,
+								onCompositionStart: () => setIsComposing(true),
+								onCompositionEnd: (
+									event: React.CompositionEvent<HTMLInputElement>,
+								) => {
+									setSearchInput(event.currentTarget.value);
+									setIsComposing(false);
+								},
+							},
 							input: {
 								...params.InputProps,
 								startAdornment: (

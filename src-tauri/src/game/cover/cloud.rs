@@ -12,6 +12,7 @@ use tauri::command;
 use tauri::http::StatusCode;
 use tokio::sync::{Notify, RwLock, Semaphore, watch};
 
+use super::thumbnail::{local_cover_path, parse_card_width, read_cover_file};
 use crate::database::repository::to_database_game_id;
 use crate::entity::prelude::Games;
 use crate::utils::image::{
@@ -338,21 +339,22 @@ async fn read_cached_cloud_cover(
     game_cover_dir: &Path,
     game_id: i64,
     cloud_url: Option<&str>,
+    card_width: Option<u32>,
 ) -> Option<(PathBuf, Vec<u8>)> {
     let cloud_url = cloud_url?;
     let key = cloud_cover_cache_key(game_id, cloud_url);
 
     if let Some(path) = state.cached_cover_path(key).await {
-        if let Ok(bytes) = tokio::fs::read(&path).await {
-            return Some((path, bytes));
+        if let Ok(cover) = read_cover_file(&path, card_width).await {
+            return Some(cover);
         }
         state.forget_cover_path_if_current(key, &path).await;
     }
 
     let path = get_cached_cloud_cover(game_cover_dir, game_id, Some(cloud_url)).await?;
-    let bytes = tokio::fs::read(&path).await.ok()?;
+    let cover = read_cover_file(&path, card_width).await.ok()?;
     state.remember_cover_path(key, path.clone()).await;
-    Some((path, bytes))
+    Some(cover)
 }
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
@@ -798,6 +800,17 @@ pub fn register_game_cover_protocol<R: tauri::Runtime>(
                     .find(|(k, _)| k == "url")
                     .map(|(_, v)| v.into_owned());
 
+                let card_width = match parsed.query_pairs().find(|(key, _)| key == "width") {
+                    Some((_, value)) => match parse_card_width(&value) {
+                        Some(width) => Some(width),
+                        None => {
+                            responder.respond(make_status_response(StatusCode::BAD_REQUEST));
+                            return;
+                        }
+                    },
+                    None => None,
+                };
+
                 let game_cover_dir = match get_game_cover_dir(game_id) {
                     Ok(dir) => dir,
                     Err(_) => {
@@ -828,10 +841,32 @@ pub fn register_game_cover_protocol<R: tauri::Runtime>(
                     }
                 }
 
+                if let Some((_, token)) = parsed.query_pairs().find(|(key, _)| key == "local") {
+                    let Some(path) = local_cover_path(&game_cover_dir, game_id, &token) else {
+                        responder.respond(make_status_response(StatusCode::BAD_REQUEST));
+                        return;
+                    };
+                    match read_cover_file(&path, card_width).await {
+                        Ok((path, bytes)) => {
+                            responder.respond(make_ok_response(bytes, content_type_for_file(&path)))
+                        }
+                        Err(error) => {
+                            log::warn!("local card cover game_id={game_id}: {error}");
+                            responder.respond(make_status_response(StatusCode::NOT_FOUND));
+                        }
+                    }
+                    return;
+                }
+
                 // ── 步骤 1：读索引路径；冷启动或失效时按现有扩展顺序发现 ──
-                if let Some((cache_path, bytes)) =
-                    read_cached_cloud_cover(&state, &game_cover_dir, game_id, cloud_url.as_deref())
-                        .await
+                if let Some((cache_path, bytes)) = read_cached_cloud_cover(
+                    &state,
+                    &game_cover_dir,
+                    game_id,
+                    cloud_url.as_deref(),
+                    card_width,
+                )
+                .await
                 {
                     responder.respond(make_ok_response(bytes, content_type_for_file(&cache_path)));
                     return;
@@ -886,6 +921,7 @@ pub fn register_game_cover_protocol<R: tauri::Runtime>(
                         &game_cover_dir,
                         game_id,
                         Some(url.as_str()),
+                        card_width,
                     )
                     .await
                     {
@@ -933,6 +969,23 @@ pub fn register_game_cover_protocol<R: tauri::Runtime>(
                 .await;
                 match fetch_result {
                     Ok(bytes) => {
+                        if card_width.is_some() {
+                            if let Some((path, thumbnail_bytes)) = read_cached_cloud_cover(
+                                &state,
+                                &game_cover_dir,
+                                game_id,
+                                Some(&url),
+                                card_width,
+                            )
+                            .await
+                            {
+                                responder.respond(make_ok_response(
+                                    thumbnail_bytes,
+                                    content_type_for_file(&path),
+                                ));
+                                return;
+                            }
+                        }
                         let content_type = content_type_for_extension(&infer_cache_extension(&url));
                         responder.respond(make_ok_response(bytes, content_type));
                     }
@@ -1130,7 +1183,7 @@ mod tests {
             .expect("rare-extension cache should be created");
 
         let (discovered_path, discovered_body) =
-            read_cached_cloud_cover(&state, &game_cover_dir, game_id, Some(cloud_url))
+            read_cached_cloud_cover(&state, &game_cover_dir, game_id, Some(cloud_url), None)
                 .await
                 .expect("cold lookup should discover an uncommon cache extension");
         assert_eq!(discovered_path, rare_extension_path);
@@ -1151,7 +1204,7 @@ mod tests {
             .expect("replacement cache should be created");
 
         let (refreshed_path, refreshed_body) =
-            read_cached_cloud_cover(&state, &game_cover_dir, game_id, Some(cloud_url))
+            read_cached_cloud_cover(&state, &game_cover_dir, game_id, Some(cloud_url), None)
                 .await
                 .expect("stale index should be rediscovered from the cache directory");
         assert_eq!(refreshed_path, replacement_path);
@@ -1217,12 +1270,14 @@ mod tests {
             .await
             .expect("second source cache should be created");
 
-        let first = read_cached_cloud_cover(&state, &game_cover_dir, game_id, Some(first_url))
-            .await
-            .expect("first source should resolve its own cache");
-        let second = read_cached_cloud_cover(&state, &game_cover_dir, game_id, Some(second_url))
-            .await
-            .expect("second source should resolve its own cache");
+        let first =
+            read_cached_cloud_cover(&state, &game_cover_dir, game_id, Some(first_url), None)
+                .await
+                .expect("first source should resolve its own cache");
+        let second =
+            read_cached_cloud_cover(&state, &game_cover_dir, game_id, Some(second_url), None)
+                .await
+                .expect("second source should resolve its own cache");
         assert_eq!(first, (first_path.clone(), b"first source".to_vec()));
         assert_eq!(second, (second_path.clone(), b"second source".to_vec()));
         assert!(
@@ -1240,7 +1295,7 @@ mod tests {
         );
 
         let first_again =
-            read_cached_cloud_cover(&state, &game_cover_dir, game_id, Some(first_url))
+            read_cached_cloud_cover(&state, &game_cover_dir, game_id, Some(first_url), None)
                 .await
                 .expect("an earlier source should be rediscovered from its URL-specific file");
         assert_eq!(first_again, (first_path, b"first source".to_vec()));
@@ -1443,7 +1498,7 @@ mod tests {
             Some(cache_path.clone())
         );
         let (indexed_path, indexed_body) =
-            read_cached_cloud_cover(&state, &game_cover_dir, game_id, Some(&source_url))
+            read_cached_cloud_cover(&state, &game_cover_dir, game_id, Some(&source_url), None)
                 .await
                 .expect("published cache index should serve a subsequent request");
         assert_eq!(indexed_path, cache_path);

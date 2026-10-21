@@ -1680,6 +1680,7 @@ html[data-mui-color-scheme="dark"] {
 	padding: var(--annual-report-page-pad);
 
 	padding-top: calc(64px + var(--annual-report-page-pad));
+	padding-inline: 10px;
 }
 
 .annual-report-header .atlas-kicker {

@@ -118,34 +118,36 @@ export function SkerryMotionOutlet() {
 				// 页面专属差异化丝滑转场：告别单一左右硬切，根据页面信息架构赋予专属沉浸动效
 				// 页面微景深呼吸转场（方案3）：彻底移除任何X/Y平面位移，依托Z轴极微景深缩放与不透明度过渡
 				let fromVars: gsap.TweenVars = { autoAlpha: 0, scale: 0.992 };
-				let duration = 0.24;
-				let ease = "cubic-bezier(0.16, 1, 0.3, 1)";
+				let duration = 0.36;
+				let ease = "power2.out";
 
 				if (currentPath === "/") {
 					// 首页：大画幅 Hero 微景深舒展展开
 					fromVars = { autoAlpha: 0, scale: 0.988 };
-					duration = 0.28;
-					ease = "cubic-bezier(0.16, 1, 0.3, 1)";
+					duration = 0.4;
+					ease = "power2.out";
 				} else if (
 					currentPath === "/libraries" ||
 					currentPath === "/collection"
 				) {
 					// 游戏库 / 收藏夹：海量卡片矩阵原位微景深呼吸吸附，零上下颠簸
 					fromVars = { autoAlpha: 0, scale: 0.992 };
-					duration = 0.24;
-					ease = "cubic-bezier(0.16, 1, 0.3, 1)";
+					duration = 0.36;
+					ease = "power2.out";
 				} else if (currentPath === "/report") {
 					// 游戏总结 / 年度报告：数据仪表盘微缩放优雅展开
 					fromVars = { autoAlpha: 0, scale: 0.988 };
-					duration = 0.28;
-					ease = "cubic-bezier(0.16, 1, 0.3, 1)";
-				} else if (
-					currentPath === "/settings" ||
-					currentPath === "/potato-import"
-				) {
-					// 设置 / 导入：工具面板极简柔和淡入
+					duration = 0.4;
+					ease = "power2.out";
+				} else if (currentPath === "/settings") {
+					// 设置页：原位轻柔显现，避免纵向滑入感
+					fromVars = { autoAlpha: 0, x: 0, y: 0, scale: 0.997 };
+					duration = 0.42;
+					ease = "power1.out";
+				} else if (currentPath === "/potato-import") {
+					// 导入页保留工具面板的轻微缩放淡入
 					fromVars = { autoAlpha: 0, scale: 0.994 };
-					duration = 0.2;
+					duration = 0.32;
 					ease = "power2.out";
 				}
 

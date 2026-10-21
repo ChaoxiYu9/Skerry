@@ -6,18 +6,19 @@
 	border-radius: 12px;
 	padding: 8px 8px 10px 8px;
 	box-sizing: border-box;
-	contain: var(--game-card-interaction-contain, var(--game-card-contain, layout style));
+	contain: var(
+		--game-card-interaction-contain,
+		var(--game-card-contain, layout style)
+	);
 	--game-card-cover-border: var(--mui-palette-divider);
 	--game-card-cover-shadow: none;
-	--game-card-cover-scroll-shadow: 0 8px 18px rgba(8, 18, 22, 0.08);
 	--game-card-cover-drag-border: color-mix(
 		in srgb,
 		var(--mui-palette-primary-main) 34%,
 		var(--skerry-glass-border)
 	);
 	--game-card-cover-drag-shadow:
-		inset 0 1px 0 rgba(255, 255, 255, 0.32),
-		0 18px 42px rgba(8, 18, 22, 0.2),
+		inset 0 1px 0 rgba(255, 255, 255, 0.32), 0 18px 42px rgba(8, 18, 22, 0.2),
 		0 0 0 1px
 		color-mix(in srgb, var(--mui-palette-primary-main) 16%, transparent),
 		0 0 26px color-mix(in srgb, var(--skerry-amber) 12%, transparent);
@@ -37,10 +38,6 @@
 }
 
 /* Cover state values have equal specificity; their order defines precedence. */
-:where(.cards-scroll-region.is-scrolling .skerry-game-card) .game-card-cover {
-	--game-card-cover-shadow: var(--game-card-cover-scroll-shadow);
-}
-
 :where(.skerry-game-card.is-drag-overlay) .game-card-cover {
 	--game-card-cover-border: var(--game-card-cover-drag-border);
 	--game-card-cover-shadow: var(--game-card-cover-drag-shadow);
@@ -54,7 +51,7 @@
 
 /* The workspace can keep this scroll treatment neutral via inherited values. */
 :where(.cards-scroll-region.is-scrolling .skerry-game-card:hover)
-	.game-card-cover {
+.game-card-cover {
 	--game-card-cover-border: var(
 		--game-card-cover-scroll-hover-border,
 		var(--mui-palette-divider)
@@ -75,7 +72,7 @@ html:is([data-mui-color-scheme="dark"], [data-toolpad-color-scheme="dark"])
 
 /* CardItem owns the frame palette. Themes supply values; states select them. */
 html:is([data-mui-color-scheme="light"], [data-toolpad-color-scheme="light"])
-	.skerry-game-card {
+.skerry-game-card {
 	--game-card-surface: #fbf9f5;
 	--game-card-cover-background: #f2eee7;
 	--game-card-cover-border: #e5dfd2;
@@ -93,22 +90,18 @@ html:is([data-mui-color-scheme="dark"], [data-toolpad-color-scheme="dark"])
 	--game-card-surface: #182232;
 	--game-card-cover-background: transparent;
 	--game-card-cover-border: rgba(255, 255, 255, 0.12);
-	--game-card-cover-scroll-shadow: none;
 	--game-card-cover-drag-border: rgba(255, 255, 255, 0.12);
 	--game-card-cover-drag-shadow: none;
 	--game-card-border: rgba(148, 163, 184, 0.22);
 	--game-card-accent-border: #38bdf8;
 	--game-card-shadow:
-		0 3px 10px rgba(0, 0, 0, 0.45),
-		0 0 0 rgba(56, 189, 248, 0),
+		0 3px 10px rgba(0, 0, 0, 0.45), 0 0 0 rgba(56, 189, 248, 0),
 		inset 0 1px 0 rgba(255, 255, 255, 0.05);
 	--game-card-selected-shadow:
-		0 3px 10px rgba(0, 0, 0, 0.45),
-		0 0 0 rgba(56, 189, 248, 0),
+		0 3px 10px rgba(0, 0, 0, 0.45), 0 0 0 rgba(56, 189, 248, 0),
 		inset 0 1px 0 rgba(255, 255, 255, 0);
 	--game-card-hover-shadow:
-		0 8px 18px -2px rgba(0, 0, 0, 0.45),
-		0 4px 16px rgba(56, 189, 248, 0.22),
+		0 8px 18px -2px rgba(0, 0, 0, 0.45), 0 4px 16px rgba(56, 189, 248, 0.22),
 		inset 0 1px 0 rgba(255, 255, 255, 0);
 }
 
@@ -137,12 +130,11 @@ html:is(
 
 /* Hover and selection share the accent border; only hover lifts the card. */
 html:is(
-		[data-mui-color-scheme="light"],
-		[data-toolpad-color-scheme="light"],
-		[data-mui-color-scheme="dark"],
-		[data-toolpad-color-scheme="dark"]
-	)
-	.skerry-game-card:hover {
+	[data-mui-color-scheme="light"],
+	[data-toolpad-color-scheme="light"],
+	[data-mui-color-scheme="dark"],
+	[data-toolpad-color-scheme="dark"]
+) .skerry-game-card:hover {
 	--game-card-border: var(--game-card-accent-border);
 	--game-card-shadow: var(--game-card-hover-shadow);
 }

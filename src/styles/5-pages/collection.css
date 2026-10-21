@@ -174,7 +174,7 @@ html:is([data-toolpad-color-scheme="dark"], [data-mui-color-scheme="dark"])
 .collection-page-shell
 	> .MuiBox-root:not(.collection-groups-viewport):not(
 		.collection-categories-viewport
-	) {
+	):not(.game-list-state-with-children) {
 	flex: 0 0 auto;
 }
 

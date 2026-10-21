@@ -74,6 +74,26 @@ export const getGameCover = (game: GameData): string => {
 	return "/images/default.png";
 };
 
+/** Card-only derivative. Detail, crop and export callers keep the original. */
+export function getGameCardCover(game: GameData, width: number): string {
+	const gameId = getStorageGameId(game.id);
+	const params = new URLSearchParams({
+		width: String(width),
+		v: String(game.updated_at ?? ""),
+	});
+	if (
+		game.custom_data?.image &&
+		!(game.custom_data.cover_source && game.image)
+	) {
+		params.set("local", game.custom_data.image);
+	} else if (game.image) {
+		params.set("url", game.image);
+	} else {
+		return "/images/default.png";
+	}
+	return buildTauriProtocolUrl("skerry-cover", String(gameId), params);
+}
+
 /** Resolve a locally imported PotatoVN-style banner, falling back at call sites. */
 export const getGameBanner = (game: GameData): string | null => {
 	if (game.custom_data?.banner) {

@@ -1,7 +1,7 @@
 /* CardItem owns rendered motion; DnD supplies transform through a custom property. */
 .skerry-game-card {
 	--game-card-interaction-layer: 1000;
-	transform: var(--game-card-transform, translateZ(0));
+	transform: var(--game-card-transform, none);
 	z-index: var(--sortable-card-z-index, auto);
 	transition: var(
 		--game-card-transition,
@@ -11,7 +11,7 @@
 	);
 }
 
-/* Idle layers still come from the overlay, DnD or detail-launch runtime.
+/* Idle layers come from the overlay or DnD runtime.
  * While interacting, one boundary selects the existing shared/grid/theme layer. */
 .skerry-game-card:is(:hover, :focus-within) {
 	z-index: var(--game-card-interaction-layer);
@@ -59,13 +59,13 @@
 	cursor: grabbing;
 }
 
+.skerry-game-card.is-detail-launching .game-card-cover {
+	contain: none;
+}
+
 .cards-scroll-region.is-scrolling .game-card-cover {
 	--skerry-motion-transition-duration: 0ms;
 	transition-duration: var(--skerry-motion-transition-duration);
-}
-
-.skerry-game-card.is-detail-launching .game-card-cover {
-	contain: none;
 }
 
 /* Component image states supply values; the page may provide a hover treatment. */
@@ -79,7 +79,7 @@
 		--game-card-image-hover-filter,
 		var(--game-card-image-filter, none)
 	);
-	transform: var(--game-card-image-hover-transform, translateZ(0));
+	transform: var(--game-card-image-hover-transform, none);
 }
 
 :where(.cards-scroll-region.is-scrolling) .game-card-image {

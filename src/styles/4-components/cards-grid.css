@@ -1,8 +1,6 @@
 /* Shared container and card-performance defaults for the sortable game grid. */
 .cards-scroll-region .skerry-game-card,
 .sortable-cards-grid .skerry-game-card {
-	content-visibility: auto;
-	contain-intrinsic-size: 180px 320px;
 	--game-card-contain: layout style paint;
 }
 
@@ -12,4 +10,16 @@
 .sortable-cards-grid {
 	position: relative;
 	isolation: isolate;
+	display: grid;
+	grid-template-columns: repeat(auto-fill, minmax(176px, 1fr));
+	column-gap: 20px;
+	row-gap: 28px;
+}
+
+.cards-viewport-item {
+	min-width: 0;
+}
+
+.cards-viewport-item:has(.skerry-game-card:is(:hover, :focus-within)) {
+	z-index: 1;
 }

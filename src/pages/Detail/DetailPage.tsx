@@ -584,7 +584,7 @@ export const Detail: React.FC = () => {
 			timeline.fromTo(
 				root,
 				{ autoAlpha: 0 },
-				{ autoAlpha: 1, duration: 0.16, ease: "power2.out" },
+				{ autoAlpha: 1, duration: 0.3, ease: "power2.out" },
 				0,
 			);
 
@@ -592,7 +592,7 @@ export const Detail: React.FC = () => {
 				timeline.fromTo(
 					bannerShell,
 					{ autoAlpha: 0, y: -14, scale: 1.03 },
-					{ autoAlpha: 1, y: 0, scale: 1, duration: 0.18, ease: "power3.out" },
+				{ autoAlpha: 1, y: 0, scale: 1, duration: 0.38, ease: "power2.out" },
 					0,
 				);
 			}
@@ -601,8 +601,8 @@ export const Detail: React.FC = () => {
 				timeline.fromTo(
 					coverShell,
 					{ autoAlpha: 0, y: 18, scale: 0.94 },
-					{ autoAlpha: 1, y: 0, scale: 1, duration: 0.18, ease: "power3.out" },
-					0.02,
+					{ autoAlpha: 1, y: 0, scale: 1, duration: 0.38, ease: "power2.out" },
+					0.04,
 				);
 			}
 
@@ -610,8 +610,8 @@ export const Detail: React.FC = () => {
 				timeline.fromTo(
 					copy,
 					{ autoAlpha: 0, y: 12 },
-					{ autoAlpha: 1, y: 0, duration: 0.16, ease: "power2.out" },
-					0.04,
+				{ autoAlpha: 1, y: 0, duration: 0.34, ease: "power2.out" },
+				0.08,
 				);
 			}
 
@@ -619,8 +619,8 @@ export const Detail: React.FC = () => {
 				timeline.fromTo(
 					actions,
 					{ autoAlpha: 0, y: 12 },
-					{ autoAlpha: 1, y: 0, duration: 0.16, ease: "power2.out" },
-					0.05,
+				{ autoAlpha: 1, y: 0, duration: 0.34, ease: "power2.out" },
+				0.1,
 				);
 			}
 
@@ -628,8 +628,8 @@ export const Detail: React.FC = () => {
 				timeline.fromTo(
 					info,
 					{ autoAlpha: 0, y: 12 },
-					{ autoAlpha: 1, y: 0, duration: 0.16, ease: "power2.out" },
-					0.06,
+				{ autoAlpha: 1, y: 0, duration: 0.34, ease: "power2.out" },
+				0.12,
 				);
 			}
 
@@ -640,11 +640,11 @@ export const Detail: React.FC = () => {
 					{
 						autoAlpha: 1,
 						y: 0,
-						duration: 0.28,
-						stagger: 0.03,
+						duration: 0.4,
+						stagger: 0.045,
 						ease: "power2.out",
 					},
-					0.07,
+					0.14,
 				);
 			}
 		}, root);
@@ -916,28 +916,28 @@ export const Detail: React.FC = () => {
 											enterDelay={300}
 										>
 											<span className="detail-badge-staff">
-												{staffDisplayByRole.length > 0 ? (
-													staffDisplayByRole.map(
-														({ role, members, hasMore }, roleIdx) => (
-															<Fragment key={role}>
-																{roleIdx > 0 && (
-																	<span className="detail-badge-staff-sep">/</span>
-																)}
-																<span className="detail-badge-staff-role">
-																	{t(`pages.Detail.staffRoles.${role}`, role)}
-																</span>
-																<span className="detail-badge-staff-names">
-																	{members
-																		.map((member) => member.name.trim())
-																		.join("、")}
-																	{hasMore ? "…" : ""}
-																</span>
-															</Fragment>
-														),
-													)
-												) : (
-													staffSummary
-												)}
+												{staffDisplayByRole.length > 0
+													? staffDisplayByRole.map(
+															({ role, members, hasMore }, roleIdx) => (
+																<Fragment key={role}>
+																	{roleIdx > 0 && (
+																		<span className="detail-badge-staff-sep">
+																			/
+																		</span>
+																	)}
+																	<span className="detail-badge-staff-role">
+																		{t(`pages.Detail.staffRoles.${role}`, role)}
+																	</span>
+																	<span className="detail-badge-staff-names">
+																		{members
+																			.map((member) => member.name.trim())
+																			.join("、")}
+																		{hasMore ? "…" : ""}
+																	</span>
+																</Fragment>
+															),
+														)
+													: staffSummary}
 											</span>
 										</Tooltip>
 									)}

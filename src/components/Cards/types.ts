@@ -25,6 +25,7 @@ export interface CardItemProps extends React.HTMLAttributes<HTMLDivElement> {
 	game: GameData;
 	displayName: string;
 	imageLoading?: "eager" | "lazy";
+	thumbnailWidth?: number;
 	sortFieldOverlay?: CardSortFieldOverlay;
 	interaction?: CardInteraction;
 	batch?: CardBatchState;

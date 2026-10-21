@@ -17,20 +17,25 @@ import type { CSSProperties, ReactNode } from "react";
 import {
 	memo,
 	useCallback,
-	useEffect,
 	useLayoutEffect,
 	useMemo,
 	useRef,
 	useState,
 } from "react";
 import { createPortal } from "react-dom";
+import type { ListRange } from "react-virtuoso";
 import { useFlipMotion } from "@/components/motion/useFlipMotion";
+import { useLibraryScrollDiagnostics } from "@/hooks/common/useLibraryScrollDiagnostics";
 import {
 	getScrollPosition,
 	setScrollPosition,
 } from "@/hooks/common/useScrollRestore";
+import { warmCardCovers } from "@/services/game/cardImageCache";
+import { useStore } from "@/store/appStore";
 import type { GameData } from "@/types";
+import { getGameCardCover, getGameNsfwStatus } from "@/utils/game";
 import { CardItem } from "./CardItem";
+import { CardsViewport } from "./CardsViewport";
 import type { SortableCardItemProps } from "./types";
 import { useCardsController } from "./useCardsController";
 import { useDragSort } from "./useDragSort";
@@ -108,6 +113,13 @@ export const SortableCardsGrid = memo(
 		clearBatchModeOnRouteChange = false,
 	}: SortableCardsGridProps) => {
 		const scrollRef = useRef<HTMLDivElement | null>(null);
+		const [scrollContainer, setScrollContainer] = useState<HTMLElement | null>(
+			null,
+		);
+		const [viewportReady, setViewportReady] = useState(false);
+		const [thumbnailWidth, setThumbnailWidth] = useState(256);
+		const restoringScrollRef = useRef(Boolean(scrollRestoreKey));
+		useLibraryScrollDiagnostics(scrollRef, pageScroll);
 		const scrollFrameRef = useRef<number | null>(null);
 		const scrollIdleTimerRef = useRef<number | null>(null);
 		const pendingScrollTopRef = useRef(0);
@@ -157,6 +169,97 @@ export const SortableCardsGrid = memo(
 					: scrollRef.current,
 			[pageScroll],
 		);
+		useLayoutEffect(() => {
+			setScrollContainer(getScrollContainer());
+			const region = scrollRef.current;
+			if (!region) return;
+			const updateSize = () => {
+				// These match the grid's 176px minimum, 20px gap and card padding.
+				const columns = Math.max(
+					1,
+					Math.floor((region.clientWidth + 20) / 196),
+				);
+				const coverWidth =
+					(region.clientWidth - (columns - 1) * 20) / columns - 16;
+				const pixels = coverWidth * window.devicePixelRatio;
+				setThumbnailWidth(
+					[256, 384, 512, 768].find((width) => width >= pixels) ?? 768,
+				);
+			};
+			updateSize();
+			const observer = new ResizeObserver(updateSize);
+			observer.observe(region);
+			window.addEventListener("resize", updateSize);
+			return () => {
+				observer.disconnect();
+				window.removeEventListener("resize", updateSize);
+			};
+		}, [getScrollContainer]);
+
+		// biome-ignore lint/correctness/useExhaustiveDependencies: a changed controller invalidates cached interaction, batch and sorting props.
+		const cardPropsCache = useMemo(
+			() => new Map<number, SortableCardItemProps>(),
+			[getCardProps],
+		);
+		const renderCard = useCallback(
+			(_index: number, gameId: number) => {
+				const game = displayById.get(gameId);
+				if (!game) return null;
+				let props = cardPropsCache.get(gameId);
+				if (!props || props.game !== game) {
+					props = getCardProps(game);
+					cardPropsCache.set(gameId, props);
+					if (cardPropsCache.size > 256) {
+						const oldest = cardPropsCache.keys().next().value;
+						if (oldest !== undefined) cardPropsCache.delete(oldest);
+					}
+				}
+				return isDragSortEnabled ? (
+					<SortableCardItem
+						{...props}
+						imageLoading="eager"
+						thumbnailWidth={thumbnailWidth}
+					/>
+				) : (
+					<CardItem
+						{...props}
+						imageLoading="eager"
+						thumbnailWidth={thumbnailWidth}
+						disableImageReveal
+					/>
+				);
+			},
+			[
+				cardPropsCache,
+				displayById,
+				getCardProps,
+				isDragSortEnabled,
+				thumbnailWidth,
+			],
+		);
+
+		const warmRange = useCallback(
+			({ startIndex, endIndex }: ListRange) => {
+				const replaceNsfw = useStore.getState().nsfwCoverReplace;
+				const sources: string[] = [];
+				// Retain the rendered range plus neighbouring rows, never the whole library.
+				for (
+					let index = Math.max(0, startIndex - 16);
+					index <= Math.min(ids.length - 1, endIndex + 16);
+					index++
+				) {
+					const game = displayById.get(ids[index]);
+					if (!game) continue;
+					sources.push(
+						replaceNsfw && getGameNsfwStatus(game)
+							? "/images/NR18.png"
+							: getGameCardCover(game, thumbnailWidth),
+					);
+				}
+				warmCardCovers(sources);
+			},
+			[displayById, ids, thumbnailWidth],
+		);
 		const captureDragOverlaySize = useCallback((activeGameId: number) => {
 			const card = scrollRef.current?.querySelector<HTMLElement>(
 				`[data-game-card-id="${activeGameId}"]`,
@@ -190,12 +293,15 @@ export const SortableCardsGrid = memo(
 
 		useLayoutEffect(() => {
 			if (!scrollRestoreKey) return;
+			restoringScrollRef.current = true;
 			const container = getScrollContainer();
 			if (!container) return;
 			if (idsSignature.length === 0) {
 				container.scrollTop = 0;
+				restoringScrollRef.current = false;
 				return;
 			}
+			if (!viewportReady) return;
 
 			let frameId = 0;
 			let cancelled = false;
@@ -213,10 +319,12 @@ export const SortableCardsGrid = memo(
 
 				attempts++;
 				if (
-					attempts < 4 &&
-					Math.abs(container.scrollTop - desiredScrollTop) > 1
+					attempts < 8 &&
+					(attempts < 2 || Math.abs(container.scrollTop - target) > 1)
 				) {
 					frameId = window.requestAnimationFrame(restore);
+				} else {
+					restoringScrollRef.current = false;
 				}
 			};
 
@@ -225,81 +333,7 @@ export const SortableCardsGrid = memo(
 				cancelled = true;
 				window.cancelAnimationFrame(frameId);
 			};
-		}, [getScrollContainer, idsSignature, scrollRestoreKey]);
-
-		// biome-ignore lint/correctness/useExhaustiveDependencies: game ID changes must restart the layout suppression window.
-		useLayoutEffect(() => {
-			if (!pageScroll) return;
-			const container = getScrollContainer();
-			if (!container) return;
-
-			container.classList.add("is-page-scrolling");
-			let frameId: number | null = null;
-			let idleId: number | null = null;
-			let timeoutId: number | null = null;
-
-			const release = () => {
-				frameId = window.requestAnimationFrame(() => {
-					container.classList.remove("is-page-scrolling");
-				});
-			};
-
-			if (window.requestIdleCallback) {
-				idleId = window.requestIdleCallback(release, { timeout: 1200 });
-			} else {
-				timeoutId = window.setTimeout(release, 500);
-			}
-
-			return () => {
-				if (idleId !== null && window.cancelIdleCallback) {
-					window.cancelIdleCallback(idleId);
-				}
-				if (idleId === null && timeoutId !== null) {
-					window.clearTimeout(timeoutId);
-				}
-				if (frameId !== null) {
-					window.cancelAnimationFrame(frameId);
-				}
-				container.classList.remove("is-page-scrolling");
-			};
-		}, [getScrollContainer, idsSignature, pageScroll]);
-
-		// biome-ignore lint/correctness/useExhaustiveDependencies: warm newly rendered card images after the game list changes.
-		useEffect(() => {
-			if (!pageScroll || !scrollRef.current) return;
-			let cancelled = false;
-
-			const warmImages = () => {
-				if (cancelled) return;
-				const images = Array.from(
-					scrollRef.current?.querySelectorAll<HTMLImageElement>(
-						".game-card-image",
-					) ?? [],
-				).slice(0, 32);
-
-				for (const image of images) {
-					if (image.complete && image.naturalWidth > 0) {
-						void image.decode?.().catch(() => undefined);
-					}
-				}
-			};
-
-			if (window.requestIdleCallback) {
-				const idleId = window.requestIdleCallback(warmImages, {
-					timeout: 1200,
-				});
-				return () => {
-					cancelled = true;
-					window.cancelIdleCallback(idleId);
-				};
-			}
-
-			const timeoutId = window.setTimeout(warmImages, 500);
-			return () => {
-				cancelled = true;
-				window.clearTimeout(timeoutId);
-			};
-		}, [idsSignature, pageScroll]);
+		}, [getScrollContainer, idsSignature, scrollRestoreKey, viewportReady]);
 
 		const handleScroll = useCallback(() => {
 			const container = getScrollContainer();
@@ -315,7 +349,7 @@ export const SortableCardsGrid = memo(
 				scrollingTarget?.classList.remove(scrollingClass);
 			}, 140);
 
-			if (!scrollRestoreKey) return;
+			if (!scrollRestoreKey || restoringScrollRef.current) return;
 			pendingScrollTopRef.current = container.scrollTop;
 			if (scrollFrameRef.current !== null) return;
 			scrollFrameRef.current = window.requestAnimationFrame(() => {
@@ -379,34 +413,16 @@ export const SortableCardsGrid = memo(
 						}
 						data-scroll-restore-key={scrollRestoreKey}
 					>
-						<div
-							ref={flipRef}
-							className="sortable-cards-grid grid grid-cols-[repeat(auto-fill,minmax(176px,1fr))] gap-x-5 gap-y-7 pb-0"
-						>
-							{ids.map((gameId, index) => {
-								const game = displayById.get(gameId);
-								if (!game) return null;
-								const props = getCardProps(game);
-								if (!isDragSortEnabled) {
-									return (
-										<CardItem
-											key={gameId}
-											{...props}
-											imageLoading={index < 32 ? "eager" : "lazy"}
-											disableImageReveal
-										/>
-									);
-								}
-								return (
-									<SortableCardItem
-										key={gameId}
-										{...props}
-										disabledSortable={!isDragSortEnabled}
-										imageLoading={index < 32 ? "eager" : "lazy"}
-									/>
-								);
-							})}
-						</div>
+						{scrollContainer && (
+							<CardsViewport
+								gameIds={ids}
+								scrollContainer={scrollContainer}
+								gridRef={flipRef}
+								renderCard={renderCard}
+								onRangeChanged={warmRange}
+								onReady={setViewportReady}
+							/>
+						)}
 					</div>
 				</SortableContext>
 				{createPortal(
@@ -432,6 +448,7 @@ export const SortableCardsGrid = memo(
 											removeAction={undefined}
 											dragHandleProps={undefined}
 											imageLoading="eager"
+											thumbnailWidth={thumbnailWidth}
 											isOverlay
 											disableWarmup
 											disableTooltips

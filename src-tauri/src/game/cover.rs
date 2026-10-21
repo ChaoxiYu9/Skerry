@@ -4,6 +4,8 @@ pub mod cloud;
 #[cfg(feature = "tauri-app")]
 pub mod custom;
 
+pub mod thumbnail;
+
 #[cfg(feature = "tauri-app")]
 pub use cloud::{DownloadState, delete_cloud_cache, register_game_cover_protocol};
 

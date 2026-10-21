@@ -1,4 +1,4 @@
-﻿import ArrowBackRoundedIcon from "@mui/icons-material/ArrowBackRounded";
+import ArrowBackRoundedIcon from "@mui/icons-material/ArrowBackRounded";
 import CategoryIcon from "@mui/icons-material/Category";
 import FileUploadRoundedIcon from "@mui/icons-material/FileUploadRounded";
 import GamesIcon from "@mui/icons-material/Games";
@@ -631,9 +631,9 @@ export const Layout: React.FC = () => {
 								? "skerry-main library-page-scroll"
 								: isReportRoute
 									? "skerry-main skerry-report-page-scroll"
-								: isHomeRoute
-									? "skerry-main skerry-home-page-scroll"
-									: "skerry-main"
+									: isHomeRoute
+										? "skerry-main skerry-home-page-scroll"
+										: "skerry-main"
 					}
 					sx={{
 						boxSizing: "border-box",
@@ -643,7 +643,8 @@ export const Layout: React.FC = () => {
 						minHeight: "100dvh",
 						height: "100dvh",
 						pt: { xs: 7, lg: 8 },
-						px: isHomeRoute ? 0 : isDetailRoute ? 0 : { xs: 1.5, sm: 3, xl: 5 },
+						px: isHomeRoute ? 0 : "10px",
+						scrollbarGutter: isDetailRoute ? "auto" : undefined,
 						pb:
 							isDetailRoute || isHomeRoute || isLibraryRoute
 								? 0
@@ -654,18 +655,6 @@ export const Layout: React.FC = () => {
 							isDetailRoute || isHomeRoute || isLibraryRoute
 								? "hidden"
 								: "auto",
-						paddingLeft: isHomeRoute
-							? "0px"
-							: isLibraryRoute
-								? "6px"
-								: isReportRoute
-									? undefined
-									: "20px",
-						paddingRight: isDetailRoute
-							? "5px"
-							: isLibraryRoute
-								? "40px"
-								: undefined,
 					}}
 				>
 					<SkerryMotionOutlet />

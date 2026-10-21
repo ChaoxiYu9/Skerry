@@ -6,7 +6,11 @@ import { warmupGameDetailCaches } from "@/providers/gameDetailWarmup";
 import { preloadDetailPage } from "@/providers/routePreloads";
 import { wasRecentlyResumed } from "@/providers/webviewKeepAlive";
 import { useStore } from "@/store/appStore";
-import { getGameCover, getGameNsfwStatus } from "@/utils/game";
+import {
+	getGameCardCover,
+	getGameCover,
+	getGameNsfwStatus,
+} from "@/utils/game";
 
 /*
 const PLAY_STATUS_CARD_MAP: Record<
@@ -37,6 +41,7 @@ export const CardItem = memo(
 				game,
 				displayName,
 				imageLoading = "lazy",
+				thumbnailWidth,
 				onFocus,
 				onPointerEnter,
 				sortFieldOverlay,
@@ -73,7 +78,7 @@ export const CardItem = memo(
 					return;
 				}
 				noop();
-			}, [getLaunchTarget, interaction]);
+			}, [game, getLaunchTarget, interaction]);
 
 			const { handlers } = useCardInteraction({
 				onClick: handleInteractionClick,
@@ -84,7 +89,11 @@ export const CardItem = memo(
 			// statusConfig temporarily disabled
 			const isNsfw = getGameNsfwStatus(game);
 			const coverImage =
-				nsfwCoverReplace && isNsfw ? "/images/NR18.png" : getGameCover(game);
+				nsfwCoverReplace && isNsfw
+					? "/images/NR18.png"
+					: thumbnailWidth
+						? getGameCardCover(game, thumbnailWidth)
+						: getGameCover(game);
 			const cancelWarmup = useCallback(() => {
 				if (warmupTimerRef.current !== null) {
 					window.clearTimeout(warmupTimerRef.current);
@@ -140,6 +149,7 @@ export const CardItem = memo(
 				[cancelWarmup, disableWarmup, game],
 			);
 
+			// biome-ignore lint/correctness/useExhaustiveDependencies: replacing game data cancels pending work that captured the previous game object.
 			useEffect(() => cancelWarmup, [cancelWarmup, game]);
 
 			const setRootRef = useCallback(
@@ -220,16 +230,14 @@ export const CardItem = memo(
 						className="game-card-action-root !block !overflow-visible !rounded-none !bg-transparent cursor-pointer select-none outline-none"
 					>
 						<Box data-flip-key={game.id}>
-							<Box
-								className="game-card-cover aspect-[2/3] bg-[var(--mui-palette-action-hover)]"
-							>
+							<Box className="game-card-cover aspect-[2/3] bg-[var(--mui-palette-action-hover)]">
 								<Box
 									component="img"
 									src={coverImage}
 									alt={displayName}
 									draggable={false}
-									loading="eager"
-									decoding="auto"
+									loading={imageLoading}
+									decoding="async"
 									onDragStart={(event) => event.preventDefault()}
 									onError={(event) => {
 										const image = event.currentTarget;

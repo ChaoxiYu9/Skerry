@@ -144,18 +144,8 @@
 	height: 0;
 }
 
-.library-page-scroll .skerry-game-card {
-	content-visibility: auto;
-
-	contain-intrinsic-size: 180px 320px;
-}
-
 .skerry-main.library-page-scroll .cards-scroll-region .skerry-game-card {
 	--game-card-contain: layout style;
-
-	content-visibility: auto;
-
-	contain-intrinsic-size: 180px 320px;
 }
 
 .skerry-main.library-page-scroll
@@ -252,7 +242,7 @@
 
 @media (max-width: 1120px) {
 	.library-page-shell {
-		padding-inline: 52px;
+		padding-inline: 0;
 	}
 
 	.library-controls-pack {
@@ -269,12 +259,11 @@
 
 /* The shared library/collection workspace keeps hovered covers neutral. */
 html:is(
-		[data-mui-color-scheme="light"],
-		[data-toolpad-color-scheme="light"],
-		[data-mui-color-scheme="dark"],
-		[data-toolpad-color-scheme="dark"]
-	)
-	:is(.library-page-shell, .library-page-scroll) {
+	[data-mui-color-scheme="light"],
+	[data-toolpad-color-scheme="light"],
+	[data-mui-color-scheme="dark"],
+	[data-toolpad-color-scheme="dark"]
+) :is(.library-page-shell, .library-page-scroll) {
 	--game-card-cover-scroll-hover-border: transparent;
 	--game-card-cover-scroll-hover-shadow: none;
 }
@@ -302,11 +291,10 @@ html:is(
 	transition: none;
 	filter: none;
 	box-shadow: none;
-  transform: none;
+	transform: none;
 	pointer-events: none;
 }
 
 .skerry-main.library-page-scroll.is-page-scrolling .skerry-game-card {
 	--game-card-contain: layout style;
 }
-
